@@ -6,10 +6,16 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { ListExercisesDifficulty } from './listExercisesDifficulty';
+import type { ListExercisesTrainingType } from './listExercisesTrainingType';
 
 export type ListExercisesParams = {
 category?: string;
 muscleGroup?: string;
 difficulty?: ListExercisesDifficulty;
+trainingType?: ListExercisesTrainingType;
+equipment?: string;
+goal?: string;
 search?: string;
+limit?: number;
+offset?: number;
 };

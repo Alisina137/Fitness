@@ -1,0 +1,334 @@
+You are a senior fitness software architect and database engineer building a premium AI fitness application.
+
+The application foundation and user onboarding system are already implemented.
+
+Now build the Exercise Intelligence System.
+
+The goal:
+Create a professional exercise database and management system that will power future AI workout generation, personalized recommendations, workout tracking, and coaching.
+
+Do not build the AI workout generator yet.
+
+---
+
+# 1. Create Exercise Database Architecture
+
+Create a scalable exercise data model.
+
+Each exercise must contain:
+
+## Basic Information
+
+* Exercise name
+* Short description
+* Detailed instructions
+* Exercise category
+* Difficulty level
+* Estimated calories burned
+* Training type
+
+Training types:
+
+* Strength
+* Hypertrophy
+* Cardio
+* Mobility
+* Flexibility
+* HIIT
+* Rehabilitation
+* Functional training
+
+---
+
+## Muscle Targeting System
+
+Each exercise should support:
+
+Primary muscles:
+
+Examples:
+
+* Chest
+* Back
+* Shoulders
+* Biceps
+* Triceps
+* Quadriceps
+* Hamstrings
+* Glutes
+* Calves
+* Core
+
+Secondary muscles:
+
+Allow multiple selections.
+
+---
+
+## Equipment System
+
+Create equipment categories:
+
+* No equipment
+* Dumbbells
+* Barbell
+* Cable machine
+* Resistance bands
+* Machines
+* Kettlebell
+* Pull-up bar
+* Bench
+* Full gym
+
+Each exercise must specify required equipment.
+
+---
+
+## Difficulty System
+
+Levels:
+
+* Beginner
+* Intermediate
+* Advanced
+* Expert
+
+Include progression relationships:
+
+Example:
+
+Beginner:
+Knee Push-up
+
+Intermediate:
+Standard Push-up
+
+Advanced:
+Weighted Push-up
+
+---
+
+# 2. Exercise Safety Information
+
+Add:
+
+* Common mistakes
+* Safety instructions
+* Contraindications
+* Alternative exercises
+
+Example:
+
+Exercise:
+Barbell Squat
+
+Safety:
+"Keep knees aligned with toes."
+
+Avoid if:
+"Certain knee limitations."
+
+Alternatives:
+
+* Goblet squat
+* Leg press
+
+This information will later be used by the AI coach.
+
+---
+
+# 3. Exercise Media Support
+
+Prepare fields for:
+
+* Exercise image
+* Instruction video URL
+* Thumbnail
+* Animation/GIF URL
+
+Do not upload media yet.
+
+Create the structure.
+
+---
+
+# 4. Create Exercise Categories
+
+Create predefined categories:
+
+Strength:
+
+* Chest exercises
+* Back exercises
+* Shoulder exercises
+* Arm exercises
+* Leg exercises
+* Core exercises
+
+Cardio:
+
+* Running
+* Cycling
+* Jump rope
+* HIIT
+
+Mobility:
+
+* Stretching
+* Yoga movements
+* Recovery exercises
+
+---
+
+# 5. Create Exercise Filtering System
+
+Build API functionality to search/filter exercises.
+
+Filters:
+
+By:
+
+* Muscle group
+* Equipment
+* Difficulty
+* Training type
+* Goal
+* Duration
+
+Examples:
+
+"Show beginner leg exercises with dumbbells"
+
+"Show chest exercises without equipment"
+
+---
+
+# 6. Create Exercise Library UI
+
+Build a premium interface.
+
+Features:
+
+## Exercise browsing page
+
+Display:
+
+* Exercise image/video placeholder
+* Name
+* Muscle group
+* Difficulty
+* Equipment
+
+## Exercise detail page
+
+Display:
+
+* Instructions
+* Steps
+* Muscles worked
+* Equipment needed
+* Safety information
+* Alternatives
+
+Design inspiration:
+
+* Apple Fitness+
+* Nike Training Club
+* Fitbod
+
+---
+
+# 7. Create Initial Exercise Dataset
+
+Create a starter dataset.
+
+Minimum:
+
+100 exercises.
+
+Distribution:
+
+Chest:
+15 exercises
+
+Back:
+15 exercises
+
+Legs:
+20 exercises
+
+Shoulders:
+10 exercises
+
+Arms:
+15 exercises
+
+Core:
+10 exercises
+
+Cardio:
+10 exercises
+
+Mobility:
+5 exercises
+
+Each exercise must have realistic:
+
+* Name
+* Muscle groups
+* Equipment
+* Difficulty
+* Instructions
+
+Do not create meaningless placeholder data.
+
+---
+
+# 8. Create Exercise Recommendation Preparation
+
+Create backend functions that can answer future AI requests:
+
+Examples:
+
+getExercisesByGoal()
+
+getExercisesByEquipment()
+
+getExercisesByMuscle()
+
+getBeginnerExercises()
+
+getAlternativeExercises()
+
+getSafeExercisesForLimitation()
+
+---
+
+# 9. Technical Requirements
+
+Important:
+
+* Use the existing project architecture.
+* Do not rewrite authentication or onboarding.
+* Keep database models scalable.
+* Write clean reusable code.
+* Add proper error handling.
+* Add loading states.
+* Make API responses structured for AI usage.
+
+Do not build:
+
+* AI workout generator
+* AI coach
+* workout plans
+* subscriptions
+
+Those come later.
+
+After implementation provide:
+
+1. Database models created
+2. API endpoints created
+3. UI pages created
+4. Exercise dataset summary
+5. How the future AI workout engine will use this system

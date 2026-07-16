@@ -466,32 +466,55 @@ export const GetWorkoutHistoryResponse = zod.array(GetWorkoutHistoryResponseItem
 
 
 /**
- * @summary List exercises
+ * @summary List and filter exercises
  */
 export const ListExercisesQueryParams = zod.object({
   "category": zod.coerce.string().optional(),
   "muscleGroup": zod.coerce.string().optional(),
-  "difficulty": zod.enum(['beginner', 'intermediate', 'advanced']).optional(),
-  "search": zod.coerce.string().optional()
+  "difficulty": zod.enum(['beginner', 'intermediate', 'advanced', 'expert']).optional(),
+  "trainingType": zod.enum(['strength', 'hypertrophy', 'cardio', 'mobility', 'flexibility', 'hiit', 'rehabilitation', 'functional']).optional(),
+  "equipment": zod.coerce.string().optional(),
+  "goal": zod.coerce.string().optional(),
+  "search": zod.coerce.string().optional(),
+  "limit": zod.coerce.number().optional(),
+  "offset": zod.coerce.number().optional()
 })
 
-export const ListExercisesResponseItem = zod.object({
+export const ListExercisesResponse = zod.object({
+  "exercises": zod.array(zod.object({
   "id": zod.number(),
   "name": zod.string(),
+  "shortDescription": zod.string().nullish(),
   "category": zod.string(),
-  "difficulty": zod.enum(['beginner', 'intermediate', 'advanced']),
+  "difficulty": zod.enum(['beginner', 'intermediate', 'advanced', 'expert']),
+  "trainingType": zod.union([zod.literal('strength'),zod.literal('hypertrophy'),zod.literal('cardio'),zod.literal('mobility'),zod.literal('flexibility'),zod.literal('hiit'),zod.literal('rehabilitation'),zod.literal('functional'),zod.literal(null)]).nullish(),
+  "primaryMuscles": zod.array(zod.string()),
+  "secondaryMuscles": zod.array(zod.string()).optional(),
   "muscleGroups": zod.array(zod.string()),
-  "equipment": zod.array(zod.string()).optional(),
+  "equipment": zod.array(zod.string()),
   "instructions": zod.string().nullish(),
-  "videoUrl": zod.string().nullish(),
+  "commonMistakes": zod.string().nullish(),
+  "safetyTips": zod.string().nullish(),
+  "contraindications": zod.string().nullish(),
+  "alternativeExercises": zod.array(zod.string()).optional(),
+  "progressions": zod.object({
+  "easier": zod.string().optional(),
+  "harder": zod.string().optional()
+}).optional(),
+  "goals": zod.array(zod.string()).optional(),
+  "tags": zod.array(zod.string()).optional(),
+  "caloriesPerMinute": zod.number().nullish(),
   "imageUrl": zod.string().nullish(),
-  "caloriesPerMinute": zod.number().nullish()
+  "videoUrl": zod.string().nullish(),
+  "thumbnailUrl": zod.string().nullish(),
+  "gifUrl": zod.string().nullish()
+})),
+  "total": zod.number()
 })
-export const ListExercisesResponse = zod.array(ListExercisesResponseItem)
 
 
 /**
- * @summary Get an exercise
+ * @summary Get an exercise by id
  */
 export const GetExerciseParams = zod.object({
   "id": zod.coerce.number()
@@ -500,15 +523,69 @@ export const GetExerciseParams = zod.object({
 export const GetExerciseResponse = zod.object({
   "id": zod.number(),
   "name": zod.string(),
+  "shortDescription": zod.string().nullish(),
   "category": zod.string(),
-  "difficulty": zod.enum(['beginner', 'intermediate', 'advanced']),
+  "difficulty": zod.enum(['beginner', 'intermediate', 'advanced', 'expert']),
+  "trainingType": zod.union([zod.literal('strength'),zod.literal('hypertrophy'),zod.literal('cardio'),zod.literal('mobility'),zod.literal('flexibility'),zod.literal('hiit'),zod.literal('rehabilitation'),zod.literal('functional'),zod.literal(null)]).nullish(),
+  "primaryMuscles": zod.array(zod.string()),
+  "secondaryMuscles": zod.array(zod.string()).optional(),
   "muscleGroups": zod.array(zod.string()),
-  "equipment": zod.array(zod.string()).optional(),
+  "equipment": zod.array(zod.string()),
   "instructions": zod.string().nullish(),
-  "videoUrl": zod.string().nullish(),
+  "commonMistakes": zod.string().nullish(),
+  "safetyTips": zod.string().nullish(),
+  "contraindications": zod.string().nullish(),
+  "alternativeExercises": zod.array(zod.string()).optional(),
+  "progressions": zod.object({
+  "easier": zod.string().optional(),
+  "harder": zod.string().optional()
+}).optional(),
+  "goals": zod.array(zod.string()).optional(),
+  "tags": zod.array(zod.string()).optional(),
+  "caloriesPerMinute": zod.number().nullish(),
   "imageUrl": zod.string().nullish(),
-  "caloriesPerMinute": zod.number().nullish()
+  "videoUrl": zod.string().nullish(),
+  "thumbnailUrl": zod.string().nullish(),
+  "gifUrl": zod.string().nullish()
 })
+
+
+/**
+ * @summary Get alternative exercises
+ */
+export const GetExerciseAlternativesParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const GetExerciseAlternativesResponseItem = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "shortDescription": zod.string().nullish(),
+  "category": zod.string(),
+  "difficulty": zod.enum(['beginner', 'intermediate', 'advanced', 'expert']),
+  "trainingType": zod.union([zod.literal('strength'),zod.literal('hypertrophy'),zod.literal('cardio'),zod.literal('mobility'),zod.literal('flexibility'),zod.literal('hiit'),zod.literal('rehabilitation'),zod.literal('functional'),zod.literal(null)]).nullish(),
+  "primaryMuscles": zod.array(zod.string()),
+  "secondaryMuscles": zod.array(zod.string()).optional(),
+  "muscleGroups": zod.array(zod.string()),
+  "equipment": zod.array(zod.string()),
+  "instructions": zod.string().nullish(),
+  "commonMistakes": zod.string().nullish(),
+  "safetyTips": zod.string().nullish(),
+  "contraindications": zod.string().nullish(),
+  "alternativeExercises": zod.array(zod.string()).optional(),
+  "progressions": zod.object({
+  "easier": zod.string().optional(),
+  "harder": zod.string().optional()
+}).optional(),
+  "goals": zod.array(zod.string()).optional(),
+  "tags": zod.array(zod.string()).optional(),
+  "caloriesPerMinute": zod.number().nullish(),
+  "imageUrl": zod.string().nullish(),
+  "videoUrl": zod.string().nullish(),
+  "thumbnailUrl": zod.string().nullish(),
+  "gifUrl": zod.string().nullish()
+})
+export const GetExerciseAlternativesResponse = zod.array(GetExerciseAlternativesResponseItem)
 
 
 /**

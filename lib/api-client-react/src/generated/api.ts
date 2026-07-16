@@ -30,6 +30,7 @@ import type {
   GetNutritionSummaryParams,
   GetWorkoutHistoryParams,
   HealthStatus,
+  ListExercises200,
   ListExercisesParams,
   ListNutritionEntriesParams,
   ListProgressEntriesParams,
@@ -1379,11 +1380,11 @@ export const getListExercisesUrl = (params?: ListExercisesParams,) => {
 }
 
 /**
- * @summary List exercises
+ * @summary List and filter exercises
  */
-export const listExercises = async (params?: ListExercisesParams, options?: RequestInit): Promise<Exercise[]> => {
+export const listExercises = async (params?: ListExercisesParams, options?: RequestInit): Promise<ListExercises200> => {
 
-  return customFetch<Exercise[]>(getListExercisesUrl(params),
+  return customFetch<ListExercises200>(getListExercisesUrl(params),
   {
     ...options,
     method: 'GET'
@@ -1426,7 +1427,7 @@ export type ListExercisesQueryError = ErrorType<unknown>
 
 
 /**
- * @summary List exercises
+ * @summary List and filter exercises
  */
 
 export function useListExercises<TData = Awaited<ReturnType<typeof listExercises>>, TError = ErrorType<unknown>>(
@@ -1456,7 +1457,7 @@ export const getGetExerciseUrl = (id: number,) => {
 }
 
 /**
- * @summary Get an exercise
+ * @summary Get an exercise by id
  */
 export const getExercise = async (id: number, options?: RequestInit): Promise<Exercise> => {
 
@@ -1503,7 +1504,7 @@ export type GetExerciseQueryError = ErrorType<void>
 
 
 /**
- * @summary Get an exercise
+ * @summary Get an exercise by id
  */
 
 export function useGetExercise<TData = Awaited<ReturnType<typeof getExercise>>, TError = ErrorType<void>>(
@@ -1512,6 +1513,83 @@ export function useGetExercise<TData = Awaited<ReturnType<typeof getExercise>>, 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getGetExerciseQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetExerciseAlternativesUrl = (id: number,) => {
+
+
+
+
+  return `/api/exercises/${id}/alternatives`
+}
+
+/**
+ * @summary Get alternative exercises
+ */
+export const getExerciseAlternatives = async (id: number, options?: RequestInit): Promise<Exercise[]> => {
+
+  return customFetch<Exercise[]>(getGetExerciseAlternativesUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetExerciseAlternativesQueryKey = (id: number,) => {
+    return [
+    `/api/exercises/${id}/alternatives`
+    ] as const;
+    }
+
+
+export const getGetExerciseAlternativesQueryOptions = <TData = Awaited<ReturnType<typeof getExerciseAlternatives>>, TError = ErrorType<void>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getExerciseAlternatives>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetExerciseAlternativesQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getExerciseAlternatives>>> = ({ signal }) => getExerciseAlternatives(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getExerciseAlternatives>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetExerciseAlternativesQueryResult = NonNullable<Awaited<ReturnType<typeof getExerciseAlternatives>>>
+export type GetExerciseAlternativesQueryError = ErrorType<void>
+
+
+/**
+ * @summary Get alternative exercises
+ */
+
+export function useGetExerciseAlternatives<TData = Awaited<ReturnType<typeof getExerciseAlternatives>>, TError = ErrorType<void>>(
+ id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getExerciseAlternatives>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetExerciseAlternativesQueryOptions(id,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

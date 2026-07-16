@@ -6,20 +6,42 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { ExerciseDifficulty } from './exerciseDifficulty';
+import type { ExerciseProgressions } from './exerciseProgressions';
+import type { ExerciseTrainingType } from './exerciseTrainingType';
 
 export interface Exercise {
   id: number;
   name: string;
+  /** @nullable */
+  shortDescription?: string | null;
   category: string;
   difficulty: ExerciseDifficulty;
+  /** @nullable */
+  trainingType?: ExerciseTrainingType;
+  primaryMuscles: string[];
+  secondaryMuscles?: string[];
   muscleGroups: string[];
-  equipment?: string[];
+  equipment: string[];
   /** @nullable */
   instructions?: string | null;
   /** @nullable */
-  videoUrl?: string | null;
+  commonMistakes?: string | null;
+  /** @nullable */
+  safetyTips?: string | null;
+  /** @nullable */
+  contraindications?: string | null;
+  alternativeExercises?: string[];
+  progressions?: ExerciseProgressions;
+  goals?: string[];
+  tags?: string[];
+  /** @nullable */
+  caloriesPerMinute?: number | null;
   /** @nullable */
   imageUrl?: string | null;
   /** @nullable */
-  caloriesPerMinute?: number | null;
+  videoUrl?: string | null;
+  /** @nullable */
+  thumbnailUrl?: string | null;
+  /** @nullable */
+  gifUrl?: string | null;
 }

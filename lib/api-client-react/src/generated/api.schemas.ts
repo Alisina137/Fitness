@@ -461,23 +461,66 @@ export const ExerciseDifficulty = {
   beginner: 'beginner',
   intermediate: 'intermediate',
   advanced: 'advanced',
+  expert: 'expert',
 } as const;
+
+/**
+ * @nullable
+ */
+export type ExerciseTrainingType = typeof ExerciseTrainingType[keyof typeof ExerciseTrainingType] | null;
+
+
+export const ExerciseTrainingType = {
+  strength: 'strength',
+  hypertrophy: 'hypertrophy',
+  cardio: 'cardio',
+  mobility: 'mobility',
+  flexibility: 'flexibility',
+  hiit: 'hiit',
+  rehabilitation: 'rehabilitation',
+  functional: 'functional',
+} as const;
+
+export type ExerciseProgressions = {
+  easier?: string;
+  harder?: string;
+};
 
 export interface Exercise {
   id: number;
   name: string;
+  /** @nullable */
+  shortDescription?: string | null;
   category: string;
   difficulty: ExerciseDifficulty;
+  /** @nullable */
+  trainingType?: ExerciseTrainingType;
+  primaryMuscles: string[];
+  secondaryMuscles?: string[];
   muscleGroups: string[];
-  equipment?: string[];
+  equipment: string[];
   /** @nullable */
   instructions?: string | null;
   /** @nullable */
-  videoUrl?: string | null;
+  commonMistakes?: string | null;
+  /** @nullable */
+  safetyTips?: string | null;
+  /** @nullable */
+  contraindications?: string | null;
+  alternativeExercises?: string[];
+  progressions?: ExerciseProgressions;
+  goals?: string[];
+  tags?: string[];
+  /** @nullable */
+  caloriesPerMinute?: number | null;
   /** @nullable */
   imageUrl?: string | null;
   /** @nullable */
-  caloriesPerMinute?: number | null;
+  videoUrl?: string | null;
+  /** @nullable */
+  thumbnailUrl?: string | null;
+  /** @nullable */
+  gifUrl?: string | null;
 }
 
 export type NutritionEntryMealType = typeof NutritionEntryMealType[keyof typeof NutritionEntryMealType];
@@ -695,7 +738,12 @@ export type ListExercisesParams = {
 category?: string;
 muscleGroup?: string;
 difficulty?: ListExercisesDifficulty;
+trainingType?: ListExercisesTrainingType;
+equipment?: string;
+goal?: string;
 search?: string;
+limit?: number;
+offset?: number;
 };
 
 export type ListExercisesDifficulty = typeof ListExercisesDifficulty[keyof typeof ListExercisesDifficulty];
@@ -705,7 +753,27 @@ export const ListExercisesDifficulty = {
   beginner: 'beginner',
   intermediate: 'intermediate',
   advanced: 'advanced',
+  expert: 'expert',
 } as const;
+
+export type ListExercisesTrainingType = typeof ListExercisesTrainingType[keyof typeof ListExercisesTrainingType];
+
+
+export const ListExercisesTrainingType = {
+  strength: 'strength',
+  hypertrophy: 'hypertrophy',
+  cardio: 'cardio',
+  mobility: 'mobility',
+  flexibility: 'flexibility',
+  hiit: 'hiit',
+  rehabilitation: 'rehabilitation',
+  functional: 'functional',
+} as const;
+
+export type ListExercises200 = {
+  exercises: Exercise[];
+  total: number;
+};
 
 export type ListNutritionEntriesParams = {
 date?: string;

@@ -340,7 +340,7 @@ paths:
     get:
       operationId: listExercises
       tags: [exercises]
-      summary: List exercises
+      summary: List and filter exercises
       parameters:
         - name: category
           in: query
@@ -357,27 +357,59 @@ paths:
           required: false
           schema:
             type: string
-            enum: [beginner, intermediate, advanced]
+            enum: [beginner, intermediate, advanced, expert]
+        - name: trainingType
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [strength, hypertrophy, cardio, mobility, flexibility, hiit, rehabilitation, functional]
+        - name: equipment
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: goal
+          in: query
+          required: false
+          schema:
+            type: string
         - name: search
           in: query
           required: false
           schema:
             type: string
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
       responses:
         "200":
           description: OK
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Exercise"
+                type: object
+                required: [exercises, total]
+                properties:
+                  exercises:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Exercise"
+                  total:
+                    type: integer
 
   /exercises/{id}:
     get:
       operationId: getExercise
       tags: [exercises]
-      summary: Get an exercise
+      summary: Get an exercise by id
       parameters:
         - name: id
           in: path
@@ -391,6 +423,29 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Exercise"
+        "404":
+          description: Not found
+
+  /exercises/{id}/alternatives:
+    get:
+      operationId: getExerciseAlternatives
+      tags: [exercises]
+      summary: Get alternative exercises
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Exercise"
         "404":
           description: Not found
 
@@ -1046,17 +1101,30 @@ components:
     # ─── Exercises ─────────────────────────────────────────────────────────────
     Exercise:
       type: object
-      required: [id, name, category, difficulty, muscleGroups]
+      required: [id, name, category, difficulty, primaryMuscles, muscleGroups, equipment]
       properties:
         id:
           type: integer
         name:
           type: string
+        shortDescription:
+          type: ["string", "null"]
         category:
           type: string
         difficulty:
           type: string
-          enum: [beginner, intermediate, advanced]
+          enum: [beginner, intermediate, advanced, expert]
+        trainingType:
+          type: ["string", "null"]
+          enum: [strength, hypertrophy, cardio, mobility, flexibility, hiit, rehabilitation, functional, null]
+        primaryMuscles:
+          type: array
+          items:
+            type: string
+        secondaryMuscles:
+          type: array
+          items:
+            type: string
         muscleGroups:
           type: array
           items:
@@ -1067,12 +1135,41 @@ components:
             type: string
         instructions:
           type: ["string", "null"]
-        videoUrl:
+        commonMistakes:
           type: ["string", "null"]
-        imageUrl:
+        safetyTips:
           type: ["string", "null"]
+        contraindications:
+          type: ["string", "null"]
+        alternativeExercises:
+          type: array
+          items:
+            type: string
+        progressions:
+          type: object
+          properties:
+            easier:
+              type: string
+            harder:
+              type: string
+        goals:
+          type: array
+          items:
+            type: string
+        tags:
+          type: array
+          items:
+            type: string
         caloriesPerMinute:
           type: ["number", "null"]
+        imageUrl:
+          type: ["string", "null"]
+        videoUrl:
+          type: ["string", "null"]
+        thumbnailUrl:
+          type: ["string", "null"]
+        gifUrl:
+          type: ["string", "null"]
 
     # ─── Nutrition ─────────────────────────────────────────────────────────────
     NutritionEntry:
