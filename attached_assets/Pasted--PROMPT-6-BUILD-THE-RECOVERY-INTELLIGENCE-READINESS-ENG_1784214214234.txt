@@ -1,0 +1,594 @@
+# PROMPT 6 — BUILD THE RECOVERY INTELLIGENCE & READINESS ENGINE
+
+You are a senior fitness technology architect building a premium AI fitness application that aims to compete with:
+
+* WHOOP
+* Oura
+* Garmin Connect
+* Fitbod
+* Freeletics
+* Apple Fitness+
+
+The application already has multiple production systems.
+
+Your task is to ADD the Recovery Intelligence System.
+
+Do not rebuild existing systems.
+
+---
+
+# CURRENT PROJECT STATE (ALREADY IMPLEMENTED)
+
+The following systems already exist.
+
+---
+
+# 1. Application Foundation
+
+Already implemented:
+
+* React + TypeScript frontend
+* Tailwind CSS design system
+* Backend API architecture
+* Authentication
+* Database connection
+* API service layer
+* Reusable components
+* Application routing
+* Environment configuration
+
+Do not replace the architecture.
+
+---
+
+# 2. User Intelligence System
+
+Already implemented:
+
+User profile includes:
+
+* Age
+* Gender
+* Height
+* Weight
+* Fitness goals
+* Fitness level
+* Activity level
+* Workout preferences
+* Workout availability
+* Available equipment
+* Injuries
+* Limitations
+* Lifestyle information
+
+Use this existing data.
+
+---
+
+# 3. Exercise Intelligence System
+
+Already implemented:
+
+* Exercise database
+* Muscle groups
+* Equipment
+* Difficulty
+* Safety information
+* Exercise alternatives
+
+Do not create another exercise database.
+
+---
+
+# 4. Workout Program Engine
+
+Already implemented:
+
+* Workout plans
+* Workout schedules
+* Workout execution
+* Workout history
+* Performance tracking
+* Progress tracking
+
+Recovery Intelligence must analyze this existing data.
+
+---
+
+# 5. AI Workout Generation Engine
+
+Already implemented:
+
+* Personalized workout generation
+* Goal-based programming
+* Equipment filtering
+* Injury adaptation
+* Progressive overload logic
+
+The recovery engine must provide data to this system.
+
+---
+
+# IMPORTANT RULES
+
+DO NOT:
+
+* Rebuild workout systems
+* Create another user profile system
+* Create another analytics system
+* Duplicate database models
+* Replace existing AI architecture
+
+Only add Recovery Intelligence.
+
+---
+
+# OBJECTIVE
+
+Build a recovery system that answers:
+
+"How ready is this user to train today?"
+
+The system should calculate:
+
+* Recovery Score
+* Readiness Score
+* Fatigue Level
+* Muscle Recovery Status
+* Training Recommendation
+
+---
+
+# 1. Create Recovery Data Architecture
+
+Create a recovery module.
+
+Create database models:
+
+---
+
+## Recovery Profile Model
+
+Fields:
+
+* userId
+* recoveryScore
+* readinessScore
+* fatigueLevel
+* recoveryTrend
+* lastUpdated
+
+---
+
+## Daily Recovery Check-In Model
+
+Fields:
+
+* userId
+* date
+* sleepQuality
+* energyLevel
+* stressLevel
+* muscleSoreness
+* motivationLevel
+* mood
+* notes
+
+---
+
+## Muscle Recovery Model
+
+Fields:
+
+* userId
+* muscleGroup
+* lastTrainedDate
+* trainingVolume
+* sorenessLevel
+* recoveryPercentage
+
+Example:
+
+Chest:
+
+Last trained:
+Yesterday
+
+Recovery:
+65%
+
+---
+
+# 2. Build Daily Recovery Check-In System
+
+Create a simple daily questionnaire.
+
+Questions:
+
+## Sleep
+
+How was your sleep?
+
+Options:
+
+* Excellent
+* Good
+* Average
+* Poor
+
+---
+
+## Energy
+
+Energy level:
+
+1-10
+
+---
+
+## Muscle soreness
+
+Current soreness:
+
+1-10
+
+---
+
+## Stress
+
+Stress level:
+
+1-10
+
+---
+
+## Motivation
+
+Training motivation:
+
+1-10
+
+---
+
+Store this data.
+
+---
+
+# 3. Create Recovery Score Algorithm
+
+Create a recovery score:
+
+Range:
+
+0-100
+
+Factors:
+
+Sleep:
+
+30%
+
+Energy:
+
+25%
+
+Soreness:
+
+20%
+
+Stress:
+
+15%
+
+Motivation:
+
+10%
+
+Example:
+
+Recovery Score:
+
+82/100
+
+Meaning:
+
+"Your body is ready for normal training."
+
+---
+
+# 4. Create Readiness Classification
+
+Create categories:
+
+## Excellent Recovery
+
+Score:
+
+85-100
+
+Recommendation:
+
+Train normally.
+
+---
+
+## Good Recovery
+
+Score:
+
+70-84
+
+Recommendation:
+
+Normal workout.
+
+---
+
+## Moderate Recovery
+
+Score:
+
+50-69
+
+Recommendation:
+
+Reduce intensity.
+
+---
+
+## Poor Recovery
+
+Score:
+
+Below 50
+
+Recommendation:
+
+Recovery session or rest day.
+
+---
+
+# 5. Build Fatigue Detection System
+
+Analyze:
+
+Workout history:
+
+* Training frequency
+* Training volume
+* Intensity
+* Consecutive workout days
+
+Detect:
+
+## Normal Fatigue
+
+Temporary fatigue.
+
+Recommendation:
+
+Continue training.
+
+---
+
+## High Fatigue
+
+Warning:
+
+"Your training load is increasing faster than recovery."
+
+---
+
+## Overtraining Risk
+
+Warning:
+
+"Your recovery indicators suggest reducing training intensity."
+
+---
+
+# 6. Build Muscle Recovery Intelligence
+
+Track every trained muscle group.
+
+Example:
+
+Monday:
+
+Chest workout
+
+System records:
+
+Chest fatigue:
+
+High
+
+After recovery:
+
+Chest fatigue:
+
+Low
+
+Use this information when generating future workouts.
+
+---
+
+# 7. Connect Recovery With AI Workout Generator
+
+Update AI Workout Engine.
+
+Before generating workouts:
+
+Check:
+
+* Recovery score
+* Muscle recovery
+* Fatigue level
+
+Examples:
+
+Recovery:
+
+90%
+
+Generate:
+
+High-intensity workout
+
+Recovery:
+
+45%
+
+Generate:
+
+Low-intensity workout
+
+---
+
+# 8. Create Recovery Dashboard
+
+Create a premium dashboard.
+
+Display:
+
+## Recovery Score
+
+Example:
+
+82%
+
+## Readiness
+
+Ready for training
+
+## Muscle Recovery
+
+Chest:
+80%
+
+Legs:
+45%
+
+## Recommendation
+
+"Your legs need more recovery. Today's recommended workout focuses on upper body."
+
+---
+
+# 9. Create Recovery Analytics
+
+Track:
+
+* Recovery trends
+* Average recovery score
+* Training stress
+* Recovery improvement
+
+Create charts:
+
+* Weekly recovery
+* Monthly recovery
+* Fatigue trends
+
+---
+
+# 10. Create API Endpoints
+
+Create:
+
+POST
+
+/api/recovery/check-in
+
+GET
+
+/api/recovery/today
+
+GET
+
+/api/recovery/history
+
+GET
+
+/api/recovery/muscles
+
+GET
+
+/api/recovery/recommendation
+
+---
+
+# 11. UI Requirements
+
+Design should feel premium.
+
+Inspiration:
+
+* WHOOP recovery screen
+* Oura readiness
+* Apple Health
+
+Requirements:
+
+* Mobile-first
+* Beautiful cards
+* Progress indicators
+* Animations
+* Loading states
+* Empty states
+* Dark mode support
+
+---
+
+# 12. Future Integration Preparation
+
+Prepare architecture for future:
+
+* Apple Health
+* Google Fit
+* Fitbit
+* Garmin
+* WHOOP
+* Oura Ring
+
+Do not integrate them yet.
+
+Only prepare the structure.
+
+---
+
+# TECHNICAL REQUIREMENTS
+
+Must:
+
+* Extend existing architecture
+* Reuse existing user/workout data
+* Keep recovery logic modular
+* Write clean scalable code
+* Add validation
+* Add error handling
+* Optimize database queries
+
+Do not build:
+
+* Wearable integrations
+* Nutrition system
+* Social features
+* AI Coach chat
+
+Those come later.
+
+---
+
+# COMPLETION REPORT
+
+After implementation provide:
+
+1. Files created
+2. Files modified
+3. Database changes
+4. API endpoints
+5. Recovery algorithm explanation
+6. AI Workout Engine integration details
+7. Example recovery scenarios
+8. Future improvements
