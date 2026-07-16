@@ -1,0 +1,27 @@
+kind = "web"
+previewPath = "/"
+title = "FitCore – AI Fitness App"
+version = "1.0.0"
+id = "artifacts/fitness-app"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21558
+
+[services.development]
+run = "pnpm --filter @workspace/fitness-app run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/fitness-app", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/fitness-app/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21558"
+BASE_PATH = "/"

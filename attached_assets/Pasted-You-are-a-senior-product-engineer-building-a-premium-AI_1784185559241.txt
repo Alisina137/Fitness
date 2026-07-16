@@ -1,0 +1,316 @@
+You are a senior product engineer building a premium AI fitness application.
+
+The foundation and architecture are already created. Now build the complete user onboarding and fitness profile system.
+
+The goal:
+Create an onboarding experience that collects enough information to allow future AI systems to generate highly personalized workouts, nutrition plans, and coaching.
+
+## 1. Create a Premium Onboarding Flow
+
+Build a multi-step onboarding wizard.
+
+Requirements:
+
+* Beautiful mobile-first UI
+* Progress indicator
+* Back/Next navigation
+* Save progress automatically
+* Smooth transitions
+* Validation on every step
+* Allow users to edit answers later from profile settings
+
+The onboarding should feel similar to premium apps like:
+
+* Apple Fitness+
+* Freeletics
+* Whoop
+* Oura
+
+## 2. Onboarding Questions
+
+Create the following steps:
+
+### Step 1: Welcome
+
+Display:
+
+* Personalized welcome message
+* Explain that the app will create a fitness journey based on the user's lifestyle
+
+Example:
+"Let's build your personalized fitness plan."
+
+---
+
+### Step 2: Basic Information
+
+Collect:
+
+* Full name
+* Age
+* Gender
+* Height
+* Weight
+
+Store this data in the User model.
+
+---
+
+### Step 3: Main Fitness Goal
+
+Allow selecting one primary goal:
+
+Options:
+
+* Lose fat
+* Build muscle
+* Increase strength
+* Improve endurance
+* Improve general health
+* Maintain current fitness
+
+Allow secondary goals.
+
+---
+
+### Step 4: Fitness Experience
+
+Options:
+
+* Beginner
+* Intermediate
+* Advanced
+* Athlete
+
+Store fitness level.
+
+---
+
+### Step 5: Current Activity Level
+
+Options:
+
+* Sedentary
+* Lightly active
+* Moderately active
+* Very active
+* Extremely active
+
+---
+
+### Step 6: Workout Preferences
+
+Collect:
+
+Workout location:
+
+* Home
+* Gym
+* Outdoor
+* Mixed
+
+Available equipment:
+
+Examples:
+
+* No equipment
+* Dumbbells
+* Resistance bands
+* Barbell
+* Machines
+* Full gym
+
+Allow multiple selections.
+
+---
+
+### Step 7: Workout Availability
+
+Collect:
+
+Days per week:
+
+* 1 day
+* 2 days
+* 3 days
+* 4 days
+* 5 days
+* 6 days
+* Every day
+
+Average workout duration:
+
+* 10 minutes
+* 20 minutes
+* 30 minutes
+* 45 minutes
+* 60+ minutes
+
+---
+
+### Step 8: Body Limitations
+
+Collect:
+
+Injuries:
+
+* None
+* Knee
+* Back
+* Shoulder
+* Wrist
+* Other
+
+Allow custom notes.
+
+Important:
+This information will later be used by the AI coach to avoid unsafe recommendations.
+
+---
+
+### Step 9: Nutrition Preferences
+
+Collect:
+
+Diet style:
+
+* No preference
+* High protein
+* Vegetarian
+* Vegan
+* Keto
+* Mediterranean
+* Low carb
+
+Food restrictions:
+
+* Allergies
+* Foods avoided
+
+---
+
+### Step 10: Motivation & Lifestyle
+
+Collect:
+
+Why do you want to get fit?
+
+Options:
+
+* Look better
+* Feel healthier
+* Build confidence
+* Improve performance
+* Prepare for an event
+
+Sleep average:
+
+* Less than 5 hours
+* 5-7 hours
+* 7-9 hours
+* 9+ hours
+
+## 3. Update Database
+
+Expand the User model with:
+
+Personal information:
+
+* name
+* age
+* gender
+* height
+* weight
+
+Fitness:
+
+* goal
+* secondary goals
+* experience level
+* activity level
+
+Workout:
+
+* location
+* equipment
+* available days
+* workout duration
+
+Health:
+
+* injuries
+* limitations
+
+Nutrition:
+
+* diet preference
+* restrictions
+
+Lifestyle:
+
+* motivation
+* sleep habits
+
+---
+
+## 4. Create User Profile Dashboard
+
+After onboarding, create a profile section where users can:
+
+* View information
+* Edit information
+* Update goals
+* Update equipment
+* Update preferences
+
+---
+
+## 5. Create Fitness Readiness Score
+
+Create a basic scoring system.
+
+Calculate a score from:
+
+* Experience level
+* Activity level
+* Workout availability
+* Goal clarity
+* Lifestyle factors
+
+Display:
+
+Example:
+
+"Your Fitness Readiness Score: 72/100"
+
+This will later become the foundation for the AI fitness score.
+
+---
+
+## 6. Technical Requirements
+
+Important:
+
+* Use the existing architecture.
+* Do not rewrite existing code.
+* Keep components reusable.
+* Create clean validation.
+* Handle incomplete onboarding states.
+* Make the system ready for future AI workout generation.
+
+Do not create:
+
+* workout generator
+* AI chatbot
+* nutrition AI
+* payment system
+
+Those will be implemented later.
+
+After completion:
+Provide:
+
+1. Files created/modified
+2. Database changes
+3. How future AI features can access this user data
+4. Any recommended improvements

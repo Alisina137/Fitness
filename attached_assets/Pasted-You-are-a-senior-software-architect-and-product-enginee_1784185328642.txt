@@ -1,0 +1,147 @@
+You are a senior software architect and product engineer. We are building a premium AI-powered fitness application that should compete with leading fitness platforms such as Fitbod, Freeletics, MyFitnessPal, Strava, and Future.
+
+Before writing any features, create a professional, scalable foundation for this application.
+
+Your task:
+
+1. Analyze the requirements of a world-class fitness SaaS application and create the correct technical architecture.
+
+2. Set up the project with a production-ready structure.
+
+Requirements:
+
+Frontend:
+
+* Use a modern React-based architecture.
+* Use TypeScript.
+* Use Tailwind CSS for styling.
+* Create a clean component-based architecture.
+* Make the UI mobile-first because the primary product is a fitness mobile experience.
+* Create reusable components from the beginning.
+
+Backend:
+
+* Create a scalable backend structure.
+* Separate authentication, users, workouts, nutrition, AI services, payments, and analytics into independent modules.
+* Use clean API architecture.
+
+Database:
+Design the database structure for future expansion.
+
+Create models/tables for:
+
+User:
+
+* profile information
+* age
+* gender
+* height
+* weight
+* fitness level
+* goals
+* preferences
+* equipment availability
+* injuries/restrictions
+* subscription status
+
+Workout:
+
+* workout plans
+* exercises
+* sets
+* reps
+* duration
+* completion history
+
+Exercise:
+
+* name
+* category
+* muscle groups
+* equipment
+* difficulty
+* instructions
+* video references
+
+Nutrition:
+
+* meals
+* calories
+* macros
+* food tracking
+
+Progress:
+
+* weight history
+* body measurements
+* photos
+* achievements
+
+Subscription:
+
+* plans
+* payments
+* premium features
+
+AI:
+
+* user conversations
+* recommendations
+* generated plans
+
+3. Create a professional folder structure that can support millions of users.
+
+4. Create environment configuration properly.
+
+5. Add:
+
+* error handling structure
+* loading states
+* authentication-ready architecture
+* API service layer
+* database connection layer
+* reusable utilities
+
+6. Create the initial UI shell:
+
+Pages:
+
+* Landing page
+* Login page
+* Signup page
+* Onboarding page
+* Main dashboard layout
+
+Dashboard placeholder sections:
+
+* Today's workout
+* Progress summary
+* AI Coach
+* Nutrition summary
+* Goals
+
+7. Design requirements:
+   The visual style should feel premium and modern, inspired by:
+
+* Apple Fitness+
+* Whoop
+* Oura
+* Strava
+
+The design should include:
+
+* clean cards
+* beautiful spacing
+* modern typography
+* smooth interactions
+* responsive layouts
+* dark mode support
+
+Important rules:
+
+* Do not create temporary code that will need major rewriting later.
+* Do not skip architecture decisions.
+* Prioritize scalability and maintainability.
+* Do not build workout generation, AI, nutrition, or payment features yet. Only prepare the foundation.
+* Explain the architecture choices before implementation.
+* After implementation, provide a summary of files created and how future features should integrate.
