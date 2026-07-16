@@ -1,49 +1,83 @@
 import React, { useState } from "react";
 import { Link } from "wouter";
-import { useListWorkouts } from "@workspace/api-client-react";
+import { useListWorkouts, useUpdateWorkout } from "@workspace/api-client-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { getListWorkoutsQueryKey } from "@workspace/api-client-react";
 import {
   ArrowLeft, ChevronLeft, ChevronRight, Dumbbell, Plus, Clock, Calendar,
+  Pencil, XCircle, Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+} from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import {
   startOfWeek, addDays, addWeeks, subWeeks, format, isSameDay, isToday,
 } from "date-fns";
 
 const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const DAY_FULL = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+type WeeklySchedule = {
+  days?: number[];
+  frequency?: number;
+  skippedDates?: string[]; // ISO date strings "YYYY-MM-DD"
+};
 
 type ScheduledWorkout = {
-  dayOfWeek: number;  // 0=Sun, 1=Mon ... 6=Sat
+  dayOfWeek: number;
   workoutName: string;
   workoutId: number;
   category: string | null;
   durationMinutes: number | null;
+  weeklySchedule: WeeklySchedule | null;
 };
+
+function toISODate(d: Date) {
+  return format(d, "yyyy-MM-dd");
+}
 
 export default function WorkoutSchedulePage() {
   const [weekOffset, setWeekOffset] = useState(0);
   const [selectedDay, setSelectedDay] = useState<number>(new Date().getDay());
 
-  const { data: workouts, isLoading } = useListWorkouts({ status: "active" });
+  // Edit-days dialog state
+  const [editingWorkout, setEditingWorkout] = useState<{
+    id: number;
+    name: string;
+    days: number[];
+  } | null>(null);
+  const [editDays, setEditDays] = useState<number[]>([]);
 
-  // Build a schedule from workouts with weeklySchedule configured
+  const queryClient = useQueryClient();
+  const { data: workouts, isLoading } = useListWorkouts({ status: "active" });
+  const updateWorkout = useUpdateWorkout();
+
+  const weekStart = startOfWeek(addWeeks(new Date(), weekOffset));
+  const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
+
+  // Build schedule, filtering out skipped dates
   const schedule: ScheduledWorkout[] = [];
   (workouts ?? []).forEach(w => {
-    const days: number[] = (w.weeklySchedule as { days?: number[] } | null)?.days ?? [];
+    const ws = (w.weeklySchedule as WeeklySchedule | null);
+    const days: number[] = ws?.days ?? [];
+    const skipped: string[] = ws?.skippedDates ?? [];
     days.forEach(dayOfWeek => {
+      const dateForDay = weekDays[dayOfWeek];
+      const dateStr = toISODate(dateForDay);
+      if (skipped.includes(dateStr)) return; // skip this occurrence
       schedule.push({
         dayOfWeek,
         workoutName: w.name,
         workoutId: w.id,
-        category: w.category,
-        durationMinutes: w.durationMinutes,
+        category: w.category ?? null,
+        durationMinutes: w.durationMinutes ?? null,
+        weeklySchedule: ws,
       });
     });
   });
-
-  const weekStart = startOfWeek(addWeeks(new Date(), weekOffset));
-  const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
 
   const workoutsOnDay = (dayIdx: number) =>
     schedule.filter(s => s.dayOfWeek === dayIdx);
@@ -51,11 +85,47 @@ export default function WorkoutSchedulePage() {
   const selectedDayWorkouts = workoutsOnDay(selectedDay);
   const selectedDate = weekDays[selectedDay];
 
-  // Count active workouts with no schedule
   const unscheduled = (workouts ?? []).filter(w => {
-    const days = (w.weeklySchedule as { days?: number[] } | null)?.days ?? [];
+    const days = (w.weeklySchedule as WeeklySchedule | null)?.days ?? [];
     return days.length === 0;
   });
+
+  // ── Handlers ────────────────────────────────────────────────────────────────
+
+  function openEditDays(sw: ScheduledWorkout) {
+    const days = sw.weeklySchedule?.days ?? [];
+    setEditingWorkout({ id: sw.workoutId, name: sw.workoutName, days });
+    setEditDays([...days]);
+  }
+
+  function toggleEditDay(d: number) {
+    setEditDays(prev =>
+      prev.includes(d) ? prev.filter(x => x !== d) : [...prev, d].sort((a, b) => a - b),
+    );
+  }
+
+  async function saveEditDays() {
+    if (!editingWorkout) return;
+    const workout = (workouts ?? []).find(w => w.id === editingWorkout.id);
+    const ws: WeeklySchedule = {
+      ...(workout?.weeklySchedule as WeeklySchedule | null ?? {}),
+      days: editDays,
+      frequency: editDays.length,
+    };
+    await updateWorkout.mutateAsync({ id: editingWorkout.id, data: { weeklySchedule: ws } });
+    queryClient.invalidateQueries({ queryKey: getListWorkoutsQueryKey({ status: "active" }) });
+    setEditingWorkout(null);
+  }
+
+  async function skipWorkout(sw: ScheduledWorkout) {
+    const dateStr = toISODate(weekDays[sw.dayOfWeek]);
+    const existing: WeeklySchedule = sw.weeklySchedule ?? {};
+    const skippedDates = [...(existing.skippedDates ?? [])];
+    if (!skippedDates.includes(dateStr)) skippedDates.push(dateStr);
+    const ws: WeeklySchedule = { ...existing, skippedDates };
+    await updateWorkout.mutateAsync({ id: sw.workoutId, data: { weeklySchedule: ws } });
+    queryClient.invalidateQueries({ queryKey: getListWorkoutsQueryKey({ status: "active" }) });
+  }
 
   return (
     <div className="p-4 md:p-8 max-w-4xl mx-auto space-y-8 animate-in fade-in duration-500">
@@ -123,7 +193,6 @@ export default function WorkoutSchedulePage() {
                 )}>
                   {format(date, "d")}
                 </span>
-                {/* Workout count indicators */}
                 <div className="flex gap-0.5">
                   {dayWorkouts.slice(0, 3).map((_, i) => (
                     <div key={i} className="h-1.5 w-1.5 rounded-full bg-primary/70" />
@@ -170,8 +239,8 @@ export default function WorkoutSchedulePage() {
         ) : (
           <div className="space-y-3">
             {selectedDayWorkouts.map((sw, i) => (
-              <Link key={i} href={`/workouts/${sw.workoutId}`}>
-                <div className="bg-card border border-border rounded-2xl p-5 flex items-center gap-4 hover:border-primary/30 transition-colors cursor-pointer">
+              <div key={i} className="bg-card border border-border rounded-2xl p-5 flex items-center gap-4 hover:border-primary/20 transition-colors">
+                <Link href={`/workouts/${sw.workoutId}`} className="flex items-center gap-4 flex-1 min-w-0">
                   <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                     <Dumbbell className="h-6 w-6 text-primary" />
                   </div>
@@ -187,8 +256,26 @@ export default function WorkoutSchedulePage() {
                       {sw.durationMinutes}min
                     </div>
                   )}
+                </Link>
+                {/* Actions */}
+                <div className="flex items-center gap-1 shrink-0">
+                  <button
+                    onClick={() => openEditDays(sw)}
+                    title="Change scheduled days"
+                    className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => skipWorkout(sw)}
+                    title="Skip this occurrence"
+                    disabled={updateWorkout.isPending}
+                    className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-50"
+                  >
+                    <XCircle className="h-4 w-4" />
+                  </button>
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         )}
@@ -241,6 +328,49 @@ export default function WorkoutSchedulePage() {
           </div>
         </div>
       )}
+
+      {/* Edit Days Dialog */}
+      <Dialog open={!!editingWorkout} onOpenChange={open => { if (!open) setEditingWorkout(null); }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Change Training Days</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground -mt-2">
+            {editingWorkout?.name} — select the days it runs each week.
+          </p>
+          <div className="grid grid-cols-7 gap-1.5 py-2">
+            {DAY_LABELS.map((label, idx) => {
+              const active = editDays.includes(idx);
+              return (
+                <button
+                  key={idx}
+                  onClick={() => toggleEditDay(idx)}
+                  className={cn(
+                    "flex flex-col items-center gap-1 p-2 rounded-xl border transition-all",
+                    active
+                      ? "bg-primary/10 border-primary/40 text-primary"
+                      : "border-border text-muted-foreground hover:bg-secondary/50",
+                  )}
+                >
+                  <span className="text-xs font-semibold">{label}</span>
+                  {active && <Check className="h-3 w-3" />}
+                </button>
+              );
+            })}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {editDays.length === 0
+              ? "No days selected — workout will be unscheduled."
+              : `${editDays.length} day${editDays.length > 1 ? "s" : ""}: ${editDays.map(d => DAY_FULL[d]).join(", ")}`}
+          </p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingWorkout(null)}>Cancel</Button>
+            <Button onClick={saveEditDays} disabled={updateWorkout.isPending}>
+              {updateWorkout.isPending ? "Saving…" : "Save"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

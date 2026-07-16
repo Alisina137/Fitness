@@ -6,7 +6,9 @@ import {
   workoutDaysTable,
   workoutDayExercisesTable,
   personalRecordsTable,
+  exercisesTable,
 } from "@workspace/db";
+import type { CompletedExerciseLog } from "@workspace/db";
 import { eq, and, desc, gte, count, sum, avg, sql } from "drizzle-orm";
 import { requireAuth, getUser } from "../lib/auth";
 
@@ -255,6 +257,54 @@ router.get("/workouts/analytics", requireAuth, async (req, res) => {
     .orderBy(desc(personalRecordsTable.achievedAt))
     .limit(5);
 
+  // Favorite exercises: count per exercise across all completions in period
+  const allCompletions = await db.select({
+    exercisesCompleted: workoutCompletionsTable.exercisesCompleted,
+    completedAt: workoutCompletionsTable.completedAt,
+  }).from(workoutCompletionsTable)
+    .where(and(
+      eq(workoutCompletionsTable.userId, user.id),
+      gte(workoutCompletionsTable.completedAt, since),
+    ));
+
+  const exerciseCounts = new Map<string, { name: string; count: number; id: number }>();
+  const weekExerciseIds = new Set<number>();
+
+  for (const c of allCompletions) {
+    const exercises = (c.exercisesCompleted || []) as CompletedExerciseLog[];
+    const isThisWeek = c.completedAt >= weekAgo;
+    for (const ex of exercises) {
+      if (ex.skipped) continue;
+      const key = String(ex.exerciseId || ex.name);
+      const existing = exerciseCounts.get(key);
+      if (existing) {
+        existing.count++;
+      } else {
+        exerciseCounts.set(key, { name: ex.name, count: 1, id: ex.exerciseId });
+      }
+      if (isThisWeek && ex.exerciseId) weekExerciseIds.add(ex.exerciseId);
+    }
+  }
+
+  const favoriteExercises = [...exerciseCounts.values()]
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 5)
+    .map(e => ({ name: e.name, count: e.count }));
+
+  // Muscle groups this week: look up exercises worked this week
+  let muscleGroupsThisWeek: string[] = [];
+  if (weekExerciseIds.size > 0) {
+    const exIds = [...weekExerciseIds];
+    const exerciseData = await db.select({ muscleGroups: exercisesTable.muscleGroups })
+      .from(exercisesTable)
+      .where(sql`${exercisesTable.id} = ANY(${exIds})`);
+    const mgSet = new Set<string>();
+    for (const ex of exerciseData) {
+      for (const mg of ex.muscleGroups) mgSet.add(mg);
+    }
+    muscleGroupsThisWeek = [...mgSet].sort();
+  }
+
   res.json({
     totalWorkouts,
     totalMinutes: Number(totals?.totalMinutes || 0),
@@ -263,8 +313,8 @@ router.get("/workouts/analytics", requireAuth, async (req, res) => {
     weeklyConsistency,
     avgDuration: Number(totals?.avgDuration || 0),
     avgDifficultyRating: totals?.avgDifficulty ? Number(totals.avgDifficulty) : null,
-    muscleGroupsThisWeek: [],
-    favoriteExercises: [],
+    muscleGroupsThisWeek,
+    favoriteExercises,
     weeklyVolume: [],
     recentPersonalRecords: prs.map(pr => ({
       id: pr.id,

@@ -1,6 +1,6 @@
 import React from "react";
 import { useGetWorkoutAnalytics, useGetWorkoutHistory } from "@workspace/api-client-react";
-import { Trophy, Flame, Clock, Calendar, TrendingUp, Target, Zap, BarChart3, ArrowLeft } from "lucide-react";
+import { Trophy, Flame, Clock, Calendar, TrendingUp, Target, Zap, BarChart3, ArrowLeft, Dumbbell, Star } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "wouter";
 import { format } from "date-fns";
@@ -149,6 +149,78 @@ export default function WorkoutAnalyticsPage() {
               </div>
               <p className="text-sm text-muted-foreground">Average session length per workout.</p>
             </>
+          )}
+        </div>
+      </div>
+
+      {/* Muscle Groups & Favorite Exercises */}
+      <div className="grid md:grid-cols-2 gap-6">
+        {/* Muscle Groups This Week */}
+        <div className="bg-card border border-border rounded-2xl p-6 flex flex-col gap-4">
+          <div className="flex items-center gap-2">
+            <Dumbbell className="h-5 w-5 text-primary" />
+            <h3 className="font-bold">Muscle Groups This Week</h3>
+          </div>
+          {isLoading ? (
+            <div className="flex flex-wrap gap-2">
+              {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-7 w-20 rounded-full" />)}
+            </div>
+          ) : (analytics?.muscleGroupsThisWeek ?? []).length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-6 text-center gap-2">
+              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <Dumbbell className="h-5 w-5 text-primary/40" />
+              </div>
+              <p className="text-sm text-muted-foreground">Complete a workout this week to see muscle coverage.</p>
+            </div>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {(analytics!.muscleGroupsThisWeek as string[]).map((mg, i) => (
+                <span key={i} className="px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold capitalize">
+                  {mg}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Top Exercises */}
+        <div className="bg-card border border-border rounded-2xl p-6 flex flex-col gap-4">
+          <div className="flex items-center gap-2">
+            <Star className="h-5 w-5 text-yellow-400" />
+            <h3 className="font-bold">Top Exercises</h3>
+          </div>
+          {isLoading ? (
+            <div className="space-y-2">
+              {[1, 2, 3].map(i => <Skeleton key={i} className="h-10 w-full rounded-xl" />)}
+            </div>
+          ) : (analytics?.favoriteExercises ?? []).length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-6 text-center gap-2">
+              <div className="h-10 w-10 rounded-full bg-yellow-400/10 flex items-center justify-center">
+                <Star className="h-5 w-5 text-yellow-400/40" />
+              </div>
+              <p className="text-sm text-muted-foreground">Log workouts to see your most-trained exercises.</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {(analytics!.favoriteExercises ?? []).map((ex, i) => {
+                const maxCount = analytics!.favoriteExercises![0]?.count ?? 1;
+                const pct = Math.round(((ex.count ?? 0) / maxCount) * 100);
+                return (
+                  <div key={i} className="space-y-1">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="font-medium truncate mr-2">{ex.name}</span>
+                      <span className="text-muted-foreground shrink-0">{ex.count}×</span>
+                    </div>
+                    <div className="w-full bg-border rounded-full h-1.5">
+                      <div
+                        className="h-full bg-yellow-400/70 rounded-full transition-all duration-500"
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           )}
         </div>
       </div>
