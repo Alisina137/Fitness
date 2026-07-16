@@ -214,6 +214,94 @@ paths:
               schema:
                 $ref: "#/components/schemas/WorkoutPlan"
 
+  # ─── Recovery ───────────────────────────────────────────────────────────────
+  /recovery/check-in:
+    post:
+      operationId: createRecoveryCheckIn
+      tags: [recovery]
+      summary: Submit daily recovery check-in
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DailyCheckInInput"
+      responses:
+        "201":
+          description: Check-in recorded and recovery score calculated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckInResult"
+        "400":
+          description: Validation error
+
+  /recovery/today:
+    get:
+      operationId: getTodayRecovery
+      tags: [recovery]
+      summary: Get today's recovery data
+      responses:
+        "200":
+          description: Today's recovery data including score, readiness, and muscle status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TodayRecovery"
+        "401":
+          description: Unauthorized
+
+  /recovery/history:
+    get:
+      operationId: getRecoveryHistory
+      tags: [recovery]
+      summary: Get recovery check-in history
+      parameters:
+        - in: query
+          name: days
+          schema:
+            type: integer
+            default: 30
+            maximum: 90
+          description: Number of days to look back
+      responses:
+        "200":
+          description: Array of past check-ins
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DailyCheckIn"
+
+  /recovery/muscles:
+    get:
+      operationId: getMuscleRecovery
+      tags: [recovery]
+      summary: Get per-muscle recovery status
+      responses:
+        "200":
+          description: Array of muscle recovery records
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MuscleRecovery"
+
+  /recovery/recommendation:
+    get:
+      operationId: getRecoveryRecommendation
+      tags: [recovery]
+      summary: Get today's training recommendation based on recovery
+      responses:
+        "200":
+          description: Training recommendation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecoveryRecommendation"
+
   /workouts/today:
     get:
       operationId: getTodayWorkout
@@ -1717,6 +1805,142 @@ components:
           type: array
           items:
             type: object
+
+    # ─── Recovery Schemas ───────────────────────────────────────────────────────
+    DailyCheckInInput:
+      type: object
+      required: [date, sleepQuality, energyLevel, stressLevel, muscleSoreness, motivationLevel]
+      properties:
+        date:
+          type: string
+          format: date
+        sleepQuality:
+          type: string
+          enum: [excellent, good, average, poor]
+        energyLevel:
+          type: integer
+          minimum: 1
+          maximum: 10
+        stressLevel:
+          type: integer
+          minimum: 1
+          maximum: 10
+        muscleSoreness:
+          type: integer
+          minimum: 1
+          maximum: 10
+        motivationLevel:
+          type: integer
+          minimum: 1
+          maximum: 10
+        mood:
+          type: string
+          enum: [great, good, neutral, low]
+        notes:
+          type: string
+          maxLength: 500
+
+    DailyCheckIn:
+      type: object
+      required: [id, date, sleepQuality, energyLevel, stressLevel, muscleSoreness, motivationLevel]
+      properties:
+        id:
+          type: integer
+        date:
+          type: string
+        sleepQuality:
+          type: string
+        energyLevel:
+          type: integer
+        stressLevel:
+          type: integer
+        muscleSoreness:
+          type: integer
+        motivationLevel:
+          type: integer
+        mood:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        recoveryScore:
+          type: ["integer", "null"]
+        createdAt:
+          type: string
+          format: date-time
+
+    CheckInResult:
+      type: object
+      required: [recoveryScore, readiness, message]
+      properties:
+        recoveryScore:
+          type: integer
+        readiness:
+          type: object
+        fatigue:
+          type: object
+        message:
+          type: string
+
+    MuscleRecovery:
+      type: object
+      required: [id, muscleGroup, recoveryPercentage, sorenessLevel, trainingVolume]
+      properties:
+        id:
+          type: integer
+        muscleGroup:
+          type: string
+        lastTrainedDate:
+          type: ["string", "null"]
+          format: date-time
+        trainingVolume:
+          type: integer
+        sorenessLevel:
+          type: integer
+        recoveryPercentage:
+          type: integer
+        updatedAt:
+          type: string
+          format: date-time
+
+    TodayRecovery:
+      type: object
+      required: [checkedInToday]
+      properties:
+        checkedInToday:
+          type: boolean
+        checkIn:
+          $ref: "#/components/schemas/DailyCheckIn"
+        profile:
+          type: object
+        score:
+          type: ["integer", "null"]
+        readiness:
+          type: object
+        muscles:
+          type: array
+          items:
+            $ref: "#/components/schemas/MuscleRecovery"
+        recommendation:
+          type: ["string", "null"]
+
+    RecoveryRecommendation:
+      type: object
+      required: [hasRecommendation]
+      properties:
+        hasRecommendation:
+          type: boolean
+        score:
+          type: integer
+        readiness:
+          type: object
+        recommendation:
+          type: string
+        muscles:
+          type: array
+          items:
+            $ref: "#/components/schemas/MuscleRecovery"
+        message:
+          type: string
 
     # ─── AI Stub Schemas ────────────────────────────────────────────────────────
 

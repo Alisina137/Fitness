@@ -11,6 +11,7 @@ import {
 import type { CompletedExerciseLog } from "@workspace/db";
 import { eq, and, desc, gte, count, sum, avg, sql } from "drizzle-orm";
 import { requireAuth, getUser } from "../lib/auth";
+import { refreshMusclesAfterWorkout } from "../lib/recovery-engine.js";
 
 const router = Router();
 
@@ -479,6 +480,13 @@ router.post("/workouts/:id/complete", requireAuth, async (req, res) => {
         }
       }
     }
+  }
+
+  // Update muscle recovery data based on exercises completed in this session
+  if (exercisesCompleted && Array.isArray(exercisesCompleted) && exercisesCompleted.length > 0) {
+    refreshMusclesAfterWorkout(user.id, exercisesCompleted as import("@workspace/db").CompletedExerciseLog[]).catch(() => {
+      // Non-blocking: muscle recovery update failure should not fail the completion response
+    });
   }
 
   res.json(serializeCompletion(completion, workout.name));

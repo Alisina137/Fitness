@@ -14,6 +14,7 @@ import type {
 } from "@workspace/db";
 import { eq, desc, gte, and } from "drizzle-orm";
 import { generateWorkoutReasoning } from "./ai-provider.js";
+import { getRecoveryContext } from "./recovery-engine.js";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -588,12 +589,24 @@ export async function generatePersonalizedWorkout(userId: number): Promise<Gener
     );
   }
 
-  // 5. Analyze progressive overload
+  // 5. Analyze progressive overload + recovery context
   const adaptation = analyzeProgressiveOverload(recentCompletions);
+  const recoveryCtx = await getRecoveryContext(userId);
   const levelCfg = LEVEL_CONFIG[level] ?? LEVEL_CONFIG.intermediate;
   const goalCfg = GOAL_CONFIG[goal] ?? GOAL_CONFIG.general_fitness;
 
   // 6. Build workout structure
+  // Merge recovery intensity modifier with progressive overload modifier.
+  // Recovery takes precedence when it signals the user needs to ease off.
+  const recoveryIntensityModifier = recoveryCtx
+    ? Math.min(adaptation.intensityModifier, recoveryCtx.intensityModifier)
+    : adaptation.intensityModifier;
+
+  // Muscles still in recovery (< 60%) — deprioritise them in exercise selection
+  const fatiguedMuscles = new Set<string>(
+    recoveryCtx?.fatiguedMuscles.map((m) => m.toLowerCase()) ?? [],
+  );
+
   const templates = getSplitTemplates(weeklyDays, goal);
   const splitName = getSplitName(weeklyDays, goal);
   const daySlots = DAY_SLOTS[Math.min(weeklyDays, 6)] ?? DAY_SLOTS[3];
@@ -606,8 +619,22 @@ export async function generatePersonalizedWorkout(userId: number): Promise<Gener
       template.compoundCount + template.isolationCount,
     );
 
+    // Prefer exercises that don't target fatigued muscles when recovery data exists
+    const exercisePool = fatiguedMuscles.size > 0
+      ? [
+          ...filteredPool.filter((e) =>
+            !e.primaryMuscles.some((m) => fatiguedMuscles.has(m.toLowerCase())) &&
+            !e.muscleGroups.some((m) => fatiguedMuscles.has(m.toLowerCase())),
+          ),
+          ...filteredPool.filter((e) =>
+            e.primaryMuscles.some((m) => fatiguedMuscles.has(m.toLowerCase())) ||
+            e.muscleGroups.some((m) => fatiguedMuscles.has(m.toLowerCase())),
+          ),
+        ]
+      : filteredPool;
+
     const selected = selectExercises(
-      filteredPool,
+      exercisePool,
       goal,
       template.primaryMuscles,
       template.compoundCount,
@@ -633,8 +660,8 @@ export async function generatePersonalizedWorkout(userId: number): Promise<Gener
 
     const exercises: GeneratedExercise[] = selected.map((ex) => {
       const vol = assignVolume(ex, goal, level, sessionMinutes, selected.length);
-      // Apply intensity modifier for progressive overload
-      const sets = Math.max(1, Math.round(vol.sets * adaptation.intensityModifier));
+      // Apply combined recovery + progressive overload intensity modifier
+      const sets = Math.max(1, Math.round(vol.sets * recoveryIntensityModifier));
       return {
         exerciseId: ex.id,
         name: ex.name,
@@ -679,8 +706,10 @@ export async function generatePersonalizedWorkout(userId: number): Promise<Gener
     durationWeeks: 8,
     difficulty: level,
     days: generatedDays,
-    overallReasoning: `This ${splitName} structure provides optimal stimulus and recovery for ${goal.replace("_", " ")} at ${level} level. The exercise selection prioritizes ${goalCfg.trainingTypes[0]} movements.`,
-    adaptationNotes: adaptation.note,
+    overallReasoning: `This ${splitName} structure provides optimal stimulus and recovery for ${goal.replace("_", " ")} at ${level} level. The exercise selection prioritizes ${goalCfg.trainingTypes[0]} movements.${recoveryCtx && recoveryCtx.fatiguedMuscles.length > 0 ? ` Recovery data: ${recoveryCtx.fatiguedMuscles.join(", ")} are still recovering — exercises for those groups have been deprioritised.` : ""}`,
+    adaptationNotes: recoveryCtx
+      ? `Recovery score: ${recoveryCtx.recoveryScore}/100 (${recoveryCtx.readinessCategory}). ${adaptation.note}`
+      : adaptation.note,
     progressionRecommendation: `Add ${goal === "strength" ? "2.5–5kg" : "1–2 reps"} per exercise every ${goal === "endurance" ? "1" : "2"} weeks when all sets are completed with good form.`,
   };
 
