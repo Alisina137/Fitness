@@ -23,6 +23,7 @@ import ExercisesPage from './pages/exercises';
 import NutritionPage from './pages/nutrition';
 import ProgressPage from './pages/progress';
 import AiCoachPage from './pages/ai-coach';
+import AiWorkoutGeneratorPage from './pages/ai-workout-generator';
 import ProfilePage from './pages/profile';
 import NotFound from '@/pages/not-found';
 
@@ -50,6 +51,7 @@ function AuthenticatedRoutes() {
         <Route path="/exercises" component={ExercisesPage} />
         <Route path="/nutrition" component={NutritionPage} />
         <Route path="/progress" component={ProgressPage} />
+        <Route path="/ai/generate" component={AiWorkoutGeneratorPage} />
         <Route path="/ai" component={AiCoachPage} />
         <Route path="/profile" component={ProfilePage} />
         <Route component={NotFound} />
