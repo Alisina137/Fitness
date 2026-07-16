@@ -1,14 +1,14 @@
 import { Router } from "express";
-import { z } from "zod/v4";
 import { db } from "@workspace/db";
-import { muscleRecoveryTable, dailyCheckInsTable } from "@workspace/db";
+import { muscleRecoveryTable, dailyCheckInsTable, recoveryScoresTable } from "@workspace/db";
 import { insertDailyCheckInSchema } from "@workspace/db";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 import { requireAuth, getUser } from "../lib/auth.js";
 import {
   processCheckIn,
   getTodayRecovery,
   getRecoveryHistory,
+  recalculateTodayScore,
   classifyReadiness,
 } from "../lib/recovery-engine.js";
 
@@ -27,9 +27,65 @@ router.post("/recovery/check-in", requireAuth, async (req, res) => {
 
   res.status(201).json({
     recoveryScore: result.recoveryScore,
+    breakdown: result.breakdown,
     readiness: result.readiness,
     fatigue: result.fatigue,
     message: `Check-in complete. Recovery score: ${result.recoveryScore}/100.`,
+  });
+});
+
+// ─── POST /api/recovery/calculate ────────────────────────────────────────────
+// Recalculates the recovery score from today's existing check-in on demand.
+router.post("/recovery/calculate", requireAuth, async (req, res) => {
+  const user = getUser(req);
+
+  const result = await recalculateTodayScore(user.id);
+
+  if (!result) {
+    return res.status(404).json({
+      error: "No check-in available for today. Complete a check-in first.",
+    });
+  }
+
+  res.json({
+    score: result.score,
+    status: result.status,
+    label: result.label,
+    recommendation: result.recommendation,
+    breakdown: result.breakdown,
+    calculatedAt: new Date().toISOString(),
+  });
+});
+
+// ─── GET /api/recovery/score/today ───────────────────────────────────────────
+// Returns the stored recovery score record for today with full breakdown.
+router.get("/recovery/score/today", requireAuth, async (req, res) => {
+  const user = getUser(req);
+  const todayStr = new Date().toISOString().split("T")[0];
+
+  const [record] = await db
+    .select()
+    .from(recoveryScoresTable)
+    .where(and(eq(recoveryScoresTable.userId, user.id), eq(recoveryScoresTable.date, todayStr)))
+    .limit(1);
+
+  if (!record) {
+    return res.json({
+      hasScore: false,
+      message: "No recovery score for today. Complete a check-in to generate one.",
+    });
+  }
+
+  const readiness = classifyReadiness(record.recoveryScore);
+
+  res.json({
+    hasScore: true,
+    score: record.recoveryScore,
+    status: record.recoveryStatus,
+    label: readiness.label,
+    recommendation: readiness.recommendation,
+    breakdown: record.calculationDetails,
+    createdAt: record.createdAt,
   });
 });
 

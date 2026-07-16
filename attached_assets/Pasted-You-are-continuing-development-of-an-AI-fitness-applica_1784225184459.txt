@@ -1,0 +1,257 @@
+You are continuing development of an AI fitness application.
+
+CURRENT PROJECT STATE:
+
+Already implemented:
+
+- React + TypeScript frontend
+- Tailwind CSS design system
+- Authentication
+- User profile system
+- Exercise database
+- Workout program engine
+- AI workout generation engine
+- Recovery system foundation
+- Daily recovery check-in system
+- Recovery score calculation engine
+
+Existing workout data includes:
+
+- Completed workouts
+- Exercises performed
+- Training dates
+- Muscle groups trained
+- Workout volume
+
+Do not rebuild these systems.
+
+TASK:
+
+Build the Muscle Recovery Tracking System.
+
+The purpose:
+
+Track how recovered each muscle group is after training.
+
+This system will later help:
+
+- AI Workout Generator choose better workouts
+- AI Coach explain recovery
+- Prevent excessive training of the same muscles
+- Improve workout personalization
+
+IMPLEMENT:
+
+1. Create Muscle Recovery database model.
+
+Create:
+
+MuscleRecovery
+
+Fields:
+
+- userId
+- muscleGroup
+- lastTrainedDate
+- trainingVolume
+- sorenessLevel
+- fatigueLevel
+- recoveryPercentage
+- estimatedRecoveryDate
+- updatedAt
+
+
+Example:
+
+{
+ muscleGroup: "Chest",
+ recoveryPercentage: 65,
+ fatigueLevel: "medium"
+}
+
+
+2. Create Muscle Recovery Service.
+
+Create functions:
+
+calculateMuscleFatigue()
+
+calculateRecoveryPercentage()
+
+updateMuscleRecovery()
+
+getRecoveredMuscles()
+
+getFatiguedMuscles()
+
+
+Keep this logic separate from controllers.
+
+
+3. Connect with completed workouts.
+
+When a user completes a workout:
+
+Automatically:
+
+- Detect trained muscles
+- Update muscle recovery records
+- Calculate fatigue increase
+
+
+Example:
+
+Workout:
+
+Bench Press
+
+Affected muscles:
+
+- Chest
+- Triceps
+- Shoulders
+
+
+Update those muscle groups.
+
+
+4. Create recovery estimation logic.
+
+Example rules:
+
+High volume workout:
+
+Recovery:
+48-72 hours
+
+
+Medium volume:
+
+Recovery:
+24-48 hours
+
+
+Low volume:
+
+Recovery:
+12-24 hours
+
+
+Make the system configurable.
+
+
+5. Create API endpoints.
+
+Create:
+
+POST
+
+/api/recovery/muscles/update
+
+
+GET
+
+/api/recovery/muscles
+
+
+GET
+
+/api/recovery/muscles/:muscleGroup
+
+
+6. Create Muscle Recovery UI component.
+
+Create:
+
+MuscleRecoveryCard
+
+
+Display:
+
+Example:
+
+Chest
+
+Recovery:
+75%
+
+Status:
+Almost recovered
+
+
+Legs
+
+Recovery:
+35%
+
+Status:
+Needs recovery
+
+
+7. Create Muscle Recovery Dashboard section.
+
+Display:
+
+- All muscle groups
+- Recovery percentage
+- Last trained date
+- Fatigue level
+- Recommended recovery time
+
+
+8. Add validation.
+
+Handle:
+
+- Missing workout data
+- Unknown muscle groups
+- Duplicate updates
+- Invalid recovery values
+
+
+9. Prepare AI integration.
+
+Create a simple function:
+
+getTrainingReadinessByMuscle()
+
+
+Example output:
+
+{
+ chest: "ready",
+ legs: "not_ready",
+ back: "ready"
+}
+
+
+This will be used later by the AI workout engine.
+
+DO NOT:
+
+- Modify AI workout generation logic yet.
+- Create AI recommendations yet.
+- Add wearable integrations.
+- Build advanced analytics charts.
+
+
+TECH REQUIREMENTS:
+
+- Extend existing architecture.
+- Reuse workout and exercise data.
+- Do not duplicate muscle group data.
+- Keep recovery logic modular.
+- Add proper error handling.
+- Build reusable components.
+
+
+COMPLETION REPORT:
+
+After finishing, provide:
+
+1. Files created
+2. Files modified
+3. Database changes
+4. API endpoints created
+5. Muscle recovery calculation explanation
+6. Example scenarios tested

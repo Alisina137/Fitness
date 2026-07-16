@@ -6,12 +6,14 @@ import {
   workoutCompletionsTable,
   exercisesTable,
   userProfilesTable,
+  recoveryScoresTable,
 } from "@workspace/db";
 import type {
   InsertDailyCheckIn,
   RecoveryContext,
   FatigueLevel,
   ReadinessCategory,
+  ScoreBreakdown,
 } from "@workspace/db";
 import type { CompletedExerciseLog } from "@workspace/db";
 import { eq, desc, gte, and, sql } from "drizzle-orm";
@@ -41,21 +43,30 @@ const SLEEP_SCORES: Record<string, number> = {
  * Weighted recovery score 0-100 based on check-in data.
  *
  * Weights:  Sleep 30% | Energy 25% | Soreness 20% | Stress 15% | Motivation 10%
+ *
+ * Returns both the final score and the per-factor breakdown (each 0-100).
  */
-export function calculateRecoveryScore(checkIn: InsertDailyCheckIn): number {
-  const sleep = SLEEP_SCORES[checkIn.sleepQuality] ?? 50;
-  const energy = (checkIn.energyLevel / 10) * 100;
-  const soreness = ((10 - checkIn.muscleSoreness) / 10) * 100;  // inverted
-  const stress = ((10 - checkIn.stressLevel) / 10) * 100;        // inverted
-  const motivation = (checkIn.motivationLevel / 10) * 100;
+export function calculateRecoveryScore(checkIn: InsertDailyCheckIn): {
+  score: number;
+  breakdown: ScoreBreakdown;
+} {
+  const breakdown: ScoreBreakdown = {
+    sleep:      Math.round(SLEEP_SCORES[checkIn.sleepQuality] ?? 50),
+    energy:     Math.round((checkIn.energyLevel / 10) * 100),
+    soreness:   Math.round(((10 - checkIn.muscleSoreness) / 10) * 100),  // inverted
+    stress:     Math.round(((10 - checkIn.stressLevel) / 10) * 100),     // inverted
+    motivation: Math.round((checkIn.motivationLevel / 10) * 100),
+  };
 
-  return Math.round(
-    sleep * 0.30 +
-    energy * 0.25 +
-    soreness * 0.20 +
-    stress * 0.15 +
-    motivation * 0.10,
+  const score = Math.round(
+    breakdown.sleep      * 0.30 +
+    breakdown.energy     * 0.25 +
+    breakdown.soreness   * 0.20 +
+    breakdown.stress     * 0.15 +
+    breakdown.motivation * 0.10,
   );
+
+  return { score, breakdown };
 }
 
 // ─── Readiness Classification ─────────────────────────────────────────────────
@@ -339,10 +350,11 @@ async function computeTrend(userId: number, currentScore: number): Promise<"impr
 
 export async function processCheckIn(userId: number, checkIn: InsertDailyCheckIn): Promise<{
   recoveryScore: number;
+  breakdown: ScoreBreakdown;
   readiness: ReturnType<typeof classifyReadiness>;
   fatigue: FatigueAnalysis;
 }> {
-  const score = calculateRecoveryScore(checkIn);
+  const { score, breakdown } = calculateRecoveryScore(checkIn);
   const readiness = classifyReadiness(score);
 
   // Load profile for weekly target
@@ -355,46 +367,66 @@ export async function processCheckIn(userId: number, checkIn: InsertDailyCheckIn
   const weeklyTarget = profile?.weeklyWorkoutTarget ?? 3;
   const fatigue = await detectFatigue(userId, weeklyTarget);
   const trend = await computeTrend(userId, score);
+  const todayStr = checkIn.date;
 
-  // Upsert daily check-in (conflict on userId+date = update)
-  await db
-    .insert(dailyCheckInsTable)
-    .values({ userId, recoveryScore: score, ...checkIn })
-    .onConflictDoUpdate({
-      target: [dailyCheckInsTable.userId, dailyCheckInsTable.date],
-      set: {
-        sleepQuality: checkIn.sleepQuality,
-        energyLevel: checkIn.energyLevel,
-        stressLevel: checkIn.stressLevel,
-        muscleSoreness: checkIn.muscleSoreness,
-        motivationLevel: checkIn.motivationLevel,
-        mood: checkIn.mood ?? null,
-        notes: checkIn.notes ?? null,
+  // Run all DB writes in parallel
+  await Promise.all([
+    // Upsert daily check-in
+    db.insert(dailyCheckInsTable)
+      .values({ userId, recoveryScore: score, ...checkIn })
+      .onConflictDoUpdate({
+        target: [dailyCheckInsTable.userId, dailyCheckInsTable.date],
+        set: {
+          sleepQuality: checkIn.sleepQuality,
+          energyLevel: checkIn.energyLevel,
+          stressLevel: checkIn.stressLevel,
+          muscleSoreness: checkIn.muscleSoreness,
+          motivationLevel: checkIn.motivationLevel,
+          mood: checkIn.mood ?? null,
+          notes: checkIn.notes ?? null,
+          recoveryScore: score,
+        },
+      }),
+
+    // Upsert recovery scores (with breakdown)
+    db.insert(recoveryScoresTable)
+      .values({
+        userId,
+        date: todayStr,
         recoveryScore: score,
-      },
-    });
+        recoveryStatus: readiness.category,
+        calculationDetails: breakdown,
+      })
+      .onConflictDoUpdate({
+        target: [recoveryScoresTable.userId, recoveryScoresTable.date],
+        set: {
+          recoveryScore: score,
+          recoveryStatus: readiness.category,
+          calculationDetails: breakdown,
+        },
+      }),
 
-  // Upsert recovery profile
-  await db
-    .insert(recoveryProfilesTable)
-    .values({
-      userId,
-      recoveryScore: score,
-      readinessScore: score,
-      fatigueLevel: fatigue.level,
-      recoveryTrend: trend,
-      lastUpdated: new Date(),
-    })
-    .onConflictDoUpdate({
-      target: recoveryProfilesTable.userId,
-      set: {
+    // Upsert recovery profile
+    db.insert(recoveryProfilesTable)
+      .values({
+        userId,
         recoveryScore: score,
         readinessScore: score,
         fatigueLevel: fatigue.level,
         recoveryTrend: trend,
         lastUpdated: new Date(),
-      },
-    });
+      })
+      .onConflictDoUpdate({
+        target: recoveryProfilesTable.userId,
+        set: {
+          recoveryScore: score,
+          readinessScore: score,
+          fatigueLevel: fatigue.level,
+          recoveryTrend: trend,
+          lastUpdated: new Date(),
+        },
+      }),
+  ]);
 
   // Refresh muscle recovery using recent completions + soreness
   const sevenDaysAgo = new Date();
@@ -410,7 +442,64 @@ export async function processCheckIn(userId: number, checkIn: InsertDailyCheckIn
   );
   await upsertMuscleRecovery(userId, muscleMap, checkIn.muscleSoreness);
 
-  return { recoveryScore: score, readiness, fatigue };
+  return { recoveryScore: score, breakdown, readiness, fatigue };
+}
+
+// ─── Explicit recalculate from today's check-in ───────────────────────────────
+// Used by POST /api/recovery/calculate — recalculates without requiring a new
+// check-in submission, useful when the user wants an on-demand refresh.
+
+export async function recalculateTodayScore(userId: number): Promise<{
+  score: number;
+  status: string;
+  label: string;
+  recommendation: string;
+  breakdown: ScoreBreakdown;
+} | null> {
+  const todayStr = new Date().toISOString().split("T")[0];
+
+  const [checkIn] = await db
+    .select()
+    .from(dailyCheckInsTable)
+    .where(and(eq(dailyCheckInsTable.userId, userId), eq(dailyCheckInsTable.date, todayStr)))
+    .limit(1);
+
+  if (!checkIn) return null;
+
+  const { score, breakdown } = calculateRecoveryScore({
+    date: checkIn.date,
+    sleepQuality: checkIn.sleepQuality as "excellent" | "good" | "average" | "poor",
+    energyLevel: checkIn.energyLevel,
+    stressLevel: checkIn.stressLevel,
+    muscleSoreness: checkIn.muscleSoreness,
+    motivationLevel: checkIn.motivationLevel,
+    mood: (checkIn.mood ?? undefined) as "great" | "good" | "neutral" | "low" | undefined,
+    notes: checkIn.notes ?? undefined,
+  });
+
+  const readiness = classifyReadiness(score);
+
+  // Persist the recalculated score
+  await db.insert(recoveryScoresTable)
+    .values({
+      userId,
+      date: todayStr,
+      recoveryScore: score,
+      recoveryStatus: readiness.category,
+      calculationDetails: breakdown,
+    })
+    .onConflictDoUpdate({
+      target: [recoveryScoresTable.userId, recoveryScoresTable.date],
+      set: { recoveryScore: score, recoveryStatus: readiness.category, calculationDetails: breakdown },
+    });
+
+  return {
+    score,
+    status: readiness.category,
+    label: readiness.label,
+    recommendation: readiness.recommendation,
+    breakdown,
+  };
 }
 
 // ─── Get today's recovery data ────────────────────────────────────────────────
