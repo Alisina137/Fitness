@@ -7,6 +7,10 @@
  */
 import type { WorkoutExercise } from './workoutExercise';
 import type { WorkoutPlanDifficulty } from './workoutPlanDifficulty';
+import type { WorkoutPlanGoal } from './workoutPlanGoal';
+import type { WorkoutPlanProgressionRules } from './workoutPlanProgressionRules';
+import type { WorkoutPlanStatus } from './workoutPlanStatus';
+import type { WorkoutPlanWeeklySchedule } from './workoutPlanWeeklySchedule';
 
 export interface WorkoutPlan {
   id: number;
@@ -15,10 +19,18 @@ export interface WorkoutPlan {
   /** @nullable */
   description?: string | null;
   /** @nullable */
+  goal?: WorkoutPlanGoal;
+  status?: WorkoutPlanStatus;
+  /** @nullable */
   durationMinutes?: number | null;
+  /** @nullable */
+  durationWeeks?: number | null;
   difficulty?: WorkoutPlanDifficulty;
   /** @nullable */
   category?: string | null;
+  isTemplate?: boolean;
+  weeklySchedule?: WorkoutPlanWeeklySchedule;
+  progressionRules?: WorkoutPlanProgressionRules;
   exercises: WorkoutExercise[];
   isActive?: boolean;
   completionCount?: number;

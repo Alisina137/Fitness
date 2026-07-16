@@ -335,6 +335,342 @@ paths:
                 items:
                   $ref: "#/components/schemas/WorkoutCompletion"
 
+  /workouts/templates:
+    get:
+      operationId: listWorkoutTemplates
+      tags: [workouts]
+      summary: List pre-built workout templates
+      parameters:
+        - name: category
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: goal
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: difficulty
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WorkoutPlan"
+
+  /workouts/templates/{id}/adopt:
+    post:
+      operationId: adoptWorkoutTemplate
+      tags: [workouts]
+      summary: Copy a template into the user's personal workout plans
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkoutPlan"
+
+  /workouts/analytics:
+    get:
+      operationId: getWorkoutAnalytics
+      tags: [workouts]
+      summary: Get workout analytics summary
+      parameters:
+        - name: days
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 30
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkoutAnalytics"
+
+  /workouts/{id}/days:
+    get:
+      operationId: listWorkoutDays
+      tags: [workouts]
+      summary: List all days in a workout program
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WorkoutDay"
+    post:
+      operationId: createWorkoutDay
+      tags: [workouts]
+      summary: Add a day to a workout program
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkoutDayInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkoutDay"
+
+  /workouts/days/{dayId}:
+    get:
+      operationId: getWorkoutDay
+      tags: [workouts]
+      summary: Get a workout day with its exercises
+      parameters:
+        - name: dayId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkoutDayWithExercises"
+    patch:
+      operationId: updateWorkoutDay
+      tags: [workouts]
+      summary: Update a workout day
+      parameters:
+        - name: dayId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkoutDayUpdate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkoutDay"
+    delete:
+      operationId: deleteWorkoutDay
+      tags: [workouts]
+      summary: Delete a workout day and its exercises
+      parameters:
+        - name: dayId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  /workouts/days/{dayId}/exercises:
+    post:
+      operationId: addExerciseToDay
+      tags: [workouts]
+      summary: Add an exercise to a workout day
+      parameters:
+        - name: dayId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkoutDayExerciseInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkoutDayExercise"
+
+  /workouts/day-exercises/{id}:
+    patch:
+      operationId: updateWorkoutDayExercise
+      tags: [workouts]
+      summary: Update an exercise within a workout day
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkoutDayExerciseUpdate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkoutDayExercise"
+    delete:
+      operationId: deleteWorkoutDayExercise
+      tags: [workouts]
+      summary: Remove an exercise from a workout day
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  # AI preparation stubs — no logic yet, will be wired to LLM later
+  /workouts/ai/generate:
+    post:
+      operationId: generateWorkoutPlan
+      tags: [workouts]
+      summary: "[AI stub] Generate a personalised workout plan"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AiWorkoutRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiWorkoutResponse"
+
+  /workouts/ai/modify:
+    post:
+      operationId: modifyWorkoutPlan
+      tags: [workouts]
+      summary: "[AI stub] Modify an existing workout plan"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AiWorkoutRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiWorkoutResponse"
+
+  /workouts/ai/replace-exercise:
+    post:
+      operationId: replaceExercise
+      tags: [workouts]
+      summary: "[AI stub] Replace an exercise with a suitable alternative"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AiWorkoutRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiWorkoutResponse"
+
+  /workouts/ai/adjust-difficulty:
+    post:
+      operationId: adjustWorkoutDifficulty
+      tags: [workouts]
+      summary: "[AI stub] Increase or decrease workout difficulty"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AiWorkoutRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiWorkoutResponse"
+
+  /workouts/ai/analyze:
+    post:
+      operationId: analyzeWorkoutPerformance
+      tags: [workouts]
+      summary: "[AI stub] Analyse performance data and suggest adjustments"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AiWorkoutRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiWorkoutResponse"
+
   # ─── Exercises ───────────────────────────────────────────────────────────────
   /exercises:
     get:
@@ -958,13 +1294,36 @@ components:
           type: string
         description:
           type: ["string", "null"]
+        goal:
+          type: ["string", "null"]
+          enum: [fat_loss, muscle_gain, strength, endurance, general_fitness, mobility, null]
+        status:
+          type: string
+          enum: [draft, active, archived]
         durationMinutes:
+          type: ["integer", "null"]
+        durationWeeks:
           type: ["integer", "null"]
         difficulty:
           type: string
           enum: [beginner, intermediate, advanced]
         category:
           type: ["string", "null"]
+        isTemplate:
+          type: boolean
+        weeklySchedule:
+          type: object
+          nullable: true
+          properties:
+            days:
+              type: array
+              items:
+                type: integer
+            frequency:
+              type: integer
+        progressionRules:
+          type: object
+          nullable: true
         exercises:
           type: array
           items:
@@ -979,20 +1338,30 @@ components:
 
     WorkoutExercise:
       type: object
-      required: [exerciseId, name, sets, reps]
+      required: [exerciseId, name, sets]
       properties:
         exerciseId:
           type: integer
         name:
           type: string
+        orderIndex:
+          type: ["integer", "null"]
         sets:
           type: integer
+        repsMin:
+          type: ["integer", "null"]
+        repsMax:
+          type: ["integer", "null"]
         reps:
           type: ["integer", "null"]
+        weightKg:
+          type: ["number", "null"]
         durationSeconds:
           type: ["integer", "null"]
         restSeconds:
           type: ["integer", "null"]
+        tempo:
+          type: ["string", "null"]
         notes:
           type: ["string", "null"]
 
@@ -1004,13 +1373,23 @@ components:
           type: string
         description:
           type: string
+        goal:
+          type: string
+          enum: [fat_loss, muscle_gain, strength, endurance, general_fitness, mobility]
+        status:
+          type: string
+          enum: [draft, active, archived]
         durationMinutes:
+          type: integer
+        durationWeeks:
           type: integer
         difficulty:
           type: string
           enum: [beginner, intermediate, advanced]
         category:
           type: string
+        weeklySchedule:
+          type: object
         exercises:
           type: array
           items:
@@ -1022,14 +1401,24 @@ components:
       properties:
         exerciseId:
           type: integer
+        orderIndex:
+          type: integer
         sets:
+          type: integer
+        repsMin:
+          type: integer
+        repsMax:
           type: integer
         reps:
           type: integer
+        weightKg:
+          type: number
         durationSeconds:
           type: integer
         restSeconds:
           type: integer
+        tempo:
+          type: string
         notes:
           type: string
 
@@ -1040,11 +1429,25 @@ components:
           type: string
         description:
           type: string
+        goal:
+          type: string
+        status:
+          type: string
         durationMinutes:
+          type: integer
+        durationWeeks:
           type: integer
         difficulty:
           type: string
           enum: [beginner, intermediate, advanced]
+        category:
+          type: string
+        weeklySchedule:
+          type: object
+        exercises:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkoutExerciseInput"
         isActive:
           type: boolean
 
@@ -1072,10 +1475,24 @@ components:
           type: string
         userId:
           type: integer
+        startTime:
+          type: ["string", "null"]
+          format: date-time
+        endTime:
+          type: ["string", "null"]
+          format: date-time
         durationMinutes:
           type: ["integer", "null"]
         caloriesBurned:
           type: ["integer", "null"]
+        exercisesCompleted:
+          type: array
+          items:
+            type: object
+        difficultyRating:
+          type: ["integer", "null"]
+          minimum: 1
+          maximum: 5
         rating:
           type: ["integer", "null"]
         notes:
@@ -1087,16 +1504,244 @@ components:
     WorkoutCompletionInput:
       type: object
       properties:
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
         durationMinutes:
           type: integer
         caloriesBurned:
           type: integer
+        exercisesCompleted:
+          type: array
+          items:
+            type: object
+        difficultyRating:
+          type: integer
+          minimum: 1
+          maximum: 5
         rating:
           type: integer
           minimum: 1
           maximum: 5
         notes:
           type: string
+
+    # ─── Workout Day Schemas ────────────────────────────────────────────────────
+
+    WorkoutDay:
+      type: object
+      required: [id, workoutPlanId, dayNumber, title]
+      properties:
+        id:
+          type: integer
+        workoutPlanId:
+          type: integer
+        dayNumber:
+          type: integer
+        title:
+          type: string
+        focusArea:
+          type: ["string", "null"]
+        estimatedDurationMinutes:
+          type: ["integer", "null"]
+        isRestDay:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+
+    WorkoutDayWithExercises:
+      allOf:
+        - $ref: "#/components/schemas/WorkoutDay"
+        - type: object
+          properties:
+            exercises:
+              type: array
+              items:
+                $ref: "#/components/schemas/WorkoutDayExercise"
+
+    WorkoutDayInput:
+      type: object
+      required: [dayNumber, title]
+      properties:
+        dayNumber:
+          type: integer
+        title:
+          type: string
+        focusArea:
+          type: string
+        estimatedDurationMinutes:
+          type: integer
+        isRestDay:
+          type: boolean
+
+    WorkoutDayUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        focusArea:
+          type: string
+        estimatedDurationMinutes:
+          type: integer
+        isRestDay:
+          type: boolean
+
+    WorkoutDayExercise:
+      type: object
+      required: [id, workoutDayId, exerciseId, exerciseName, sets]
+      properties:
+        id:
+          type: integer
+        workoutDayId:
+          type: integer
+        exerciseId:
+          type: integer
+        exerciseName:
+          type: string
+        orderIndex:
+          type: integer
+        sets:
+          type: integer
+        repsMin:
+          type: ["integer", "null"]
+        repsMax:
+          type: ["integer", "null"]
+        weightKg:
+          type: ["number", "null"]
+        durationSeconds:
+          type: ["integer", "null"]
+        restSeconds:
+          type: ["integer", "null"]
+        tempo:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+
+    WorkoutDayExerciseInput:
+      type: object
+      required: [exerciseId, exerciseName, sets]
+      properties:
+        exerciseId:
+          type: integer
+        exerciseName:
+          type: string
+        orderIndex:
+          type: integer
+        sets:
+          type: integer
+        repsMin:
+          type: integer
+        repsMax:
+          type: integer
+        weightKg:
+          type: number
+        durationSeconds:
+          type: integer
+        restSeconds:
+          type: integer
+        tempo:
+          type: string
+        notes:
+          type: string
+
+    WorkoutDayExerciseUpdate:
+      type: object
+      properties:
+        orderIndex:
+          type: integer
+        sets:
+          type: integer
+        repsMin:
+          type: integer
+        repsMax:
+          type: integer
+        weightKg:
+          type: number
+        durationSeconds:
+          type: integer
+        restSeconds:
+          type: integer
+        tempo:
+          type: string
+        notes:
+          type: string
+
+    WorkoutAnalytics:
+      type: object
+      required: [totalWorkouts, totalMinutes, thisWeekWorkouts, weeklyConsistency]
+      properties:
+        totalWorkouts:
+          type: integer
+        totalMinutes:
+          type: integer
+        caloriesBurned:
+          type: integer
+        thisWeekWorkouts:
+          type: integer
+        weeklyConsistency:
+          type: number
+          description: Percentage of target days hit over the period
+        avgDuration:
+          type: number
+        avgDifficultyRating:
+          type: ["number", "null"]
+        muscleGroupsThisWeek:
+          type: array
+          items:
+            type: string
+        favoriteExercises:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              count:
+                type: integer
+        weeklyVolume:
+          type: array
+          items:
+            type: object
+            properties:
+              week:
+                type: string
+              workouts:
+                type: integer
+              minutes:
+                type: integer
+        recentPersonalRecords:
+          type: array
+          items:
+            type: object
+
+    # ─── AI Stub Schemas ────────────────────────────────────────────────────────
+
+    AiWorkoutRequest:
+      type: object
+      properties:
+        workoutPlanId:
+          type: integer
+        goal:
+          type: string
+        context:
+          type: string
+        constraints:
+          type: object
+
+    AiWorkoutResponse:
+      type: object
+      required: [message, available]
+      properties:
+        message:
+          type: string
+        available:
+          type: boolean
+        data:
+          type: object
 
     # ─── Exercises ─────────────────────────────────────────────────────────────
     Exercise:

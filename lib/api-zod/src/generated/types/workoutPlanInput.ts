@@ -7,12 +7,19 @@
  */
 import type { WorkoutExerciseInput } from './workoutExerciseInput';
 import type { WorkoutPlanInputDifficulty } from './workoutPlanInputDifficulty';
+import type { WorkoutPlanInputGoal } from './workoutPlanInputGoal';
+import type { WorkoutPlanInputStatus } from './workoutPlanInputStatus';
+import type { WorkoutPlanInputWeeklySchedule } from './workoutPlanInputWeeklySchedule';
 
 export interface WorkoutPlanInput {
   name: string;
   description?: string;
+  goal?: WorkoutPlanInputGoal;
+  status?: WorkoutPlanInputStatus;
   durationMinutes?: number;
+  durationWeeks?: number;
   difficulty?: WorkoutPlanInputDifficulty;
   category?: string;
+  weeklySchedule?: WorkoutPlanInputWeeklySchedule;
   exercises: WorkoutExerciseInput[];
 }

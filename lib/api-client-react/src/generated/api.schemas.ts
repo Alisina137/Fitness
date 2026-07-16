@@ -308,6 +308,30 @@ export interface NutritionSummary {
   entries: number;
 }
 
+/**
+ * @nullable
+ */
+export type WorkoutPlanGoal = typeof WorkoutPlanGoal[keyof typeof WorkoutPlanGoal] | null;
+
+
+export const WorkoutPlanGoal = {
+  fat_loss: 'fat_loss',
+  muscle_gain: 'muscle_gain',
+  strength: 'strength',
+  endurance: 'endurance',
+  general_fitness: 'general_fitness',
+  mobility: 'mobility',
+} as const;
+
+export type WorkoutPlanStatus = typeof WorkoutPlanStatus[keyof typeof WorkoutPlanStatus];
+
+
+export const WorkoutPlanStatus = {
+  draft: 'draft',
+  active: 'active',
+  archived: 'archived',
+} as const;
+
 export type WorkoutPlanDifficulty = typeof WorkoutPlanDifficulty[keyof typeof WorkoutPlanDifficulty];
 
 
@@ -320,16 +344,33 @@ export const WorkoutPlanDifficulty = {
 export interface WorkoutExercise {
   exerciseId: number;
   name: string;
+  /** @nullable */
+  orderIndex?: number | null;
   sets: number;
   /** @nullable */
-  reps: number | null;
+  repsMin?: number | null;
+  /** @nullable */
+  repsMax?: number | null;
+  /** @nullable */
+  reps?: number | null;
+  /** @nullable */
+  weightKg?: number | null;
   /** @nullable */
   durationSeconds?: number | null;
   /** @nullable */
   restSeconds?: number | null;
   /** @nullable */
+  tempo?: string | null;
+  /** @nullable */
   notes?: string | null;
 }
+
+export type WorkoutPlanWeeklySchedule = {
+  days?: number[];
+  frequency?: number;
+} | null;
+
+export type WorkoutPlanProgressionRules = { [key: string]: unknown } | null;
 
 export interface WorkoutPlan {
   id: number;
@@ -338,10 +379,18 @@ export interface WorkoutPlan {
   /** @nullable */
   description?: string | null;
   /** @nullable */
+  goal?: WorkoutPlanGoal;
+  status?: WorkoutPlanStatus;
+  /** @nullable */
   durationMinutes?: number | null;
+  /** @nullable */
+  durationWeeks?: number | null;
   difficulty?: WorkoutPlanDifficulty;
   /** @nullable */
   category?: string | null;
+  isTemplate?: boolean;
+  weeklySchedule?: WorkoutPlanWeeklySchedule;
+  progressionRules?: WorkoutPlanProgressionRules;
   exercises: WorkoutExercise[];
   isActive?: boolean;
   completionCount?: number;
@@ -383,6 +432,27 @@ export interface ActivityItem {
   occurredAt: string;
 }
 
+export type WorkoutPlanInputGoal = typeof WorkoutPlanInputGoal[keyof typeof WorkoutPlanInputGoal];
+
+
+export const WorkoutPlanInputGoal = {
+  fat_loss: 'fat_loss',
+  muscle_gain: 'muscle_gain',
+  strength: 'strength',
+  endurance: 'endurance',
+  general_fitness: 'general_fitness',
+  mobility: 'mobility',
+} as const;
+
+export type WorkoutPlanInputStatus = typeof WorkoutPlanInputStatus[keyof typeof WorkoutPlanInputStatus];
+
+
+export const WorkoutPlanInputStatus = {
+  draft: 'draft',
+  active: 'active',
+  archived: 'archived',
+} as const;
+
 export type WorkoutPlanInputDifficulty = typeof WorkoutPlanInputDifficulty[keyof typeof WorkoutPlanInputDifficulty];
 
 
@@ -392,21 +462,32 @@ export const WorkoutPlanInputDifficulty = {
   advanced: 'advanced',
 } as const;
 
+export type WorkoutPlanInputWeeklySchedule = { [key: string]: unknown };
+
 export interface WorkoutExerciseInput {
   exerciseId: number;
+  orderIndex?: number;
   sets: number;
+  repsMin?: number;
+  repsMax?: number;
   reps?: number;
+  weightKg?: number;
   durationSeconds?: number;
   restSeconds?: number;
+  tempo?: string;
   notes?: string;
 }
 
 export interface WorkoutPlanInput {
   name: string;
   description?: string;
+  goal?: WorkoutPlanInputGoal;
+  status?: WorkoutPlanInputStatus;
   durationMinutes?: number;
+  durationWeeks?: number;
   difficulty?: WorkoutPlanInputDifficulty;
   category?: string;
+  weeklySchedule?: WorkoutPlanInputWeeklySchedule;
   exercises: WorkoutExerciseInput[];
 }
 
@@ -419,13 +500,23 @@ export const WorkoutPlanUpdateDifficulty = {
   advanced: 'advanced',
 } as const;
 
+export type WorkoutPlanUpdateWeeklySchedule = { [key: string]: unknown };
+
 export interface WorkoutPlanUpdate {
   name?: string;
   description?: string;
+  goal?: string;
+  status?: string;
   durationMinutes?: number;
+  durationWeeks?: number;
   difficulty?: WorkoutPlanUpdateDifficulty;
+  category?: string;
+  weeklySchedule?: WorkoutPlanUpdateWeeklySchedule;
+  exercises?: WorkoutExerciseInput[];
   isActive?: boolean;
 }
+
+export type WorkoutCompletionExercisesCompletedItem = { [key: string]: unknown };
 
 export interface WorkoutCompletion {
   id: number;
@@ -433,9 +524,20 @@ export interface WorkoutCompletion {
   workoutName?: string;
   userId: number;
   /** @nullable */
+  startTime?: string | null;
+  /** @nullable */
+  endTime?: string | null;
+  /** @nullable */
   durationMinutes?: number | null;
   /** @nullable */
   caloriesBurned?: number | null;
+  exercisesCompleted?: WorkoutCompletionExercisesCompletedItem[];
+  /**
+     * @minimum 1
+     * @maximum 5
+     * @nullable
+     */
+  difficultyRating?: number | null;
   /** @nullable */
   rating?: number | null;
   /** @nullable */
@@ -443,15 +545,152 @@ export interface WorkoutCompletion {
   completedAt: string;
 }
 
+export type WorkoutCompletionInputExercisesCompletedItem = { [key: string]: unknown };
+
 export interface WorkoutCompletionInput {
+  startTime?: string;
+  endTime?: string;
   durationMinutes?: number;
   caloriesBurned?: number;
+  exercisesCompleted?: WorkoutCompletionInputExercisesCompletedItem[];
+  /**
+     * @minimum 1
+     * @maximum 5
+     */
+  difficultyRating?: number;
   /**
      * @minimum 1
      * @maximum 5
      */
   rating?: number;
   notes?: string;
+}
+
+export interface WorkoutDay {
+  id: number;
+  workoutPlanId: number;
+  dayNumber: number;
+  title: string;
+  /** @nullable */
+  focusArea?: string | null;
+  /** @nullable */
+  estimatedDurationMinutes?: number | null;
+  isRestDay?: boolean;
+  createdAt?: string;
+}
+
+export interface WorkoutDayExercise {
+  id: number;
+  workoutDayId: number;
+  exerciseId: number;
+  exerciseName: string;
+  orderIndex?: number;
+  sets: number;
+  /** @nullable */
+  repsMin?: number | null;
+  /** @nullable */
+  repsMax?: number | null;
+  /** @nullable */
+  weightKg?: number | null;
+  /** @nullable */
+  durationSeconds?: number | null;
+  /** @nullable */
+  restSeconds?: number | null;
+  /** @nullable */
+  tempo?: string | null;
+  /** @nullable */
+  notes?: string | null;
+}
+
+export type WorkoutDayWithExercises = WorkoutDay & {
+  exercises?: WorkoutDayExercise[];
+};
+
+export interface WorkoutDayInput {
+  dayNumber: number;
+  title: string;
+  focusArea?: string;
+  estimatedDurationMinutes?: number;
+  isRestDay?: boolean;
+}
+
+export interface WorkoutDayUpdate {
+  title?: string;
+  focusArea?: string;
+  estimatedDurationMinutes?: number;
+  isRestDay?: boolean;
+}
+
+export interface WorkoutDayExerciseInput {
+  exerciseId: number;
+  exerciseName: string;
+  orderIndex?: number;
+  sets: number;
+  repsMin?: number;
+  repsMax?: number;
+  weightKg?: number;
+  durationSeconds?: number;
+  restSeconds?: number;
+  tempo?: string;
+  notes?: string;
+}
+
+export interface WorkoutDayExerciseUpdate {
+  orderIndex?: number;
+  sets?: number;
+  repsMin?: number;
+  repsMax?: number;
+  weightKg?: number;
+  durationSeconds?: number;
+  restSeconds?: number;
+  tempo?: string;
+  notes?: string;
+}
+
+export type WorkoutAnalyticsFavoriteExercisesItem = {
+  name?: string;
+  count?: number;
+};
+
+export type WorkoutAnalyticsWeeklyVolumeItem = {
+  week?: string;
+  workouts?: number;
+  minutes?: number;
+};
+
+export type WorkoutAnalyticsRecentPersonalRecordsItem = { [key: string]: unknown };
+
+export interface WorkoutAnalytics {
+  totalWorkouts: number;
+  totalMinutes: number;
+  caloriesBurned?: number;
+  thisWeekWorkouts: number;
+  /** Percentage of target days hit over the period */
+  weeklyConsistency: number;
+  avgDuration?: number;
+  /** @nullable */
+  avgDifficultyRating?: number | null;
+  muscleGroupsThisWeek?: string[];
+  favoriteExercises?: WorkoutAnalyticsFavoriteExercisesItem[];
+  weeklyVolume?: WorkoutAnalyticsWeeklyVolumeItem[];
+  recentPersonalRecords?: WorkoutAnalyticsRecentPersonalRecordsItem[];
+}
+
+export type AiWorkoutRequestConstraints = { [key: string]: unknown };
+
+export interface AiWorkoutRequest {
+  workoutPlanId?: number;
+  goal?: string;
+  context?: string;
+  constraints?: AiWorkoutRequestConstraints;
+}
+
+export type AiWorkoutResponseData = { [key: string]: unknown };
+
+export interface AiWorkoutResponse {
+  message: string;
+  available: boolean;
+  data?: AiWorkoutResponseData;
 }
 
 export type ExerciseDifficulty = typeof ExerciseDifficulty[keyof typeof ExerciseDifficulty];
@@ -732,6 +971,16 @@ export const ListWorkoutsStatus = {
 
 export type GetWorkoutHistoryParams = {
 limit?: number;
+};
+
+export type ListWorkoutTemplatesParams = {
+category?: string;
+goal?: string;
+difficulty?: string;
+};
+
+export type GetWorkoutAnalyticsParams = {
+days?: number;
 };
 
 export type ListExercisesParams = {

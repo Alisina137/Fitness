@@ -15,6 +15,10 @@ import OnboardingPage from './pages/onboarding';
 import DashboardPage from './pages/dashboard';
 import WorkoutsPage from './pages/workouts';
 import WorkoutDetailPage from './pages/workout-detail';
+import WorkoutBuilderPage from './pages/workout-builder';
+import WorkoutActivePage from './pages/workout-active';
+import WorkoutSchedulePage from './pages/workout-schedule';
+import WorkoutAnalyticsPage from './pages/workout-analytics';
 import ExercisesPage from './pages/exercises';
 import NutritionPage from './pages/nutrition';
 import ProgressPage from './pages/progress';
@@ -37,6 +41,11 @@ function AuthenticatedRoutes() {
       <Switch>
         <Route path="/dashboard" component={DashboardPage} />
         <Route path="/workouts" component={WorkoutsPage} />
+        <Route path="/workouts/builder" component={WorkoutBuilderPage} />
+        <Route path="/workouts/builder/:id" component={WorkoutBuilderPage} />
+        <Route path="/workouts/schedule" component={WorkoutSchedulePage} />
+        <Route path="/workouts/analytics" component={WorkoutAnalyticsPage} />
+        <Route path="/workouts/:id/active" component={WorkoutActivePage} />
         <Route path="/workouts/:id" component={WorkoutDetailPage} />
         <Route path="/exercises" component={ExercisesPage} />
         <Route path="/nutrition" component={NutritionPage} />

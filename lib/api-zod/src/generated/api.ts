@@ -194,16 +194,32 @@ export const GetDashboardSummaryResponse = zod.object({
   "userId": zod.number(),
   "name": zod.string(),
   "description": zod.string().nullish(),
+  "goal": zod.union([zod.literal('fat_loss'),zod.literal('muscle_gain'),zod.literal('strength'),zod.literal('endurance'),zod.literal('general_fitness'),zod.literal('mobility'),zod.literal(null)]).nullish(),
+  "status": zod.enum(['draft', 'active', 'archived']).optional(),
   "durationMinutes": zod.number().nullish(),
+  "durationWeeks": zod.number().nullish(),
   "difficulty": zod.enum(['beginner', 'intermediate', 'advanced']).optional(),
   "category": zod.string().nullish(),
+  "isTemplate": zod.boolean().optional(),
+  "weeklySchedule": zod.object({
+  "days": zod.array(zod.number()).optional(),
+  "frequency": zod.number().optional()
+}).nullish(),
+  "progressionRules": zod.object({
+
+}).nullish(),
   "exercises": zod.array(zod.object({
   "exerciseId": zod.number(),
   "name": zod.string(),
+  "orderIndex": zod.number().nullish(),
   "sets": zod.number(),
-  "reps": zod.number().nullable(),
+  "repsMin": zod.number().nullish(),
+  "repsMax": zod.number().nullish(),
+  "reps": zod.number().nullish(),
+  "weightKg": zod.number().nullish(),
   "durationSeconds": zod.number().nullish(),
   "restSeconds": zod.number().nullish(),
+  "tempo": zod.string().nullish(),
   "notes": zod.string().nullish()
 })),
   "isActive": zod.boolean().optional(),
@@ -240,16 +256,32 @@ export const ListWorkoutsResponseItem = zod.object({
   "userId": zod.number(),
   "name": zod.string(),
   "description": zod.string().nullish(),
+  "goal": zod.union([zod.literal('fat_loss'),zod.literal('muscle_gain'),zod.literal('strength'),zod.literal('endurance'),zod.literal('general_fitness'),zod.literal('mobility'),zod.literal(null)]).nullish(),
+  "status": zod.enum(['draft', 'active', 'archived']).optional(),
   "durationMinutes": zod.number().nullish(),
+  "durationWeeks": zod.number().nullish(),
   "difficulty": zod.enum(['beginner', 'intermediate', 'advanced']).optional(),
   "category": zod.string().nullish(),
+  "isTemplate": zod.boolean().optional(),
+  "weeklySchedule": zod.object({
+  "days": zod.array(zod.number()).optional(),
+  "frequency": zod.number().optional()
+}).nullish(),
+  "progressionRules": zod.object({
+
+}).nullish(),
   "exercises": zod.array(zod.object({
   "exerciseId": zod.number(),
   "name": zod.string(),
+  "orderIndex": zod.number().nullish(),
   "sets": zod.number(),
-  "reps": zod.number().nullable(),
+  "repsMin": zod.number().nullish(),
+  "repsMax": zod.number().nullish(),
+  "reps": zod.number().nullish(),
+  "weightKg": zod.number().nullish(),
   "durationSeconds": zod.number().nullish(),
   "restSeconds": zod.number().nullish(),
+  "tempo": zod.string().nullish(),
   "notes": zod.string().nullish()
 })),
   "isActive": zod.boolean().optional(),
@@ -265,15 +297,26 @@ export const ListWorkoutsResponse = zod.array(ListWorkoutsResponseItem)
 export const CreateWorkoutBody = zod.object({
   "name": zod.string(),
   "description": zod.string().optional(),
+  "goal": zod.enum(['fat_loss', 'muscle_gain', 'strength', 'endurance', 'general_fitness', 'mobility']).optional(),
+  "status": zod.enum(['draft', 'active', 'archived']).optional(),
   "durationMinutes": zod.number().optional(),
+  "durationWeeks": zod.number().optional(),
   "difficulty": zod.enum(['beginner', 'intermediate', 'advanced']).optional(),
   "category": zod.string().optional(),
+  "weeklySchedule": zod.object({
+
+}).optional(),
   "exercises": zod.array(zod.object({
   "exerciseId": zod.number(),
+  "orderIndex": zod.number().optional(),
   "sets": zod.number(),
+  "repsMin": zod.number().optional(),
+  "repsMax": zod.number().optional(),
   "reps": zod.number().optional(),
+  "weightKg": zod.number().optional(),
   "durationSeconds": zod.number().optional(),
   "restSeconds": zod.number().optional(),
+  "tempo": zod.string().optional(),
   "notes": zod.string().optional()
 }))
 })
@@ -283,16 +326,32 @@ export const CreateWorkoutResponse = zod.object({
   "userId": zod.number(),
   "name": zod.string(),
   "description": zod.string().nullish(),
+  "goal": zod.union([zod.literal('fat_loss'),zod.literal('muscle_gain'),zod.literal('strength'),zod.literal('endurance'),zod.literal('general_fitness'),zod.literal('mobility'),zod.literal(null)]).nullish(),
+  "status": zod.enum(['draft', 'active', 'archived']).optional(),
   "durationMinutes": zod.number().nullish(),
+  "durationWeeks": zod.number().nullish(),
   "difficulty": zod.enum(['beginner', 'intermediate', 'advanced']).optional(),
   "category": zod.string().nullish(),
+  "isTemplate": zod.boolean().optional(),
+  "weeklySchedule": zod.object({
+  "days": zod.array(zod.number()).optional(),
+  "frequency": zod.number().optional()
+}).nullish(),
+  "progressionRules": zod.object({
+
+}).nullish(),
   "exercises": zod.array(zod.object({
   "exerciseId": zod.number(),
   "name": zod.string(),
+  "orderIndex": zod.number().nullish(),
   "sets": zod.number(),
-  "reps": zod.number().nullable(),
+  "repsMin": zod.number().nullish(),
+  "repsMax": zod.number().nullish(),
+  "reps": zod.number().nullish(),
+  "weightKg": zod.number().nullish(),
   "durationSeconds": zod.number().nullish(),
   "restSeconds": zod.number().nullish(),
+  "tempo": zod.string().nullish(),
   "notes": zod.string().nullish()
 })),
   "isActive": zod.boolean().optional(),
@@ -311,16 +370,32 @@ export const GetTodayWorkoutResponse = zod.object({
   "userId": zod.number(),
   "name": zod.string(),
   "description": zod.string().nullish(),
+  "goal": zod.union([zod.literal('fat_loss'),zod.literal('muscle_gain'),zod.literal('strength'),zod.literal('endurance'),zod.literal('general_fitness'),zod.literal('mobility'),zod.literal(null)]).nullish(),
+  "status": zod.enum(['draft', 'active', 'archived']).optional(),
   "durationMinutes": zod.number().nullish(),
+  "durationWeeks": zod.number().nullish(),
   "difficulty": zod.enum(['beginner', 'intermediate', 'advanced']).optional(),
   "category": zod.string().nullish(),
+  "isTemplate": zod.boolean().optional(),
+  "weeklySchedule": zod.object({
+  "days": zod.array(zod.number()).optional(),
+  "frequency": zod.number().optional()
+}).nullish(),
+  "progressionRules": zod.object({
+
+}).nullish(),
   "exercises": zod.array(zod.object({
   "exerciseId": zod.number(),
   "name": zod.string(),
+  "orderIndex": zod.number().nullish(),
   "sets": zod.number(),
-  "reps": zod.number().nullable(),
+  "repsMin": zod.number().nullish(),
+  "repsMax": zod.number().nullish(),
+  "reps": zod.number().nullish(),
+  "weightKg": zod.number().nullish(),
   "durationSeconds": zod.number().nullish(),
   "restSeconds": zod.number().nullish(),
+  "tempo": zod.string().nullish(),
   "notes": zod.string().nullish()
 })),
   "isActive": zod.boolean().optional(),
@@ -343,16 +418,32 @@ export const GetWorkoutResponse = zod.object({
   "userId": zod.number(),
   "name": zod.string(),
   "description": zod.string().nullish(),
+  "goal": zod.union([zod.literal('fat_loss'),zod.literal('muscle_gain'),zod.literal('strength'),zod.literal('endurance'),zod.literal('general_fitness'),zod.literal('mobility'),zod.literal(null)]).nullish(),
+  "status": zod.enum(['draft', 'active', 'archived']).optional(),
   "durationMinutes": zod.number().nullish(),
+  "durationWeeks": zod.number().nullish(),
   "difficulty": zod.enum(['beginner', 'intermediate', 'advanced']).optional(),
   "category": zod.string().nullish(),
+  "isTemplate": zod.boolean().optional(),
+  "weeklySchedule": zod.object({
+  "days": zod.array(zod.number()).optional(),
+  "frequency": zod.number().optional()
+}).nullish(),
+  "progressionRules": zod.object({
+
+}).nullish(),
   "exercises": zod.array(zod.object({
   "exerciseId": zod.number(),
   "name": zod.string(),
+  "orderIndex": zod.number().nullish(),
   "sets": zod.number(),
-  "reps": zod.number().nullable(),
+  "repsMin": zod.number().nullish(),
+  "repsMax": zod.number().nullish(),
+  "reps": zod.number().nullish(),
+  "weightKg": zod.number().nullish(),
   "durationSeconds": zod.number().nullish(),
   "restSeconds": zod.number().nullish(),
+  "tempo": zod.string().nullish(),
   "notes": zod.string().nullish()
 })),
   "isActive": zod.boolean().optional(),
@@ -371,8 +462,28 @@ export const UpdateWorkoutParams = zod.object({
 export const UpdateWorkoutBody = zod.object({
   "name": zod.string().optional(),
   "description": zod.string().optional(),
+  "goal": zod.string().optional(),
+  "status": zod.string().optional(),
   "durationMinutes": zod.number().optional(),
+  "durationWeeks": zod.number().optional(),
   "difficulty": zod.enum(['beginner', 'intermediate', 'advanced']).optional(),
+  "category": zod.string().optional(),
+  "weeklySchedule": zod.object({
+
+}).optional(),
+  "exercises": zod.array(zod.object({
+  "exerciseId": zod.number(),
+  "orderIndex": zod.number().optional(),
+  "sets": zod.number(),
+  "repsMin": zod.number().optional(),
+  "repsMax": zod.number().optional(),
+  "reps": zod.number().optional(),
+  "weightKg": zod.number().optional(),
+  "durationSeconds": zod.number().optional(),
+  "restSeconds": zod.number().optional(),
+  "tempo": zod.string().optional(),
+  "notes": zod.string().optional()
+})).optional(),
   "isActive": zod.boolean().optional()
 })
 
@@ -381,16 +492,32 @@ export const UpdateWorkoutResponse = zod.object({
   "userId": zod.number(),
   "name": zod.string(),
   "description": zod.string().nullish(),
+  "goal": zod.union([zod.literal('fat_loss'),zod.literal('muscle_gain'),zod.literal('strength'),zod.literal('endurance'),zod.literal('general_fitness'),zod.literal('mobility'),zod.literal(null)]).nullish(),
+  "status": zod.enum(['draft', 'active', 'archived']).optional(),
   "durationMinutes": zod.number().nullish(),
+  "durationWeeks": zod.number().nullish(),
   "difficulty": zod.enum(['beginner', 'intermediate', 'advanced']).optional(),
   "category": zod.string().nullish(),
+  "isTemplate": zod.boolean().optional(),
+  "weeklySchedule": zod.object({
+  "days": zod.array(zod.number()).optional(),
+  "frequency": zod.number().optional()
+}).nullish(),
+  "progressionRules": zod.object({
+
+}).nullish(),
   "exercises": zod.array(zod.object({
   "exerciseId": zod.number(),
   "name": zod.string(),
+  "orderIndex": zod.number().nullish(),
   "sets": zod.number(),
-  "reps": zod.number().nullable(),
+  "repsMin": zod.number().nullish(),
+  "repsMax": zod.number().nullish(),
+  "reps": zod.number().nullish(),
+  "weightKg": zod.number().nullish(),
   "durationSeconds": zod.number().nullish(),
   "restSeconds": zod.number().nullish(),
+  "tempo": zod.string().nullish(),
   "notes": zod.string().nullish()
 })),
   "isActive": zod.boolean().optional(),
@@ -418,24 +545,42 @@ export const CompleteWorkoutParams = zod.object({
   "id": zod.coerce.number()
 })
 
+export const completeWorkoutBodyDifficultyRatingMax = 5;
+
 export const completeWorkoutBodyRatingMax = 5;
 
 
 
 export const CompleteWorkoutBody = zod.object({
+  "startTime": zod.coerce.date().optional(),
+  "endTime": zod.coerce.date().optional(),
   "durationMinutes": zod.number().optional(),
   "caloriesBurned": zod.number().optional(),
+  "exercisesCompleted": zod.array(zod.object({
+
+})).optional(),
+  "difficultyRating": zod.number().min(1).max(completeWorkoutBodyDifficultyRatingMax).optional(),
   "rating": zod.number().min(1).max(completeWorkoutBodyRatingMax).optional(),
   "notes": zod.string().optional()
 })
+
+export const completeWorkoutResponseDifficultyRatingMax = 5;
+
+
 
 export const CompleteWorkoutResponse = zod.object({
   "id": zod.number(),
   "workoutPlanId": zod.number(),
   "workoutName": zod.string().optional(),
   "userId": zod.number(),
+  "startTime": zod.coerce.date().nullish(),
+  "endTime": zod.coerce.date().nullish(),
   "durationMinutes": zod.number().nullish(),
   "caloriesBurned": zod.number().nullish(),
+  "exercisesCompleted": zod.array(zod.object({
+
+})).optional(),
+  "difficultyRating": zod.number().min(1).max(completeWorkoutResponseDifficultyRatingMax).nullish(),
   "rating": zod.number().nullish(),
   "notes": zod.string().nullish(),
   "completedAt": zod.coerce.date()
@@ -451,18 +596,467 @@ export const GetWorkoutHistoryQueryParams = zod.object({
   "limit": zod.coerce.number().default(getWorkoutHistoryQueryLimitDefault)
 })
 
+export const getWorkoutHistoryResponseDifficultyRatingMax = 5;
+
+
+
 export const GetWorkoutHistoryResponseItem = zod.object({
   "id": zod.number(),
   "workoutPlanId": zod.number(),
   "workoutName": zod.string().optional(),
   "userId": zod.number(),
+  "startTime": zod.coerce.date().nullish(),
+  "endTime": zod.coerce.date().nullish(),
   "durationMinutes": zod.number().nullish(),
   "caloriesBurned": zod.number().nullish(),
+  "exercisesCompleted": zod.array(zod.object({
+
+})).optional(),
+  "difficultyRating": zod.number().min(1).max(getWorkoutHistoryResponseDifficultyRatingMax).nullish(),
   "rating": zod.number().nullish(),
   "notes": zod.string().nullish(),
   "completedAt": zod.coerce.date()
 })
 export const GetWorkoutHistoryResponse = zod.array(GetWorkoutHistoryResponseItem)
+
+
+/**
+ * @summary List pre-built workout templates
+ */
+export const ListWorkoutTemplatesQueryParams = zod.object({
+  "category": zod.coerce.string().optional(),
+  "goal": zod.coerce.string().optional(),
+  "difficulty": zod.coerce.string().optional()
+})
+
+export const ListWorkoutTemplatesResponseItem = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "name": zod.string(),
+  "description": zod.string().nullish(),
+  "goal": zod.union([zod.literal('fat_loss'),zod.literal('muscle_gain'),zod.literal('strength'),zod.literal('endurance'),zod.literal('general_fitness'),zod.literal('mobility'),zod.literal(null)]).nullish(),
+  "status": zod.enum(['draft', 'active', 'archived']).optional(),
+  "durationMinutes": zod.number().nullish(),
+  "durationWeeks": zod.number().nullish(),
+  "difficulty": zod.enum(['beginner', 'intermediate', 'advanced']).optional(),
+  "category": zod.string().nullish(),
+  "isTemplate": zod.boolean().optional(),
+  "weeklySchedule": zod.object({
+  "days": zod.array(zod.number()).optional(),
+  "frequency": zod.number().optional()
+}).nullish(),
+  "progressionRules": zod.object({
+
+}).nullish(),
+  "exercises": zod.array(zod.object({
+  "exerciseId": zod.number(),
+  "name": zod.string(),
+  "orderIndex": zod.number().nullish(),
+  "sets": zod.number(),
+  "repsMin": zod.number().nullish(),
+  "repsMax": zod.number().nullish(),
+  "reps": zod.number().nullish(),
+  "weightKg": zod.number().nullish(),
+  "durationSeconds": zod.number().nullish(),
+  "restSeconds": zod.number().nullish(),
+  "tempo": zod.string().nullish(),
+  "notes": zod.string().nullish()
+})),
+  "isActive": zod.boolean().optional(),
+  "completionCount": zod.number().optional(),
+  "createdAt": zod.coerce.date()
+})
+export const ListWorkoutTemplatesResponse = zod.array(ListWorkoutTemplatesResponseItem)
+
+
+/**
+ * @summary Copy a template into the user's personal workout plans
+ */
+export const AdoptWorkoutTemplateParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const AdoptWorkoutTemplateResponse = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "name": zod.string(),
+  "description": zod.string().nullish(),
+  "goal": zod.union([zod.literal('fat_loss'),zod.literal('muscle_gain'),zod.literal('strength'),zod.literal('endurance'),zod.literal('general_fitness'),zod.literal('mobility'),zod.literal(null)]).nullish(),
+  "status": zod.enum(['draft', 'active', 'archived']).optional(),
+  "durationMinutes": zod.number().nullish(),
+  "durationWeeks": zod.number().nullish(),
+  "difficulty": zod.enum(['beginner', 'intermediate', 'advanced']).optional(),
+  "category": zod.string().nullish(),
+  "isTemplate": zod.boolean().optional(),
+  "weeklySchedule": zod.object({
+  "days": zod.array(zod.number()).optional(),
+  "frequency": zod.number().optional()
+}).nullish(),
+  "progressionRules": zod.object({
+
+}).nullish(),
+  "exercises": zod.array(zod.object({
+  "exerciseId": zod.number(),
+  "name": zod.string(),
+  "orderIndex": zod.number().nullish(),
+  "sets": zod.number(),
+  "repsMin": zod.number().nullish(),
+  "repsMax": zod.number().nullish(),
+  "reps": zod.number().nullish(),
+  "weightKg": zod.number().nullish(),
+  "durationSeconds": zod.number().nullish(),
+  "restSeconds": zod.number().nullish(),
+  "tempo": zod.string().nullish(),
+  "notes": zod.string().nullish()
+})),
+  "isActive": zod.boolean().optional(),
+  "completionCount": zod.number().optional(),
+  "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Get workout analytics summary
+ */
+export const getWorkoutAnalyticsQueryDaysDefault = 30;
+
+export const GetWorkoutAnalyticsQueryParams = zod.object({
+  "days": zod.coerce.number().default(getWorkoutAnalyticsQueryDaysDefault)
+})
+
+export const GetWorkoutAnalyticsResponse = zod.object({
+  "totalWorkouts": zod.number(),
+  "totalMinutes": zod.number(),
+  "caloriesBurned": zod.number().optional(),
+  "thisWeekWorkouts": zod.number(),
+  "weeklyConsistency": zod.number().describe('Percentage of target days hit over the period'),
+  "avgDuration": zod.number().optional(),
+  "avgDifficultyRating": zod.number().nullish(),
+  "muscleGroupsThisWeek": zod.array(zod.string()).optional(),
+  "favoriteExercises": zod.array(zod.object({
+  "name": zod.string().optional(),
+  "count": zod.number().optional()
+})).optional(),
+  "weeklyVolume": zod.array(zod.object({
+  "week": zod.string().optional(),
+  "workouts": zod.number().optional(),
+  "minutes": zod.number().optional()
+})).optional(),
+  "recentPersonalRecords": zod.array(zod.object({
+
+})).optional()
+})
+
+
+/**
+ * @summary List all days in a workout program
+ */
+export const ListWorkoutDaysParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const ListWorkoutDaysResponseItem = zod.object({
+  "id": zod.number(),
+  "workoutPlanId": zod.number(),
+  "dayNumber": zod.number(),
+  "title": zod.string(),
+  "focusArea": zod.string().nullish(),
+  "estimatedDurationMinutes": zod.number().nullish(),
+  "isRestDay": zod.boolean().optional(),
+  "createdAt": zod.coerce.date().optional()
+})
+export const ListWorkoutDaysResponse = zod.array(ListWorkoutDaysResponseItem)
+
+
+/**
+ * @summary Add a day to a workout program
+ */
+export const CreateWorkoutDayParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const CreateWorkoutDayBody = zod.object({
+  "dayNumber": zod.number(),
+  "title": zod.string(),
+  "focusArea": zod.string().optional(),
+  "estimatedDurationMinutes": zod.number().optional(),
+  "isRestDay": zod.boolean().optional()
+})
+
+export const CreateWorkoutDayResponse = zod.object({
+  "id": zod.number(),
+  "workoutPlanId": zod.number(),
+  "dayNumber": zod.number(),
+  "title": zod.string(),
+  "focusArea": zod.string().nullish(),
+  "estimatedDurationMinutes": zod.number().nullish(),
+  "isRestDay": zod.boolean().optional(),
+  "createdAt": zod.coerce.date().optional()
+})
+
+
+/**
+ * @summary Get a workout day with its exercises
+ */
+export const GetWorkoutDayParams = zod.object({
+  "dayId": zod.coerce.number()
+})
+
+export const GetWorkoutDayResponse = zod.object({
+  "id": zod.number(),
+  "workoutPlanId": zod.number(),
+  "dayNumber": zod.number(),
+  "title": zod.string(),
+  "focusArea": zod.string().nullish(),
+  "estimatedDurationMinutes": zod.number().nullish(),
+  "isRestDay": zod.boolean().optional(),
+  "createdAt": zod.coerce.date().optional()
+}).and(zod.object({
+  "exercises": zod.array(zod.object({
+  "id": zod.number(),
+  "workoutDayId": zod.number(),
+  "exerciseId": zod.number(),
+  "exerciseName": zod.string(),
+  "orderIndex": zod.number().optional(),
+  "sets": zod.number(),
+  "repsMin": zod.number().nullish(),
+  "repsMax": zod.number().nullish(),
+  "weightKg": zod.number().nullish(),
+  "durationSeconds": zod.number().nullish(),
+  "restSeconds": zod.number().nullish(),
+  "tempo": zod.string().nullish(),
+  "notes": zod.string().nullish()
+})).optional()
+}))
+
+
+/**
+ * @summary Update a workout day
+ */
+export const UpdateWorkoutDayParams = zod.object({
+  "dayId": zod.coerce.number()
+})
+
+export const UpdateWorkoutDayBody = zod.object({
+  "title": zod.string().optional(),
+  "focusArea": zod.string().optional(),
+  "estimatedDurationMinutes": zod.number().optional(),
+  "isRestDay": zod.boolean().optional()
+})
+
+export const UpdateWorkoutDayResponse = zod.object({
+  "id": zod.number(),
+  "workoutPlanId": zod.number(),
+  "dayNumber": zod.number(),
+  "title": zod.string(),
+  "focusArea": zod.string().nullish(),
+  "estimatedDurationMinutes": zod.number().nullish(),
+  "isRestDay": zod.boolean().optional(),
+  "createdAt": zod.coerce.date().optional()
+})
+
+
+/**
+ * @summary Delete a workout day and its exercises
+ */
+export const DeleteWorkoutDayParams = zod.object({
+  "dayId": zod.coerce.number()
+})
+
+export const DeleteWorkoutDayResponse = zod.object({
+  "message": zod.string()
+})
+
+
+/**
+ * @summary Add an exercise to a workout day
+ */
+export const AddExerciseToDayParams = zod.object({
+  "dayId": zod.coerce.number()
+})
+
+export const AddExerciseToDayBody = zod.object({
+  "exerciseId": zod.number(),
+  "exerciseName": zod.string(),
+  "orderIndex": zod.number().optional(),
+  "sets": zod.number(),
+  "repsMin": zod.number().optional(),
+  "repsMax": zod.number().optional(),
+  "weightKg": zod.number().optional(),
+  "durationSeconds": zod.number().optional(),
+  "restSeconds": zod.number().optional(),
+  "tempo": zod.string().optional(),
+  "notes": zod.string().optional()
+})
+
+export const AddExerciseToDayResponse = zod.object({
+  "id": zod.number(),
+  "workoutDayId": zod.number(),
+  "exerciseId": zod.number(),
+  "exerciseName": zod.string(),
+  "orderIndex": zod.number().optional(),
+  "sets": zod.number(),
+  "repsMin": zod.number().nullish(),
+  "repsMax": zod.number().nullish(),
+  "weightKg": zod.number().nullish(),
+  "durationSeconds": zod.number().nullish(),
+  "restSeconds": zod.number().nullish(),
+  "tempo": zod.string().nullish(),
+  "notes": zod.string().nullish()
+})
+
+
+/**
+ * @summary Update an exercise within a workout day
+ */
+export const UpdateWorkoutDayExerciseParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UpdateWorkoutDayExerciseBody = zod.object({
+  "orderIndex": zod.number().optional(),
+  "sets": zod.number().optional(),
+  "repsMin": zod.number().optional(),
+  "repsMax": zod.number().optional(),
+  "weightKg": zod.number().optional(),
+  "durationSeconds": zod.number().optional(),
+  "restSeconds": zod.number().optional(),
+  "tempo": zod.string().optional(),
+  "notes": zod.string().optional()
+})
+
+export const UpdateWorkoutDayExerciseResponse = zod.object({
+  "id": zod.number(),
+  "workoutDayId": zod.number(),
+  "exerciseId": zod.number(),
+  "exerciseName": zod.string(),
+  "orderIndex": zod.number().optional(),
+  "sets": zod.number(),
+  "repsMin": zod.number().nullish(),
+  "repsMax": zod.number().nullish(),
+  "weightKg": zod.number().nullish(),
+  "durationSeconds": zod.number().nullish(),
+  "restSeconds": zod.number().nullish(),
+  "tempo": zod.string().nullish(),
+  "notes": zod.string().nullish()
+})
+
+
+/**
+ * @summary Remove an exercise from a workout day
+ */
+export const DeleteWorkoutDayExerciseParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const DeleteWorkoutDayExerciseResponse = zod.object({
+  "message": zod.string()
+})
+
+
+/**
+ * @summary [AI stub] Generate a personalised workout plan
+ */
+export const GenerateWorkoutPlanBody = zod.object({
+  "workoutPlanId": zod.number().optional(),
+  "goal": zod.string().optional(),
+  "context": zod.string().optional(),
+  "constraints": zod.object({
+
+}).optional()
+})
+
+export const GenerateWorkoutPlanResponse = zod.object({
+  "message": zod.string(),
+  "available": zod.boolean(),
+  "data": zod.object({
+
+}).optional()
+})
+
+
+/**
+ * @summary [AI stub] Modify an existing workout plan
+ */
+export const ModifyWorkoutPlanBody = zod.object({
+  "workoutPlanId": zod.number().optional(),
+  "goal": zod.string().optional(),
+  "context": zod.string().optional(),
+  "constraints": zod.object({
+
+}).optional()
+})
+
+export const ModifyWorkoutPlanResponse = zod.object({
+  "message": zod.string(),
+  "available": zod.boolean(),
+  "data": zod.object({
+
+}).optional()
+})
+
+
+/**
+ * @summary [AI stub] Replace an exercise with a suitable alternative
+ */
+export const ReplaceExerciseBody = zod.object({
+  "workoutPlanId": zod.number().optional(),
+  "goal": zod.string().optional(),
+  "context": zod.string().optional(),
+  "constraints": zod.object({
+
+}).optional()
+})
+
+export const ReplaceExerciseResponse = zod.object({
+  "message": zod.string(),
+  "available": zod.boolean(),
+  "data": zod.object({
+
+}).optional()
+})
+
+
+/**
+ * @summary [AI stub] Increase or decrease workout difficulty
+ */
+export const AdjustWorkoutDifficultyBody = zod.object({
+  "workoutPlanId": zod.number().optional(),
+  "goal": zod.string().optional(),
+  "context": zod.string().optional(),
+  "constraints": zod.object({
+
+}).optional()
+})
+
+export const AdjustWorkoutDifficultyResponse = zod.object({
+  "message": zod.string(),
+  "available": zod.boolean(),
+  "data": zod.object({
+
+}).optional()
+})
+
+
+/**
+ * @summary [AI stub] Analyse performance data and suggest adjustments
+ */
+export const AnalyzeWorkoutPerformanceBody = zod.object({
+  "workoutPlanId": zod.number().optional(),
+  "goal": zod.string().optional(),
+  "context": zod.string().optional(),
+  "constraints": zod.object({
+
+}).optional()
+})
+
+export const AnalyzeWorkoutPerformanceResponse = zod.object({
+  "message": zod.string(),
+  "available": zod.boolean(),
+  "data": zod.object({
+
+}).optional()
+})
 
 
 /**

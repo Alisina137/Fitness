@@ -6,13 +6,11 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface WorkoutExerciseInput {
-  exerciseId: number;
+export interface WorkoutDayExerciseUpdate {
   orderIndex?: number;
-  sets: number;
+  sets?: number;
   repsMin?: number;
   repsMax?: number;
-  reps?: number;
   weightKg?: number;
   durationSeconds?: number;
   restSeconds?: number;

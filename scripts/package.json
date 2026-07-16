@@ -6,6 +6,7 @@
   "scripts": {
     "hello": "tsx ./src/hello.ts",
     "seed-exercises": "tsx ./src/seed-exercises.ts",
+    "seed-workout-templates": "tsx ./src/seed-workout-templates.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {

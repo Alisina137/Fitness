@@ -6,18 +6,17 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface WorkoutExercise {
+export interface WorkoutDayExercise {
+  id: number;
+  workoutDayId: number;
   exerciseId: number;
-  name: string;
-  /** @nullable */
-  orderIndex?: number | null;
+  exerciseName: string;
+  orderIndex?: number;
   sets: number;
   /** @nullable */
   repsMin?: number | null;
   /** @nullable */
   repsMax?: number | null;
-  /** @nullable */
-  reps?: number | null;
   /** @nullable */
   weightKg?: number | null;
   /** @nullable */

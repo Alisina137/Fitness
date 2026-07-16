@@ -1,0 +1,569 @@
+# PROMPT 5 — BUILD THE AI WORKOUT GENERATION ENGINE
+
+You are a senior AI fitness product engineer building a premium AI-powered fitness application that should compete with Fitbod, Freeletics, Future, and other leading fitness platforms.
+
+Before making any changes, understand the current application state.
+
+---
+
+# CURRENT PROJECT STATE (ALREADY IMPLEMENTED)
+
+The following systems already exist and must NOT be rebuilt.
+
+---
+
+# 1. Application Foundation
+
+Already created:
+
+* React frontend
+* TypeScript
+* Tailwind CSS
+* Backend API architecture
+* Database structure
+* Authentication system
+* Environment configuration
+* Reusable components
+* API service layer
+
+Do not replace the architecture.
+
+---
+
+# 2. User Intelligence System
+
+Already created:
+
+User profile data:
+
+* Age
+* Gender
+* Height
+* Weight
+* Fitness level
+* Main goal
+* Secondary goals
+* Activity level
+* Workout location
+* Available equipment
+* Workout schedule
+* Workout duration
+* Injuries and limitations
+* Nutrition preferences
+* Lifestyle information
+
+The AI Workout Engine must use this information.
+
+---
+
+# 3. Exercise Intelligence System
+
+Already created:
+
+Exercise database containing:
+
+* Exercise name
+* Muscle groups
+* Equipment requirements
+* Difficulty level
+* Training type
+* Instructions
+* Safety information
+* Exercise alternatives
+
+The AI must select exercises from this database.
+
+Do not create a second exercise database.
+
+---
+
+# 4. Workout Program Engine
+
+Already created:
+
+* Workout plans
+* Workout days
+* Workout exercises
+* Sets
+* Reps
+* Rest periods
+* Workout scheduling
+* Workout execution tracking
+* Workout history
+* User performance tracking
+
+The AI must generate plans using this existing workout system.
+
+---
+
+# IMPORTANT RULES
+
+Do NOT:
+
+* create a separate workout system
+* create random workouts
+* ignore user profile data
+* duplicate exercise data
+* rewrite previous features
+
+The goal is to add intelligence on top of the existing workout engine.
+
+---
+
+# TASK: BUILD THE AI WORKOUT GENERATION ENGINE
+
+Create an intelligent workout planning system that generates personalized workout programs.
+
+The AI must behave like a professional fitness coach.
+
+It should consider:
+
+* User goal
+* Experience level
+* Equipment
+* Available time
+* Workout history
+* Performance
+* Injuries
+* Preferences
+
+---
+
+# 1. Create AI Workout Service
+
+Create:
+
+AI Workout Engine module
+
+Input:
+
+User profile:
+
+* Goal
+* Fitness level
+* Activity level
+* Equipment
+* Limitations
+
+Workout information:
+
+* Previous workouts
+* Completed exercises
+* Performance history
+* Difficulty feedback
+
+Output:
+
+A complete personalized workout plan.
+
+---
+
+# 2. Create Workout Generation Logic
+
+The AI should generate workouts based on goals.
+
+---
+
+## Fat Loss Goal
+
+Prioritize:
+
+* Full body training
+* Strength + conditioning
+* Higher calorie expenditure
+* Efficient workouts
+
+---
+
+## Muscle Gain Goal
+
+Prioritize:
+
+* Hypertrophy principles
+* Progressive overload
+* Appropriate volume
+* Muscle frequency
+
+Example:
+
+Chest training:
+8-20 weekly sets depending on level.
+
+---
+
+## Strength Goal
+
+Prioritize:
+
+* Compound exercises
+* Lower repetitions
+* Higher intensity
+* Longer recovery
+
+---
+
+## Endurance Goal
+
+Prioritize:
+
+* Cardio
+* Conditioning
+* Stamina improvement
+
+---
+
+# 3. Fitness Level Adaptation
+
+The AI must adapt workouts.
+
+---
+
+Beginner:
+
+Rules:
+
+* Simple movements
+* Lower volume
+* More explanation
+* More recovery
+
+---
+
+Intermediate:
+
+Rules:
+
+* Increased volume
+* More exercise variation
+* Structured progression
+
+---
+
+Advanced:
+
+Rules:
+
+* Higher intensity
+* Advanced programming
+* Complex progression
+
+---
+
+# 4. Equipment Filtering System
+
+The AI must NEVER recommend unavailable equipment.
+
+Example:
+
+User:
+
+Equipment:
+"Dumbbells only"
+
+Allowed:
+
+* Dumbbell press
+* Dumbbell row
+* Goblet squat
+
+Not allowed:
+
+* Cable crossover
+* Barbell squat
+
+Create strict equipment validation before generation.
+
+---
+
+# 5. Injury Safety System
+
+Before generating workouts:
+
+Analyze:
+
+User limitations:
+
+* Knee
+* Back
+* Shoulder
+* Wrist
+* Other
+
+Rules:
+
+Example:
+
+Knee limitation:
+
+Avoid:
+
+* High impact jumps
+* Unsafe squat variations
+
+Suggest:
+
+* Safer alternatives
+
+Safety always overrides optimization.
+
+---
+
+# 6. Create Personalized Workout Generator
+
+Create:
+
+generatePersonalizedWorkout(userId)
+
+The output should include:
+
+Program name
+
+Example:
+
+"12 Week Muscle Building Journey"
+
+Workout schedule:
+
+Monday:
+Upper Body
+
+Exercise:
+
+Bench Press
+
+Sets:
+4
+
+Reps:
+8-10
+
+Rest:
+90 seconds
+
+Explanation:
+
+"Selected because it matches your muscle growth goal and available equipment."
+
+---
+
+# 7. Create Progressive Overload Intelligence
+
+The AI should analyze previous performance.
+
+Rules:
+
+If user completes all sets easily:
+
+Increase:
+
+* Weight
+* Reps
+* Difficulty
+
+If user struggles:
+
+Decrease:
+
+* Weight
+* Volume
+* Difficulty
+
+If user misses workouts:
+
+Adapt the plan.
+
+Example:
+
+"User inactive for 10 days. Reduce intensity by 20%."
+
+---
+
+# 8. Create Smart Exercise Replacement
+
+Users can request:
+
+"Replace this exercise."
+
+The system should consider:
+
+* Same muscle group
+* Same goal
+* Similar difficulty
+* Available equipment
+
+Example:
+
+Replace:
+
+Barbell Squat
+
+With:
+
+Goblet Squat
+
+---
+
+# 9. Create Workout Explanation System
+
+Every generated workout should explain:
+
+Why this workout?
+
+Example:
+
+"Your program contains three strength sessions because your goal is muscle gain and you have four available training days."
+
+This improves trust.
+
+---
+
+# 10. Create Workout Match Score
+
+Create:
+
+Workout Personalization Score:
+
+0-100%
+
+Calculate using:
+
+* Goal alignment
+* Equipment match
+* Fitness level
+* Previous performance
+* Preferences
+
+Example:
+
+"Workout Match: 95%"
+
+---
+
+# 11. Database Updates
+
+Add required models:
+
+AI Generated Workout:
+
+Fields:
+
+* userId
+* generated plan
+* goal
+* reasoning
+* created date
+
+Workout Adaptation History:
+
+Fields:
+
+* userId
+* previous workout
+* changes made
+* reason
+
+---
+
+# 12. Create API Endpoints
+
+Create:
+
+POST
+
+/api/ai/workout/generate
+
+POST
+
+/api/ai/workout/replace-exercise
+
+POST
+
+/api/ai/workout/adapt
+
+GET
+
+/api/ai/workout/recommendation
+
+---
+
+# 13. AI Provider Architecture
+
+Use the existing AI abstraction layer.
+
+Support:
+
+* OpenAI compatible providers
+* Gemini
+* Groq
+* Local models
+
+Requirements:
+
+* Validate AI output
+* Handle failures
+* Control token usage
+* Prevent invalid workout generation
+
+---
+
+# 14. UI Requirements
+
+Create:
+
+AI Workout Generator Interface
+
+Features:
+
+* Goal selection
+* Generate button
+* Loading animation
+* Generated workout preview
+* Explanation section
+* Save workout button
+
+Design should feel premium:
+
+Inspired by:
+
+* Fitbod
+* Apple Fitness+
+* Freeletics
+
+---
+
+# TECHNICAL REQUIREMENTS
+
+Important:
+
+* Extend existing systems.
+* Do not rewrite previous code.
+* Keep AI logic modular.
+* Separate fitness rules from AI prompts.
+* Use clean architecture.
+* Make it scalable.
+* Add error handling.
+* Add loading states.
+* Optimize database queries.
+
+Do not build:
+
+* AI chatbot
+* Nutrition system
+* Camera trainer
+* Social features
+* Payments
+
+Those will be implemented later.
+
+---
+
+# COMPLETION REPORT
+
+After finishing, provide:
+
+1. Files created and modified
+2. Database changes
+3. API endpoints
+4. AI decision logic
+5. Example generated workouts
+6. How future features can use this engine

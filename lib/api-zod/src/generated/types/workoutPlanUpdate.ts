@@ -5,12 +5,20 @@
  * FitCore AI Fitness App API
  * OpenAPI spec version: 0.1.0
  */
+import type { WorkoutExerciseInput } from './workoutExerciseInput';
 import type { WorkoutPlanUpdateDifficulty } from './workoutPlanUpdateDifficulty';
+import type { WorkoutPlanUpdateWeeklySchedule } from './workoutPlanUpdateWeeklySchedule';
 
 export interface WorkoutPlanUpdate {
   name?: string;
   description?: string;
+  goal?: string;
+  status?: string;
   durationMinutes?: number;
+  durationWeeks?: number;
   difficulty?: WorkoutPlanUpdateDifficulty;
+  category?: string;
+  weeklySchedule?: WorkoutPlanUpdateWeeklySchedule;
+  exercises?: WorkoutExerciseInput[];
   isActive?: boolean;
 }

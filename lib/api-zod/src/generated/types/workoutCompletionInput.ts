@@ -5,10 +5,19 @@
  * FitCore AI Fitness App API
  * OpenAPI spec version: 0.1.0
  */
+import type { WorkoutCompletionInputExercisesCompletedItem } from './workoutCompletionInputExercisesCompletedItem';
 
 export interface WorkoutCompletionInput {
+  startTime?: Date;
+  endTime?: Date;
   durationMinutes?: number;
   caloriesBurned?: number;
+  exercisesCompleted?: WorkoutCompletionInputExercisesCompletedItem[];
+  /**
+     * @minimum 1
+     * @maximum 5
+     */
+  difficultyRating?: number;
   /**
      * @minimum 1
      * @maximum 5
