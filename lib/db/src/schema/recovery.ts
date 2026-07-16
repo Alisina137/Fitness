@@ -46,7 +46,9 @@ export const muscleRecoveryTable = pgTable("muscle_recovery", {
   lastTrainedDate: timestamp("last_trained_date"),
   trainingVolume: integer("training_volume").default(0).notNull(), // # exercises in last session
   sorenessLevel: integer("soreness_level").default(0).notNull(), // 0-10
+  fatigueLevel: text("fatigue_level").default("low").notNull(), // low | medium | high
   recoveryPercentage: integer("recovery_percentage").default(100).notNull(), // 0-100
+  estimatedRecoveryDate: timestamp("estimated_recovery_date"),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }, (t) => [unique("muscle_recovery_user_muscle").on(t.userId, t.muscleGroup)]);
 
@@ -112,6 +114,7 @@ export type ScoreBreakdown = {
 };
 
 export type FatigueLevel = "normal" | "high" | "overtraining_risk";
+export type MuscleFatigueLevel = "low" | "medium" | "high";
 export type RecoveryTrend = "improving" | "stable" | "declining";
 export type ReadinessCategory = "excellent" | "good" | "moderate" | "poor";
 

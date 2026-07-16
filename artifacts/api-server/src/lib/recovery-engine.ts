@@ -282,6 +282,119 @@ function normalizeToTracked(raw: string): string | null {
 
 // ─── Upsert Muscle Recovery rows ─────────────────────────────────────────────
 
+// ─── Named service functions (exported for AI engine + API) ──────────────────
+
+/**
+ * Maps a recovery percentage to a per-muscle fatigue level.
+ * low = recovered / lightly fatigued
+ * medium = moderately fatigued, can train with care
+ * high = significantly fatigued, avoid training this group
+ */
+export function calculateMuscleFatigue(recoveryPct: number): "low" | "medium" | "high" {
+  if (recoveryPct >= 70) return "low";
+  if (recoveryPct >= 45) return "medium";
+  return "high";
+}
+
+/**
+ * Calculates recovery percentage for a single muscle group.
+ * Factors in time since training, exercise volume, and soreness level.
+ *
+ * Volume thresholds (exercises):
+ *   ≥4 → high volume → 48-72 h base recovery (×1.35 multiplier)
+ *   2-3 → medium     → 24-48 h (×1.0)
+ *   1   → low        → 12-24 h (×0.8)
+ */
+export function calculateRecoveryPercentage(
+  muscle: string,
+  lastTrainedDate: Date,
+  exerciseCount: number,
+  sorenessLevel: number,
+): { pct: number; estimatedRecoveryDate: Date } {
+  const baseHours = RECOVERY_HOURS[muscle] ?? 48;
+  const volumeMod = exerciseCount >= 4 ? 1.35 : exerciseCount >= 2 ? 1.0 : 0.8;
+  const totalHours = baseHours * volumeMod;
+  const hoursAgo = (Date.now() - lastTrainedDate.getTime()) / (1000 * 60 * 60);
+
+  let pct = Math.min(100, (hoursAgo / totalHours) * 100);
+  // Soreness slows recovery — user-reported in daily check-in
+  if (sorenessLevel >= 8) pct *= 0.65;
+  else if (sorenessLevel >= 6) pct *= 0.80;
+  else if (sorenessLevel >= 4) pct *= 0.90;
+
+  const remainingHours = Math.max(0, totalHours - hoursAgo);
+  const estimatedRecoveryDate = new Date(Date.now() + remainingHours * 60 * 60 * 1000);
+
+  return { pct: Math.round(pct), estimatedRecoveryDate };
+}
+
+/**
+ * Triggers a muscle recovery update for a user based on a list of completed
+ * exercise logs. Detects which muscles were trained and upserts their records.
+ */
+export async function updateMuscleRecovery(
+  userId: number,
+  completedExercises: CompletedExerciseLog[],
+  sorenessLevel = 5,
+): Promise<void> {
+  const mockCompletions = [{ completedAt: new Date(), exercisesCompleted: completedExercises }];
+  const muscleMap = await extractMusclesFromCompletions(mockCompletions);
+  await upsertMuscleRecovery(userId, muscleMap, sorenessLevel);
+}
+
+/**
+ * Returns muscles that are ≥80% recovered (safe to train).
+ */
+export async function getRecoveredMuscles(userId: number): Promise<typeof muscleRecoveryTable.$inferSelect[]> {
+  const all = await db
+    .select()
+    .from(muscleRecoveryTable)
+    .where(eq(muscleRecoveryTable.userId, userId));
+  return all.filter((m) => m.recoveryPercentage >= 80);
+}
+
+/**
+ * Returns muscles that are <60% recovered (should avoid or reduce load).
+ */
+export async function getFatiguedMuscles(userId: number): Promise<typeof muscleRecoveryTable.$inferSelect[]> {
+  const all = await db
+    .select()
+    .from(muscleRecoveryTable)
+    .where(eq(muscleRecoveryTable.userId, userId));
+  return all.filter((m) => m.recoveryPercentage < 60);
+}
+
+/**
+ * Returns a simple readiness map for every tracked muscle group.
+ * Used by the AI workout engine to avoid programming fatigued muscles.
+ *
+ * Output: { chest: "ready" | "caution" | "not_ready", ... }
+ */
+export async function getTrainingReadinessByMuscle(
+  userId: number,
+): Promise<Record<string, "ready" | "caution" | "not_ready">> {
+  const records = await db
+    .select({ muscleGroup: muscleRecoveryTable.muscleGroup, recoveryPercentage: muscleRecoveryTable.recoveryPercentage })
+    .from(muscleRecoveryTable)
+    .where(eq(muscleRecoveryTable.userId, userId));
+
+  const result: Record<string, "ready" | "caution" | "not_ready"> = {};
+
+  // Muscles with no record at all are considered fully recovered
+  for (const muscle of TRACKED_MUSCLES) {
+    result[muscle.toLowerCase()] = "ready";
+  }
+
+  for (const r of records) {
+    const key = r.muscleGroup.toLowerCase();
+    if (r.recoveryPercentage >= 80) result[key] = "ready";
+    else if (r.recoveryPercentage >= 50) result[key] = "caution";
+    else result[key] = "not_ready";
+  }
+
+  return result;
+}
+
 async function upsertMuscleRecovery(
   userId: number,
   muscleMap: Map<string, { lastDate: Date; count: number }>,
@@ -290,14 +403,8 @@ async function upsertMuscleRecovery(
   if (muscleMap.size === 0) return;
 
   const upserts = Array.from(muscleMap.entries()).map(([muscle, { lastDate, count }]) => {
-    const baseHours = RECOVERY_HOURS[muscle] ?? 48;
-    const volumeMod = count >= 4 ? 1.35 : count >= 2 ? 1.0 : 0.8;
-    const totalHours = baseHours * volumeMod;
-    const hoursAgo = (Date.now() - lastDate.getTime()) / (1000 * 60 * 60);
-    let pct = Math.min(100, (hoursAgo / totalHours) * 100);
-    if (sorenessLevel >= 8) pct *= 0.65;
-    else if (sorenessLevel >= 6) pct *= 0.80;
-    else if (sorenessLevel >= 4) pct *= 0.90;
+    const { pct, estimatedRecoveryDate } = calculateRecoveryPercentage(muscle, lastDate, count, sorenessLevel);
+    const fatigueLevel = calculateMuscleFatigue(pct);
 
     return db
       .insert(muscleRecoveryTable)
@@ -307,7 +414,9 @@ async function upsertMuscleRecovery(
         lastTrainedDate: lastDate,
         trainingVolume: count,
         sorenessLevel,
-        recoveryPercentage: Math.round(pct),
+        fatigueLevel,
+        recoveryPercentage: pct,
+        estimatedRecoveryDate,
         updatedAt: new Date(),
       })
       .onConflictDoUpdate({
@@ -316,7 +425,9 @@ async function upsertMuscleRecovery(
           lastTrainedDate: lastDate,
           trainingVolume: count,
           sorenessLevel,
-          recoveryPercentage: Math.round(pct),
+          fatigueLevel,
+          recoveryPercentage: pct,
+          estimatedRecoveryDate,
           updatedAt: new Date(),
         },
       });
