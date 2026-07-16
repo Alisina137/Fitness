@@ -49,7 +49,32 @@ router.post("/auth/logout", (_req, res) => {
 
 router.get("/auth/me", requireAuth, async (req, res) => {
   const user = getUser(req);
-  res.json(serializeUser(user));
+
+  // If the DB flag is already true, return immediately — fast path.
+  if (user.onboardingCompleted) {
+    return res.json(serializeUser(user));
+  }
+
+  // Slower path: check the profile. Users who completed every onboarding step
+  // before the flag-writing bug was fixed will have primaryGoal + fitnessLevel
+  // set but onboardingCompleted = false. Detect that here and heal the DB row.
+  const [profile] = await db
+    .select({ primaryGoal: userProfilesTable.primaryGoal, fitnessLevel: userProfilesTable.fitnessLevel })
+    .from(userProfilesTable)
+    .where(eq(userProfilesTable.userId, user.id))
+    .limit(1);
+
+  const effectivelyOnboarded = !!(profile?.primaryGoal && profile?.fitnessLevel);
+
+  if (effectivelyOnboarded && !user.onboardingCompleted) {
+    // Heal the stale flag so future fast-path hits work.
+    await db
+      .update(usersTable)
+      .set({ onboardingCompleted: true, updatedAt: new Date() })
+      .where(eq(usersTable.id, user.id));
+  }
+
+  res.json(serializeUser({ ...user, onboardingCompleted: effectivelyOnboarded }));
 });
 
 function serializeUser(user: typeof usersTable.$inferSelect) {

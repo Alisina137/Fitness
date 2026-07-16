@@ -106,16 +106,23 @@ router.patch("/users/profile", requireAuth, async (req, res) => {
   if (sleepHours !== undefined) updates.sleepHours = sleepHours;
   if (goals !== undefined) updates.goals = goals;
 
-  // Mark onboarding complete when key fields are present
-  if (primaryGoal && fitnessLevel) {
-    await db.update(usersTable).set({ onboardingCompleted: true, updatedAt: new Date() }).where(eq(usersTable.id, user.id));
-  }
-
   const [profile] = await db.update(userProfilesTable).set(updates).where(eq(userProfilesTable.userId, user.id)).returning();
   if (!profile) {
     res.status(404).json({ error: "Profile not found" });
     return;
   }
+
+  // Mark onboarding complete once the profile has both key fields set.
+  // Check the saved profile (not just req.body) so partial step-by-step
+  // saves accumulate correctly — primaryGoal and fitnessLevel arrive in
+  // separate steps, so we can't rely on them both being in the same request.
+  if (profile.primaryGoal && profile.fitnessLevel) {
+    await db
+      .update(usersTable)
+      .set({ onboardingCompleted: true, updatedAt: new Date() })
+      .where(eq(usersTable.id, user.id));
+  }
+
   res.json(serializeProfile(profile));
 });
 

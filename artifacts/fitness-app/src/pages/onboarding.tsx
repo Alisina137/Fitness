@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useLocation } from "wouter";
 import { useUpdateUserProfile, useGetMe } from "@workspace/api-client-react";
+import { useAuthStore } from "../store/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -133,6 +134,7 @@ export default function OnboardingPage() {
   const { toast } = useToast();
   const { data: me } = useGetMe();
   const updateProfile = useUpdateUserProfile();
+  const { user, token, setAuth } = useAuthStore();
   
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState(1);
@@ -775,7 +777,15 @@ export default function OnboardingPage() {
                   <Button 
                     size="lg" 
                     className="mt-8 h-14 px-10 text-lg font-bold text-black rounded-full shadow-xl shadow-primary/20 hover:scale-105 transition-transform" 
-                    onClick={() => setLocation("/dashboard")}
+                    onClick={() => {
+                      // Update the auth store immediately so ProtectedRoute sees
+                      // onboardingCompleted=true before we navigate — without this
+                      // the stale user object causes an instant redirect back here.
+                      if (user && token) {
+                        setAuth({ ...user, onboardingCompleted: true }, token);
+                      }
+                      setLocation("/dashboard");
+                    }}
                   >
                     Go to Dashboard <ChevronRight className="ml-2 w-5 h-5" />
                   </Button>

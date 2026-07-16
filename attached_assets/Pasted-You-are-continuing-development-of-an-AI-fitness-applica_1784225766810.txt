@@ -1,0 +1,328 @@
+You are continuing development of an AI fitness application.
+
+CURRENT PROJECT STATE:
+
+Already implemented:
+
+- React + TypeScript frontend
+- Tailwind CSS design system
+- Authentication
+- User profile system
+- Exercise database
+- Workout program engine
+- Workout execution tracking
+- Workout history
+- AI workout generation engine
+- Recovery intelligence system
+
+Existing workout data:
+
+- Completed workouts
+- Exercises performed
+- Sets
+- Reps
+- Weight used
+- Workout duration
+- Training dates
+- Muscle groups trained
+
+Do not rebuild these systems.
+
+TASK:
+
+Build the Advanced Workout Analytics Foundation.
+
+The purpose:
+
+Create a system that understands user performance over time.
+
+This will later power:
+
+- Progress dashboard
+- AI Coach insights
+- AI workout adaptation
+- Personal records
+- Goal tracking
+
+
+IMPLEMENT:
+
+
+1. Create Workout Analytics Data Model
+
+Create:
+
+WorkoutAnalytics
+
+Fields:
+
+- userId
+- date
+- workoutId
+- totalExercises
+- totalSets
+- totalReps
+- totalVolume
+- workoutDuration
+- caloriesEstimated
+- muscleGroupsTrained
+- difficultyRating
+- createdAt
+
+
+2. Create Exercise Performance Model
+
+Create:
+
+ExercisePerformance
+
+Fields:
+
+- userId
+- exerciseId
+- date
+- weight
+- reps
+- sets
+- totalVolume
+- personalRecord
+- createdAt
+
+
+Purpose:
+
+Track improvement for each exercise.
+
+
+3. Create Analytics Processing Service
+
+Create:
+
+calculateWorkoutVolume()
+
+calculateExerciseProgress()
+
+calculateTrainingFrequency()
+
+calculateConsistencyScore()
+
+
+Keep calculations separate from API routes.
+
+
+4. Calculate Training Volume
+
+Formula:
+
+Volume = Weight × Reps × Sets
+
+
+Example:
+
+Bench Press:
+
+80kg × 8 reps × 4 sets
+
+Volume:
+
+2560kg
+
+
+Store this information.
+
+
+5. Calculate Training Consistency
+
+Create consistency score:
+
+0-100
+
+
+Consider:
+
+- Planned workouts
+- Completed workouts
+- Missed workouts
+- Weekly frequency
+
+
+Example:
+
+Completed:
+
+4/5 workouts
+
+Consistency:
+
+80%
+
+
+6. Track Exercise Progression
+
+For each exercise track:
+
+- Weight improvement
+- Rep improvement
+- Volume improvement
+- Frequency
+
+
+Example:
+
+Bench Press:
+
+January:
+60kg × 8
+
+March:
+80kg × 8
+
+
+Progress:
+
++33% strength increase
+
+
+7. Create Analytics API Endpoints
+
+
+Create:
+
+
+GET
+
+/api/analytics/workout-summary
+
+
+Returns:
+
+- Total workouts
+- Total training time
+- Total volume
+- Average workout duration
+
+
+---
+
+
+GET
+
+/api/analytics/exercise/:exerciseId
+
+
+Returns:
+
+- Progress history
+- Strength changes
+- Volume changes
+
+
+---
+
+
+GET
+
+/api/analytics/consistency
+
+
+Returns:
+
+- Weekly consistency score
+
+
+8. Create Analytics Components
+
+
+Create:
+
+
+WorkoutSummaryCard
+
+Display:
+
+- Workouts completed
+- Total volume
+- Training time
+
+
+ExerciseProgressCard
+
+Display:
+
+- Exercise improvement
+- Strength trend
+
+
+ConsistencyCard
+
+Display:
+
+- Weekly consistency percentage
+
+
+9. Add Empty States
+
+Handle:
+
+- New users
+- No workouts completed
+- Missing exercise history
+
+
+10. Prepare For Future AI Analysis
+
+Create service:
+
+getUserPerformanceSummary(userId)
+
+
+Example output:
+
+
+{
+ workoutsCompleted: 50,
+ strengthTrend: "improving",
+ consistency: 85,
+ weakAreas: [
+  "lower body"
+ ]
+}
+
+
+This will later be used by:
+
+- AI Coach
+- AI Workout Generator
+- Progress reports
+
+
+DO NOT:
+
+- Build charts yet.
+- Build AI Coach insights yet.
+- Build personal records system yet.
+- Modify workout tracking.
+- Modify recovery calculations.
+
+
+TECH REQUIREMENTS:
+
+- Reuse existing workout history.
+- Do not duplicate workout data.
+- Keep analytics services modular.
+- Optimize database queries.
+- Add proper validation.
+- Maintain backward compatibility.
+
+
+COMPLETION REPORT:
+
+After finishing, provide:
+
+1. Files created
+2. Files modified
+3. Database changes
+4. API endpoints
+5. Analytics formulas implemented
+6. Example analytics output
+7. Any issues found
