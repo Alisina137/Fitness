@@ -14,11 +14,12 @@ export default function ExercisesPage() {
   const [category, setCategory] = useState<string>("");
   const [muscle, setMuscle] = useState<string>("");
 
-  const { data: exercises, isLoading } = useListExercises({
+  const { data: exercisesResponse, isLoading } = useListExercises({
     search: search || undefined,
     category: category || undefined,
     muscleGroup: muscle || undefined
   });
+  const exercises = exercisesResponse?.exercises;
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
