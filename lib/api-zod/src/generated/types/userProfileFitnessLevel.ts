@@ -13,4 +13,5 @@ export const UserProfileFitnessLevel = {
   beginner: 'beginner',
   intermediate: 'intermediate',
   advanced: 'advanced',
+  athlete: 'athlete',
 } as const;

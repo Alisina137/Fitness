@@ -98,12 +98,23 @@ export const GetUserProfileResponse = zod.object({
   "gender": zod.union([zod.literal('male'),zod.literal('female'),zod.literal('non_binary'),zod.literal('prefer_not_to_say'),zod.literal(null)]).nullish(),
   "heightCm": zod.number().nullish(),
   "weightKg": zod.number().nullish(),
-  "fitnessLevel": zod.enum(['beginner', 'intermediate', 'advanced']),
-  "goals": zod.array(zod.string()),
-  "preferences": zod.record(zod.string(), zod.unknown()).optional(),
+  "primaryGoal": zod.union([zod.literal('lose_fat'),zod.literal('build_muscle'),zod.literal('increase_strength'),zod.literal('improve_endurance'),zod.literal('improve_health'),zod.literal('maintain'),zod.literal(null)]).nullish(),
+  "secondaryGoals": zod.array(zod.string()).optional(),
+  "fitnessLevel": zod.enum(['beginner', 'intermediate', 'advanced', 'athlete']),
+  "activityLevel": zod.union([zod.literal('sedentary'),zod.literal('lightly_active'),zod.literal('moderately_active'),zod.literal('very_active'),zod.literal('extremely_active'),zod.literal(null)]).nullish(),
+  "workoutLocation": zod.union([zod.literal('home'),zod.literal('gym'),zod.literal('outdoor'),zod.literal('mixed'),zod.literal(null)]).nullish(),
   "equipmentAvailable": zod.array(zod.string()).optional(),
+  "weeklyWorkoutTarget": zod.number().nullish(),
+  "workoutDurationMinutes": zod.number().nullish(),
   "injuries": zod.array(zod.string()).optional(),
-  "weeklyWorkoutTarget": zod.number().nullish()
+  "injuryNotes": zod.string().nullish(),
+  "dietPreference": zod.union([zod.literal('no_preference'),zod.literal('high_protein'),zod.literal('vegetarian'),zod.literal('vegan'),zod.literal('keto'),zod.literal('mediterranean'),zod.literal('low_carb'),zod.literal(null)]).nullish(),
+  "foodRestrictions": zod.array(zod.string()).optional(),
+  "motivation": zod.union([zod.literal('look_better'),zod.literal('feel_healthier'),zod.literal('build_confidence'),zod.literal('improve_performance'),zod.literal('prepare_for_event'),zod.literal(null)]).nullish(),
+  "sleepHours": zod.union([zod.literal('lt5'),zod.literal('h5_7'),zod.literal('h7_9'),zod.literal('gt9'),zod.literal(null)]).nullish(),
+  "goals": zod.array(zod.string()),
+  "fitnessReadinessScore": zod.number().nullish(),
+  "preferences": zod.record(zod.string(), zod.unknown()).optional()
 })
 
 
@@ -115,11 +126,21 @@ export const UpdateUserProfileBody = zod.object({
   "gender": zod.string().optional(),
   "heightCm": zod.number().optional(),
   "weightKg": zod.number().optional(),
-  "fitnessLevel": zod.enum(['beginner', 'intermediate', 'advanced']).optional(),
-  "goals": zod.array(zod.string()).optional(),
+  "primaryGoal": zod.enum(['lose_fat', 'build_muscle', 'increase_strength', 'improve_endurance', 'improve_health', 'maintain']).optional(),
+  "secondaryGoals": zod.array(zod.string()).optional(),
+  "fitnessLevel": zod.enum(['beginner', 'intermediate', 'advanced', 'athlete']).optional(),
+  "activityLevel": zod.enum(['sedentary', 'lightly_active', 'moderately_active', 'very_active', 'extremely_active']).optional(),
+  "workoutLocation": zod.enum(['home', 'gym', 'outdoor', 'mixed']).optional(),
   "equipmentAvailable": zod.array(zod.string()).optional(),
+  "weeklyWorkoutTarget": zod.number().optional(),
+  "workoutDurationMinutes": zod.number().optional(),
   "injuries": zod.array(zod.string()).optional(),
-  "weeklyWorkoutTarget": zod.number().optional()
+  "injuryNotes": zod.string().optional(),
+  "dietPreference": zod.enum(['no_preference', 'high_protein', 'vegetarian', 'vegan', 'keto', 'mediterranean', 'low_carb']).optional(),
+  "foodRestrictions": zod.array(zod.string()).optional(),
+  "motivation": zod.enum(['look_better', 'feel_healthier', 'build_confidence', 'improve_performance', 'prepare_for_event']).optional(),
+  "sleepHours": zod.enum(['lt5', 'h5_7', 'h7_9', 'gt9']).optional(),
+  "goals": zod.array(zod.string()).optional()
 })
 
 export const UpdateUserProfileResponse = zod.object({
@@ -129,12 +150,23 @@ export const UpdateUserProfileResponse = zod.object({
   "gender": zod.union([zod.literal('male'),zod.literal('female'),zod.literal('non_binary'),zod.literal('prefer_not_to_say'),zod.literal(null)]).nullish(),
   "heightCm": zod.number().nullish(),
   "weightKg": zod.number().nullish(),
-  "fitnessLevel": zod.enum(['beginner', 'intermediate', 'advanced']),
-  "goals": zod.array(zod.string()),
-  "preferences": zod.record(zod.string(), zod.unknown()).optional(),
+  "primaryGoal": zod.union([zod.literal('lose_fat'),zod.literal('build_muscle'),zod.literal('increase_strength'),zod.literal('improve_endurance'),zod.literal('improve_health'),zod.literal('maintain'),zod.literal(null)]).nullish(),
+  "secondaryGoals": zod.array(zod.string()).optional(),
+  "fitnessLevel": zod.enum(['beginner', 'intermediate', 'advanced', 'athlete']),
+  "activityLevel": zod.union([zod.literal('sedentary'),zod.literal('lightly_active'),zod.literal('moderately_active'),zod.literal('very_active'),zod.literal('extremely_active'),zod.literal(null)]).nullish(),
+  "workoutLocation": zod.union([zod.literal('home'),zod.literal('gym'),zod.literal('outdoor'),zod.literal('mixed'),zod.literal(null)]).nullish(),
   "equipmentAvailable": zod.array(zod.string()).optional(),
+  "weeklyWorkoutTarget": zod.number().nullish(),
+  "workoutDurationMinutes": zod.number().nullish(),
   "injuries": zod.array(zod.string()).optional(),
-  "weeklyWorkoutTarget": zod.number().nullish()
+  "injuryNotes": zod.string().nullish(),
+  "dietPreference": zod.union([zod.literal('no_preference'),zod.literal('high_protein'),zod.literal('vegetarian'),zod.literal('vegan'),zod.literal('keto'),zod.literal('mediterranean'),zod.literal('low_carb'),zod.literal(null)]).nullish(),
+  "foodRestrictions": zod.array(zod.string()).optional(),
+  "motivation": zod.union([zod.literal('look_better'),zod.literal('feel_healthier'),zod.literal('build_confidence'),zod.literal('improve_performance'),zod.literal('prepare_for_event'),zod.literal(null)]).nullish(),
+  "sleepHours": zod.union([zod.literal('lt5'),zod.literal('h5_7'),zod.literal('h7_9'),zod.literal('gt9'),zod.literal(null)]).nullish(),
+  "goals": zod.array(zod.string()),
+  "fitnessReadinessScore": zod.number().nullish(),
+  "preferences": zod.record(zod.string(), zod.unknown()).optional()
 })
 
 

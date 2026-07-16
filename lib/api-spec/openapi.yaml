@@ -741,26 +741,58 @@ components:
           type: ["number", "null"]
         weightKg:
           type: ["number", "null"]
+        primaryGoal:
+          type: ["string", "null"]
+          enum: [lose_fat, build_muscle, increase_strength, improve_endurance, improve_health, maintain, null]
+        secondaryGoals:
+          type: array
+          items:
+            type: string
         fitnessLevel:
           type: string
-          enum: [beginner, intermediate, advanced]
-        goals:
-          type: array
-          items:
-            type: string
-        preferences:
-          type: object
-          additionalProperties: true
+          enum: [beginner, intermediate, advanced, athlete]
+        activityLevel:
+          type: ["string", "null"]
+          enum: [sedentary, lightly_active, moderately_active, very_active, extremely_active, null]
+        workoutLocation:
+          type: ["string", "null"]
+          enum: [home, gym, outdoor, mixed, null]
         equipmentAvailable:
-          type: array
-          items:
-            type: string
-        injuries:
           type: array
           items:
             type: string
         weeklyWorkoutTarget:
           type: ["integer", "null"]
+        workoutDurationMinutes:
+          type: ["integer", "null"]
+        injuries:
+          type: array
+          items:
+            type: string
+        injuryNotes:
+          type: ["string", "null"]
+        dietPreference:
+          type: ["string", "null"]
+          enum: [no_preference, high_protein, vegetarian, vegan, keto, mediterranean, low_carb, null]
+        foodRestrictions:
+          type: array
+          items:
+            type: string
+        motivation:
+          type: ["string", "null"]
+          enum: [look_better, feel_healthier, build_confidence, improve_performance, prepare_for_event, null]
+        sleepHours:
+          type: ["string", "null"]
+          enum: [lt5, h5_7, h7_9, gt9, null]
+        goals:
+          type: array
+          items:
+            type: string
+        fitnessReadinessScore:
+          type: ["integer", "null"]
+        preferences:
+          type: object
+          additionalProperties: true
 
     UserProfileUpdate:
       type: object
@@ -773,23 +805,53 @@ components:
           type: number
         weightKg:
           type: number
+        primaryGoal:
+          type: string
+          enum: [lose_fat, build_muscle, increase_strength, improve_endurance, improve_health, maintain]
+        secondaryGoals:
+          type: array
+          items:
+            type: string
         fitnessLevel:
           type: string
-          enum: [beginner, intermediate, advanced]
-        goals:
-          type: array
-          items:
-            type: string
+          enum: [beginner, intermediate, advanced, athlete]
+        activityLevel:
+          type: string
+          enum: [sedentary, lightly_active, moderately_active, very_active, extremely_active]
+        workoutLocation:
+          type: string
+          enum: [home, gym, outdoor, mixed]
         equipmentAvailable:
-          type: array
-          items:
-            type: string
-        injuries:
           type: array
           items:
             type: string
         weeklyWorkoutTarget:
           type: integer
+        workoutDurationMinutes:
+          type: integer
+        injuries:
+          type: array
+          items:
+            type: string
+        injuryNotes:
+          type: string
+        dietPreference:
+          type: string
+          enum: [no_preference, high_protein, vegetarian, vegan, keto, mediterranean, low_carb]
+        foodRestrictions:
+          type: array
+          items:
+            type: string
+        motivation:
+          type: string
+          enum: [look_better, feel_healthier, build_confidence, improve_performance, prepare_for_event]
+        sleepHours:
+          type: string
+          enum: [lt5, h5_7, h7_9, gt9]
+        goals:
+          type: array
+          items:
+            type: string
 
     # ─── Dashboard ─────────────────────────────────────────────────────────────
     DashboardSummary:

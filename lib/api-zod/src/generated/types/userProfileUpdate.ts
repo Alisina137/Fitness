@@ -5,16 +5,32 @@
  * FitCore AI Fitness App API
  * OpenAPI spec version: 0.1.0
  */
+import type { UserProfileUpdateActivityLevel } from './userProfileUpdateActivityLevel';
+import type { UserProfileUpdateDietPreference } from './userProfileUpdateDietPreference';
 import type { UserProfileUpdateFitnessLevel } from './userProfileUpdateFitnessLevel';
+import type { UserProfileUpdateMotivation } from './userProfileUpdateMotivation';
+import type { UserProfileUpdatePrimaryGoal } from './userProfileUpdatePrimaryGoal';
+import type { UserProfileUpdateSleepHours } from './userProfileUpdateSleepHours';
+import type { UserProfileUpdateWorkoutLocation } from './userProfileUpdateWorkoutLocation';
 
 export interface UserProfileUpdate {
   age?: number;
   gender?: string;
   heightCm?: number;
   weightKg?: number;
+  primaryGoal?: UserProfileUpdatePrimaryGoal;
+  secondaryGoals?: string[];
   fitnessLevel?: UserProfileUpdateFitnessLevel;
-  goals?: string[];
+  activityLevel?: UserProfileUpdateActivityLevel;
+  workoutLocation?: UserProfileUpdateWorkoutLocation;
   equipmentAvailable?: string[];
-  injuries?: string[];
   weeklyWorkoutTarget?: number;
+  workoutDurationMinutes?: number;
+  injuries?: string[];
+  injuryNotes?: string;
+  dietPreference?: UserProfileUpdateDietPreference;
+  foodRestrictions?: string[];
+  motivation?: UserProfileUpdateMotivation;
+  sleepHours?: UserProfileUpdateSleepHours;
+  goals?: string[];
 }

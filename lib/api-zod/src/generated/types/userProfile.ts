@@ -5,9 +5,15 @@
  * FitCore AI Fitness App API
  * OpenAPI spec version: 0.1.0
  */
+import type { UserProfileActivityLevel } from './userProfileActivityLevel';
+import type { UserProfileDietPreference } from './userProfileDietPreference';
 import type { UserProfileFitnessLevel } from './userProfileFitnessLevel';
 import type { UserProfileGender } from './userProfileGender';
+import type { UserProfileMotivation } from './userProfileMotivation';
 import type { UserProfilePreferences } from './userProfilePreferences';
+import type { UserProfilePrimaryGoal } from './userProfilePrimaryGoal';
+import type { UserProfileSleepHours } from './userProfileSleepHours';
+import type { UserProfileWorkoutLocation } from './userProfileWorkoutLocation';
 
 export interface UserProfile {
   id: number;
@@ -20,11 +26,31 @@ export interface UserProfile {
   heightCm?: number | null;
   /** @nullable */
   weightKg?: number | null;
+  /** @nullable */
+  primaryGoal?: UserProfilePrimaryGoal;
+  secondaryGoals?: string[];
   fitnessLevel: UserProfileFitnessLevel;
-  goals: string[];
-  preferences?: UserProfilePreferences;
+  /** @nullable */
+  activityLevel?: UserProfileActivityLevel;
+  /** @nullable */
+  workoutLocation?: UserProfileWorkoutLocation;
   equipmentAvailable?: string[];
-  injuries?: string[];
   /** @nullable */
   weeklyWorkoutTarget?: number | null;
+  /** @nullable */
+  workoutDurationMinutes?: number | null;
+  injuries?: string[];
+  /** @nullable */
+  injuryNotes?: string | null;
+  /** @nullable */
+  dietPreference?: UserProfileDietPreference;
+  foodRestrictions?: string[];
+  /** @nullable */
+  motivation?: UserProfileMotivation;
+  /** @nullable */
+  sleepHours?: UserProfileSleepHours;
+  goals: string[];
+  /** @nullable */
+  fitnessReadinessScore?: number | null;
+  preferences?: UserProfilePreferences;
 }

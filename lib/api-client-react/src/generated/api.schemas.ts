@@ -63,6 +63,21 @@ export const UserProfileGender = {
   prefer_not_to_say: 'prefer_not_to_say',
 } as const;
 
+/**
+ * @nullable
+ */
+export type UserProfilePrimaryGoal = typeof UserProfilePrimaryGoal[keyof typeof UserProfilePrimaryGoal] | null;
+
+
+export const UserProfilePrimaryGoal = {
+  lose_fat: 'lose_fat',
+  build_muscle: 'build_muscle',
+  increase_strength: 'increase_strength',
+  improve_endurance: 'improve_endurance',
+  improve_health: 'improve_health',
+  maintain: 'maintain',
+} as const;
+
 export type UserProfileFitnessLevel = typeof UserProfileFitnessLevel[keyof typeof UserProfileFitnessLevel];
 
 
@@ -70,6 +85,77 @@ export const UserProfileFitnessLevel = {
   beginner: 'beginner',
   intermediate: 'intermediate',
   advanced: 'advanced',
+  athlete: 'athlete',
+} as const;
+
+/**
+ * @nullable
+ */
+export type UserProfileActivityLevel = typeof UserProfileActivityLevel[keyof typeof UserProfileActivityLevel] | null;
+
+
+export const UserProfileActivityLevel = {
+  sedentary: 'sedentary',
+  lightly_active: 'lightly_active',
+  moderately_active: 'moderately_active',
+  very_active: 'very_active',
+  extremely_active: 'extremely_active',
+} as const;
+
+/**
+ * @nullable
+ */
+export type UserProfileWorkoutLocation = typeof UserProfileWorkoutLocation[keyof typeof UserProfileWorkoutLocation] | null;
+
+
+export const UserProfileWorkoutLocation = {
+  home: 'home',
+  gym: 'gym',
+  outdoor: 'outdoor',
+  mixed: 'mixed',
+} as const;
+
+/**
+ * @nullable
+ */
+export type UserProfileDietPreference = typeof UserProfileDietPreference[keyof typeof UserProfileDietPreference] | null;
+
+
+export const UserProfileDietPreference = {
+  no_preference: 'no_preference',
+  high_protein: 'high_protein',
+  vegetarian: 'vegetarian',
+  vegan: 'vegan',
+  keto: 'keto',
+  mediterranean: 'mediterranean',
+  low_carb: 'low_carb',
+} as const;
+
+/**
+ * @nullable
+ */
+export type UserProfileMotivation = typeof UserProfileMotivation[keyof typeof UserProfileMotivation] | null;
+
+
+export const UserProfileMotivation = {
+  look_better: 'look_better',
+  feel_healthier: 'feel_healthier',
+  build_confidence: 'build_confidence',
+  improve_performance: 'improve_performance',
+  prepare_for_event: 'prepare_for_event',
+} as const;
+
+/**
+ * @nullable
+ */
+export type UserProfileSleepHours = typeof UserProfileSleepHours[keyof typeof UserProfileSleepHours] | null;
+
+
+export const UserProfileSleepHours = {
+  lt5: 'lt5',
+  h5_7: 'h5_7',
+  h7_9: 'h7_9',
+  gt9: 'gt9',
 } as const;
 
 export type UserProfilePreferences = { [key: string]: unknown };
@@ -85,14 +171,46 @@ export interface UserProfile {
   heightCm?: number | null;
   /** @nullable */
   weightKg?: number | null;
+  /** @nullable */
+  primaryGoal?: UserProfilePrimaryGoal;
+  secondaryGoals?: string[];
   fitnessLevel: UserProfileFitnessLevel;
-  goals: string[];
-  preferences?: UserProfilePreferences;
+  /** @nullable */
+  activityLevel?: UserProfileActivityLevel;
+  /** @nullable */
+  workoutLocation?: UserProfileWorkoutLocation;
   equipmentAvailable?: string[];
-  injuries?: string[];
   /** @nullable */
   weeklyWorkoutTarget?: number | null;
+  /** @nullable */
+  workoutDurationMinutes?: number | null;
+  injuries?: string[];
+  /** @nullable */
+  injuryNotes?: string | null;
+  /** @nullable */
+  dietPreference?: UserProfileDietPreference;
+  foodRestrictions?: string[];
+  /** @nullable */
+  motivation?: UserProfileMotivation;
+  /** @nullable */
+  sleepHours?: UserProfileSleepHours;
+  goals: string[];
+  /** @nullable */
+  fitnessReadinessScore?: number | null;
+  preferences?: UserProfilePreferences;
 }
+
+export type UserProfileUpdatePrimaryGoal = typeof UserProfileUpdatePrimaryGoal[keyof typeof UserProfileUpdatePrimaryGoal];
+
+
+export const UserProfileUpdatePrimaryGoal = {
+  lose_fat: 'lose_fat',
+  build_muscle: 'build_muscle',
+  increase_strength: 'increase_strength',
+  improve_endurance: 'improve_endurance',
+  improve_health: 'improve_health',
+  maintain: 'maintain',
+} as const;
 
 export type UserProfileUpdateFitnessLevel = typeof UserProfileUpdateFitnessLevel[keyof typeof UserProfileUpdateFitnessLevel];
 
@@ -101,6 +219,62 @@ export const UserProfileUpdateFitnessLevel = {
   beginner: 'beginner',
   intermediate: 'intermediate',
   advanced: 'advanced',
+  athlete: 'athlete',
+} as const;
+
+export type UserProfileUpdateActivityLevel = typeof UserProfileUpdateActivityLevel[keyof typeof UserProfileUpdateActivityLevel];
+
+
+export const UserProfileUpdateActivityLevel = {
+  sedentary: 'sedentary',
+  lightly_active: 'lightly_active',
+  moderately_active: 'moderately_active',
+  very_active: 'very_active',
+  extremely_active: 'extremely_active',
+} as const;
+
+export type UserProfileUpdateWorkoutLocation = typeof UserProfileUpdateWorkoutLocation[keyof typeof UserProfileUpdateWorkoutLocation];
+
+
+export const UserProfileUpdateWorkoutLocation = {
+  home: 'home',
+  gym: 'gym',
+  outdoor: 'outdoor',
+  mixed: 'mixed',
+} as const;
+
+export type UserProfileUpdateDietPreference = typeof UserProfileUpdateDietPreference[keyof typeof UserProfileUpdateDietPreference];
+
+
+export const UserProfileUpdateDietPreference = {
+  no_preference: 'no_preference',
+  high_protein: 'high_protein',
+  vegetarian: 'vegetarian',
+  vegan: 'vegan',
+  keto: 'keto',
+  mediterranean: 'mediterranean',
+  low_carb: 'low_carb',
+} as const;
+
+export type UserProfileUpdateMotivation = typeof UserProfileUpdateMotivation[keyof typeof UserProfileUpdateMotivation];
+
+
+export const UserProfileUpdateMotivation = {
+  look_better: 'look_better',
+  feel_healthier: 'feel_healthier',
+  build_confidence: 'build_confidence',
+  improve_performance: 'improve_performance',
+  prepare_for_event: 'prepare_for_event',
+} as const;
+
+export type UserProfileUpdateSleepHours = typeof UserProfileUpdateSleepHours[keyof typeof UserProfileUpdateSleepHours];
+
+
+export const UserProfileUpdateSleepHours = {
+  lt5: 'lt5',
+  h5_7: 'h5_7',
+  h7_9: 'h7_9',
+  gt9: 'gt9',
 } as const;
 
 export interface UserProfileUpdate {
@@ -108,11 +282,21 @@ export interface UserProfileUpdate {
   gender?: string;
   heightCm?: number;
   weightKg?: number;
+  primaryGoal?: UserProfileUpdatePrimaryGoal;
+  secondaryGoals?: string[];
   fitnessLevel?: UserProfileUpdateFitnessLevel;
-  goals?: string[];
+  activityLevel?: UserProfileUpdateActivityLevel;
+  workoutLocation?: UserProfileUpdateWorkoutLocation;
   equipmentAvailable?: string[];
-  injuries?: string[];
   weeklyWorkoutTarget?: number;
+  workoutDurationMinutes?: number;
+  injuries?: string[];
+  injuryNotes?: string;
+  dietPreference?: UserProfileUpdateDietPreference;
+  foodRestrictions?: string[];
+  motivation?: UserProfileUpdateMotivation;
+  sleepHours?: UserProfileUpdateSleepHours;
+  goals?: string[];
 }
 
 export interface NutritionSummary {
