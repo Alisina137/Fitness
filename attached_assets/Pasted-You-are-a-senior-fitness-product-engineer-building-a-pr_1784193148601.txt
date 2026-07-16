@@ -1,0 +1,362 @@
+You are a senior fitness product engineer building a premium AI fitness application.
+
+The following systems already exist:
+
+* Project architecture
+* Authentication
+* User onboarding
+* Exercise database
+* Exercise library
+
+Now build the Workout Program Engine.
+
+The goal:
+Create a professional workout management system that can support beginners, advanced athletes, and future AI-generated workout plans.
+
+Do not build AI workout generation yet.
+
+---
+
+# 1. Create Workout Data Architecture
+
+Create scalable database models.
+
+## Workout Plan Model
+
+Fields:
+
+* name
+* description
+* goal
+* difficulty level
+* duration in weeks
+* created by
+* status
+* exercises
+* schedule
+* progression rules
+
+Goals:
+
+* Fat loss
+* Muscle gain
+* Strength
+* Endurance
+* General fitness
+* Mobility
+
+---
+
+## Workout Day Model
+
+Each workout plan contains multiple days.
+
+Fields:
+
+* day number
+* title
+* focus area
+* estimated duration
+* exercises
+* completion status
+
+Examples:
+
+Day 1:
+Upper Body Strength
+
+Day 2:
+Lower Body Strength
+
+Day 3:
+Recovery
+
+---
+
+## Workout Exercise Model
+
+Each exercise inside a workout should contain:
+
+* exercise ID
+* order
+* sets
+* repetitions
+* weight target
+* duration
+* rest time
+* tempo
+* notes
+
+Example:
+
+Exercise:
+Barbell Squat
+
+Sets:
+4
+
+Reps:
+8-10
+
+Rest:
+90 seconds
+
+---
+
+## Workout Session Model
+
+Track every completed workout.
+
+Fields:
+
+* user ID
+* workout ID
+* start time
+* end time
+* duration
+* exercises completed
+* calories burned
+* notes
+* difficulty rating
+
+---
+
+# 2. Create Workout Builder System
+
+Create functionality to manually create workout plans.
+
+Admin/user can:
+
+* Create workout plan
+* Add exercises
+* Arrange exercise order
+* Set:
+
+  * sets
+  * reps
+  * rest
+  * duration
+
+Allow editing and deleting.
+
+---
+
+# 3. Create Workout Templates
+
+Create professional starter programs.
+
+Create at least:
+
+## Beginner Programs
+
+1.
+
+Full Body Beginner
+Duration:
+4 weeks
+
+Schedule:
+3 days/week
+
+2.
+
+Weight Loss Beginner
+Duration:
+6 weeks
+
+---
+
+## Muscle Building Programs
+
+1.
+
+Push Pull Legs
+
+2.
+
+Upper Lower Split
+
+---
+
+## Home Workout Programs
+
+1.
+
+No Equipment Fat Loss
+
+2.
+
+30 Minute Home Fitness
+
+---
+
+Each program should use exercises from the existing exercise database.
+
+---
+
+# 4. Create Workout Scheduling System
+
+Users should be able to:
+
+* Select workout days
+* View weekly schedule
+* Move workouts
+* Skip workouts
+* Reschedule workouts
+
+Example:
+
+Monday:
+Chest + Triceps
+
+Wednesday:
+Back + Biceps
+
+Friday:
+Legs
+
+---
+
+# 5. Build Workout Execution Interface
+
+Create a premium workout experience.
+
+When user starts workout:
+
+Display:
+
+* Current exercise
+* Exercise instructions
+* Sets
+* Reps
+* Rest timer
+* Previous performance
+* Completion button
+
+Features:
+
+* Start workout timer
+* Complete sets
+* Skip exercise
+* Replace exercise
+* Pause workout
+* Finish workout
+
+Design inspiration:
+
+* Apple Fitness+
+* Fitbod
+* Nike Training Club
+
+---
+
+# 6. Add Exercise Progress Tracking
+
+During workouts track:
+
+Strength:
+
+* Weight used
+* Reps completed
+* Personal records
+
+Examples:
+
+"New personal record:
+Bench press +5kg"
+
+Store progress history.
+
+---
+
+# 7. Create Workout Analytics
+
+Create dashboard components:
+
+Display:
+
+* Total workouts completed
+* Weekly consistency
+* Training volume
+* Favorite exercises
+* Muscle groups trained
+* Time spent training
+
+---
+
+# 8. Add User Feedback System
+
+After each workout ask:
+
+How difficult was this workout?
+
+Options:
+
+1 Very easy
+
+2 Easy
+
+3 Moderate
+
+4 Hard
+
+5 Very hard
+
+Store this information.
+
+This data will later train the AI adaptation engine.
+
+---
+
+# 9. Prepare For Future AI Integration
+
+Create functions:
+
+generateWorkoutPlan()
+
+modifyWorkoutPlan()
+
+replaceExercise()
+
+increaseDifficulty()
+
+decreaseDifficulty()
+
+analyzeWorkoutPerformance()
+
+Do not implement AI logic yet.
+
+Only create the structure.
+
+---
+
+# 10. Technical Requirements
+
+Important:
+
+* Use existing architecture.
+* Reuse exercise components.
+* Keep database relationships clean.
+* Avoid duplicate code.
+* Build production-quality components.
+* Make mobile experience excellent.
+* Add proper error handling.
+* Add loading states.
+
+Do not create:
+
+* AI trainer
+* AI chatbot
+* Nutrition
+* Payments
+* Social features
+
+Those will come later.
+
+After completion provide:
+
+1. Database models created
+2. API endpoints created
+3. Pages/components created
+4. Workout programs added
+5. How AI will later generate and modify workouts using this system
