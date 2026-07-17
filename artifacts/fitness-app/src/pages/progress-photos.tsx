@@ -142,8 +142,11 @@ function UploadModal({ onClose }: { onClose: () => void }) {
     setIsSubmitting(false);
 
     if (successCount > 0) {
-      // Invalidate the photos query so the gallery refreshes
-      queryClient.invalidateQueries({ queryKey: ["/api/progress-photos"] });
+      // Invalidate both query keys: the filtered list and the timeline used by the gallery
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["/api/progress-photos"] }),
+        queryClient.invalidateQueries({ queryKey: ["/api/progress-photos/timeline"] }),
+      ]);
       // Brief pause so user sees completion state, then close
       setTimeout(onClose, 600);
     }
@@ -342,12 +345,20 @@ function UploadModal({ onClose }: { onClose: () => void }) {
 
 function DeleteDialog({ photoId, onCancel, onConfirm }: { photoId: number; onCancel: () => void; onConfirm: () => void }) {
   const deletePhoto = useDeleteProgressPhotosId();
+  const queryClient = useQueryClient();
 
   function handleConfirm() {
     deletePhoto.mutate(
       { id: photoId },
       {
-        onSuccess: onConfirm,
+        onSuccess: () => {
+          // Invalidate both query keys so the gallery removes the photo immediately
+          Promise.all([
+            queryClient.invalidateQueries({ queryKey: ["/api/progress-photos"] }),
+            queryClient.invalidateQueries({ queryKey: ["/api/progress-photos/timeline"] }),
+          ]);
+          onConfirm();
+        },
       }
     );
   }
