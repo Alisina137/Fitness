@@ -25,16 +25,23 @@ import type {
   AiWorkoutRequest,
   AiWorkoutResponse,
   AuthResponse,
+  BodyMeasurementChartData,
+  BodyMeasurementComparisonResult,
   CheckInResult,
   Conversation,
   ConversationInput,
+  CreateProgressPhotoInput,
   DailyCheckIn,
   DailyCheckInInput,
   DashboardSummary,
+  DeleteProgressPhotosId200,
   DeleteResponse,
   Exercise,
+  GetBodyMeasurementChartParams,
+  GetBodyMeasurementComparisonParams,
   GetBodyMeasurementHistoryParams,
   GetNutritionSummaryParams,
+  GetProgressPhotosParams,
   GetRecoveryHistoryParams,
   GetWorkoutAnalyticsParams,
   GetWorkoutHistoryParams,
@@ -61,6 +68,7 @@ import type {
   NutritionSummary,
   ProgressEntry,
   ProgressEntryInput,
+  ProgressPhoto,
   ProgressStats,
   RecoveryRecommendation,
   RegisterInput,
@@ -3504,6 +3512,174 @@ export function useGetNutritionSummary<TData = Awaited<ReturnType<typeof getNutr
 
 
 
+export const getGetBodyMeasurementComparisonUrl = (params: GetBodyMeasurementComparisonParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/body-measurements/compare?${stringifiedParams}` : `/api/body-measurements/compare`
+}
+
+/**
+ * @summary Compare a measurement between two dates
+ */
+export const getBodyMeasurementComparison = async (params: GetBodyMeasurementComparisonParams, options?: RequestInit): Promise<BodyMeasurementComparisonResult> => {
+
+  return customFetch<BodyMeasurementComparisonResult>(getGetBodyMeasurementComparisonUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetBodyMeasurementComparisonQueryKey = (params?: GetBodyMeasurementComparisonParams,) => {
+    return [
+    `/api/body-measurements/compare`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetBodyMeasurementComparisonQueryOptions = <TData = Awaited<ReturnType<typeof getBodyMeasurementComparison>>, TError = ErrorType<void>>(params: GetBodyMeasurementComparisonParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getBodyMeasurementComparison>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetBodyMeasurementComparisonQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getBodyMeasurementComparison>>> = ({ signal }) => getBodyMeasurementComparison(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getBodyMeasurementComparison>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetBodyMeasurementComparisonQueryResult = NonNullable<Awaited<ReturnType<typeof getBodyMeasurementComparison>>>
+export type GetBodyMeasurementComparisonQueryError = ErrorType<void>
+
+
+/**
+ * @summary Compare a measurement between two dates
+ */
+
+export function useGetBodyMeasurementComparison<TData = Awaited<ReturnType<typeof getBodyMeasurementComparison>>, TError = ErrorType<void>>(
+ params: GetBodyMeasurementComparisonParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getBodyMeasurementComparison>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetBodyMeasurementComparisonQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetBodyMeasurementChartUrl = (params?: GetBodyMeasurementChartParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/body-measurements/chart?${stringifiedParams}` : `/api/body-measurements/chart`
+}
+
+/**
+ * @summary Get chart-ready measurement data grouped by metric
+ */
+export const getBodyMeasurementChart = async (params?: GetBodyMeasurementChartParams, options?: RequestInit): Promise<BodyMeasurementChartData> => {
+
+  return customFetch<BodyMeasurementChartData>(getGetBodyMeasurementChartUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetBodyMeasurementChartQueryKey = (params?: GetBodyMeasurementChartParams,) => {
+    return [
+    `/api/body-measurements/chart`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetBodyMeasurementChartQueryOptions = <TData = Awaited<ReturnType<typeof getBodyMeasurementChart>>, TError = ErrorType<unknown>>(params?: GetBodyMeasurementChartParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getBodyMeasurementChart>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetBodyMeasurementChartQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getBodyMeasurementChart>>> = ({ signal }) => getBodyMeasurementChart(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getBodyMeasurementChart>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetBodyMeasurementChartQueryResult = NonNullable<Awaited<ReturnType<typeof getBodyMeasurementChart>>>
+export type GetBodyMeasurementChartQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get chart-ready measurement data grouped by metric
+ */
+
+export function useGetBodyMeasurementChart<TData = Awaited<ReturnType<typeof getBodyMeasurementChart>>, TError = ErrorType<unknown>>(
+ params?: GetBodyMeasurementChartParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getBodyMeasurementChart>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetBodyMeasurementChartQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
 export const getGetBodyMeasurementHistoryUrl = (params?: GetBodyMeasurementHistoryParams,) => {
   const normalizedParams = new URLSearchParams();
 
@@ -5171,5 +5347,231 @@ export const useGenerateMilestones = <TError = ErrorType<void>,
         TContext
       > => {
       return useMutation(getGenerateMilestonesMutationOptions(options));
+    }
+
+export const getGetProgressPhotosUrl = (params?: GetProgressPhotosParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/progress-photos?${stringifiedParams}` : `/api/progress-photos`
+}
+
+/**
+ * @summary List progress photos
+ */
+export const getProgressPhotos = async (params?: GetProgressPhotosParams, options?: RequestInit): Promise<ProgressPhoto[]> => {
+
+  return customFetch<ProgressPhoto[]>(getGetProgressPhotosUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetProgressPhotosQueryKey = (params?: GetProgressPhotosParams,) => {
+    return [
+    `/api/progress-photos`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetProgressPhotosQueryOptions = <TData = Awaited<ReturnType<typeof getProgressPhotos>>, TError = ErrorType<unknown>>(params?: GetProgressPhotosParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getProgressPhotos>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetProgressPhotosQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getProgressPhotos>>> = ({ signal }) => getProgressPhotos(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getProgressPhotos>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetProgressPhotosQueryResult = NonNullable<Awaited<ReturnType<typeof getProgressPhotos>>>
+export type GetProgressPhotosQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List progress photos
+ */
+
+export function useGetProgressPhotos<TData = Awaited<ReturnType<typeof getProgressPhotos>>, TError = ErrorType<unknown>>(
+ params?: GetProgressPhotosParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getProgressPhotos>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetProgressPhotosQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getPostProgressPhotosUrl = () => {
+
+
+
+
+  return `/api/progress-photos`
+}
+
+/**
+ * @summary Upload a progress photo
+ */
+export const postProgressPhotos = async (createProgressPhotoInput: CreateProgressPhotoInput, options?: RequestInit): Promise<ProgressPhoto> => {
+
+  return customFetch<ProgressPhoto>(getPostProgressPhotosUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(createProgressPhotoInput)
+  }
+);}
+
+
+
+
+
+export const getPostProgressPhotosMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postProgressPhotos>>, TError,{data: BodyType<CreateProgressPhotoInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postProgressPhotos>>, TError,{data: BodyType<CreateProgressPhotoInput>}, TContext> => {
+
+const mutationKey = ['postProgressPhotos'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postProgressPhotos>>, {data: BodyType<CreateProgressPhotoInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postProgressPhotos(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostProgressPhotosMutationResult = NonNullable<Awaited<ReturnType<typeof postProgressPhotos>>>
+    export type PostProgressPhotosMutationBody = BodyType<CreateProgressPhotoInput>
+    export type PostProgressPhotosMutationError = ErrorType<void>
+
+    /**
+ * @summary Upload a progress photo
+ */
+export const usePostProgressPhotos = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postProgressPhotos>>, TError,{data: BodyType<CreateProgressPhotoInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof postProgressPhotos>>,
+        TError,
+        {data: BodyType<CreateProgressPhotoInput>},
+        TContext
+      > => {
+      return useMutation(getPostProgressPhotosMutationOptions(options));
+    }
+
+export const getDeleteProgressPhotosIdUrl = (id: number,) => {
+
+
+
+
+  return `/api/progress-photos/${id}`
+}
+
+/**
+ * @summary Delete a progress photo
+ */
+export const deleteProgressPhotosId = async (id: number, options?: RequestInit): Promise<DeleteProgressPhotosId200> => {
+
+  return customFetch<DeleteProgressPhotosId200>(getDeleteProgressPhotosIdUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteProgressPhotosIdMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteProgressPhotosId>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteProgressPhotosId>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['deleteProgressPhotosId'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteProgressPhotosId>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteProgressPhotosId(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteProgressPhotosIdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteProgressPhotosId>>>
+
+    export type DeleteProgressPhotosIdMutationError = ErrorType<void>
+
+    /**
+ * @summary Delete a progress photo
+ */
+export const useDeleteProgressPhotosId = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteProgressPhotosId>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteProgressPhotosId>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getDeleteProgressPhotosIdMutationOptions(options));
     }
 

@@ -1,1 +1,3 @@
 - [Zod looseObject codegen issue](zod-looseobject-codegen.md) — after every codegen run, sed-replace zod.looseObject→zod.object in lib/api-zod/src/generated/api.ts or API server crashes.
+- [API server zod dependency](api-server-zod-dep.md) — zod must be in artifacts/api-server/package.json dependencies (catalog:) for esbuild to bundle it; routes that import zod directly will fail to build otherwise.
+- [Orval hook naming](orval-hook-naming.md) — Orval generates hooks from HTTP verb+path, not from schema names: POST /progress-photos → usePostProgressPhotos, DELETE /progress-photos/{id} → useDeleteProgressPhotosId. Always verify generated names before using them in the frontend.

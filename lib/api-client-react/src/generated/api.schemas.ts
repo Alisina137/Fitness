@@ -927,6 +927,32 @@ export interface NutritionEntryInput {
   loggedAt?: string;
 }
 
+export interface BodyMeasurementComparisonResult {
+  measurementType: string;
+  startValue: number;
+  endValue: number;
+  difference: number;
+  percentageChange: number;
+  startDate: string;
+  endDate: string;
+  dataPoints: number;
+}
+
+export interface ChartPoint {
+  date: string;
+  value: number;
+}
+
+export interface BodyMeasurementChartData {
+  weight?: ChartPoint[];
+  bodyFat?: ChartPoint[];
+  waist?: ChartPoint[];
+  chest?: ChartPoint[];
+  arms?: ChartPoint[];
+  hips?: ChartPoint[];
+  thighs?: ChartPoint[];
+}
+
 export type ProgressEntryType = typeof ProgressEntryType[keyof typeof ProgressEntryType];
 
 
@@ -1242,6 +1268,47 @@ export type UpcomingMilestone = {
   milestone?: GoalMilestone;
 } | null;
 
+export type ProgressPhotoPhotoType = typeof ProgressPhotoPhotoType[keyof typeof ProgressPhotoPhotoType];
+
+
+export const ProgressPhotoPhotoType = {
+  front: 'front',
+  side: 'side',
+  back: 'back',
+  custom: 'custom',
+} as const;
+
+export interface ProgressPhoto {
+  id: number;
+  userId: number;
+  imageUrl: string;
+  photoType: ProgressPhotoPhotoType;
+  /** @nullable */
+  notes?: string | null;
+  takenAt: string;
+  createdAt: string;
+}
+
+export type CreateProgressPhotoInputPhotoType = typeof CreateProgressPhotoInputPhotoType[keyof typeof CreateProgressPhotoInputPhotoType];
+
+
+export const CreateProgressPhotoInputPhotoType = {
+  front: 'front',
+  side: 'side',
+  back: 'back',
+  custom: 'custom',
+} as const;
+
+export interface CreateProgressPhotoInput {
+  /** @minLength 1 */
+  imageUrl: string;
+  photoType: CreateProgressPhotoInputPhotoType;
+  /** @maxLength 500 */
+  notes?: string;
+  takenAt?: string;
+  contentType?: string;
+}
+
 export interface DeleteResponse {
   success: boolean;
   id: number;
@@ -1368,6 +1435,39 @@ export type GetNutritionSummaryParams = {
 date?: string;
 };
 
+export type GetBodyMeasurementComparisonParams = {
+measurementType: GetBodyMeasurementComparisonMeasurementType;
+startDate?: string;
+endDate?: string;
+};
+
+export type GetBodyMeasurementComparisonMeasurementType = typeof GetBodyMeasurementComparisonMeasurementType[keyof typeof GetBodyMeasurementComparisonMeasurementType];
+
+
+export const GetBodyMeasurementComparisonMeasurementType = {
+  weight: 'weight',
+  bodyFat: 'bodyFat',
+  waist: 'waist',
+  chest: 'chest',
+  arms: 'arms',
+  hips: 'hips',
+  thighs: 'thighs',
+} as const;
+
+export type GetBodyMeasurementChartParams = {
+range?: GetBodyMeasurementChartRange;
+};
+
+export type GetBodyMeasurementChartRange = typeof GetBodyMeasurementChartRange[keyof typeof GetBodyMeasurementChartRange];
+
+
+export const GetBodyMeasurementChartRange = {
+  '30d': '30d',
+  '90d': '90d',
+  '1y': '1y',
+  all: 'all',
+} as const;
+
 export type GetBodyMeasurementHistoryParams = {
 field?: GetBodyMeasurementHistoryField;
 };
@@ -1424,4 +1524,23 @@ export const ListGoalsPriority = {
   medium: 'medium',
   low: 'low',
 } as const;
+
+export type GetProgressPhotosParams = {
+type?: GetProgressPhotosType;
+};
+
+export type GetProgressPhotosType = typeof GetProgressPhotosType[keyof typeof GetProgressPhotosType];
+
+
+export const GetProgressPhotosType = {
+  front: 'front',
+  side: 'side',
+  back: 'back',
+  custom: 'custom',
+} as const;
+
+export type DeleteProgressPhotosId200 = {
+  deleted: boolean;
+  id: number;
+};
 

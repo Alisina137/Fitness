@@ -51,7 +51,7 @@ export type GeneratedDay = {
   reasoning: string;
 };
 
-export type ScoreBreakdown = {
+export type AiScoreBreakdown = {
   goalMatch: number;
   equipmentMatch: number;
   levelMatch: number;
@@ -81,7 +81,7 @@ export const aiGeneratedWorkoutsTable = pgTable("ai_generated_workouts", {
   generatedPlan: jsonb("generated_plan").notNull().$type<GeneratedPlan>(),
   reasoning: text("reasoning"),
   personalizationScore: integer("personalization_score"),
-  scoreBreakdown: jsonb("score_breakdown").$type<ScoreBreakdown>(),
+  scoreBreakdown: jsonb("score_breakdown").$type<AiScoreBreakdown>(),
   status: text("status").default("draft").notNull(), // draft | saved | rejected
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });

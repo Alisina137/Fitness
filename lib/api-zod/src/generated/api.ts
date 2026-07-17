@@ -1407,6 +1407,66 @@ export const GetNutritionSummaryResponse = zod.object({
 
 
 /**
+ * @summary Compare a measurement between two dates
+ */
+export const GetBodyMeasurementComparisonQueryParams = zod.object({
+  "measurementType": zod.enum(['weight', 'bodyFat', 'waist', 'chest', 'arms', 'hips', 'thighs']),
+  "startDate": zod.date().optional(),
+  "endDate": zod.date().optional()
+})
+
+export const GetBodyMeasurementComparisonResponse = zod.object({
+  "measurementType": zod.string(),
+  "startValue": zod.number(),
+  "endValue": zod.number(),
+  "difference": zod.number(),
+  "percentageChange": zod.number(),
+  "startDate": zod.coerce.date(),
+  "endDate": zod.coerce.date(),
+  "dataPoints": zod.number()
+})
+
+
+/**
+ * @summary Get chart-ready measurement data grouped by metric
+ */
+export const GetBodyMeasurementChartQueryParams = zod.object({
+  "range": zod.enum(['30d', '90d', '1y', 'all']).optional()
+})
+
+export const GetBodyMeasurementChartResponse = zod.object({
+  "weight": zod.array(zod.object({
+  "date": zod.coerce.date(),
+  "value": zod.number()
+})).optional(),
+  "bodyFat": zod.array(zod.object({
+  "date": zod.coerce.date(),
+  "value": zod.number()
+})).optional(),
+  "waist": zod.array(zod.object({
+  "date": zod.coerce.date(),
+  "value": zod.number()
+})).optional(),
+  "chest": zod.array(zod.object({
+  "date": zod.coerce.date(),
+  "value": zod.number()
+})).optional(),
+  "arms": zod.array(zod.object({
+  "date": zod.coerce.date(),
+  "value": zod.number()
+})).optional(),
+  "hips": zod.array(zod.object({
+  "date": zod.coerce.date(),
+  "value": zod.number()
+})).optional(),
+  "thighs": zod.array(zod.object({
+  "date": zod.coerce.date(),
+  "value": zod.number()
+})).optional()
+})
+
+
+/**
  * @summary Get body measurement history sorted newest first
  */
 export const GetBodyMeasurementHistoryQueryParams = zod.object({
@@ -1880,5 +1940,64 @@ export const GenerateMilestonesResponseItem = zod.object({
   "createdAt": zod.coerce.date()
 })
 export const GenerateMilestonesResponse = zod.array(GenerateMilestonesResponseItem)
+
+
+/**
+ * @summary List progress photos
+ */
+export const GetProgressPhotosQueryParams = zod.object({
+  "type": zod.enum(['front', 'side', 'back', 'custom']).optional()
+})
+
+export const GetProgressPhotosResponseItem = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "imageUrl": zod.string(),
+  "photoType": zod.enum(['front', 'side', 'back', 'custom']),
+  "notes": zod.string().nullish(),
+  "takenAt": zod.coerce.date(),
+  "createdAt": zod.coerce.date()
+})
+export const GetProgressPhotosResponse = zod.array(GetProgressPhotosResponseItem)
+
+
+/**
+ * @summary Upload a progress photo
+ */
+
+export const postProgressPhotosBodyNotesMax = 500;
+
+
+
+export const PostProgressPhotosBody = zod.object({
+  "imageUrl": zod.string().min(1),
+  "photoType": zod.enum(['front', 'side', 'back', 'custom']),
+  "notes": zod.string().max(postProgressPhotosBodyNotesMax).optional(),
+  "takenAt": zod.coerce.date().optional(),
+  "contentType": zod.string().optional()
+})
+
+export const PostProgressPhotosResponse = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "imageUrl": zod.string(),
+  "photoType": zod.enum(['front', 'side', 'back', 'custom']),
+  "notes": zod.string().nullish(),
+  "takenAt": zod.coerce.date(),
+  "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Delete a progress photo
+ */
+export const DeleteProgressPhotosIdParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const DeleteProgressPhotosIdResponse = zod.object({
+  "deleted": zod.boolean(),
+  "id": zod.number()
+})
 
 

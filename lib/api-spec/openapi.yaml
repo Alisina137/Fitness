@@ -32,6 +32,8 @@ tags:
     description: Goal management operations
   - name: milestones
     description: Goal milestone operations
+  - name: progress-photos
+    description: Progress photo management
 paths:
   /healthz:
     get:
@@ -1443,6 +1445,77 @@ paths:
         "404":
           description: Goal not found
 
+  /progress-photos:
+    get:
+      tags: [progress-photos]
+      summary: List progress photos
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: type
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [front, side, back, custom]
+      responses:
+        "200":
+          description: List of progress photos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProgressPhoto"
+    post:
+      tags: [progress-photos]
+      summary: Upload a progress photo
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProgressPhotoInput"
+      responses:
+        "201":
+          description: Photo created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProgressPhoto"
+        "400":
+          description: Validation error
+
+  /progress-photos/{id}:
+    delete:
+      tags: [progress-photos]
+      summary: Delete a progress photo
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Photo deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [deleted, id]
+                properties:
+                  deleted:
+                    type: boolean
+                  id:
+                    type: integer
+        "404":
+          description: Photo not found
+
 components:
   schemas:
     HealthStatus:
@@ -2819,6 +2892,48 @@ components:
               type: ["number", "null"]
         milestone:
           $ref: "#/components/schemas/GoalMilestone"
+
+    # ─── Progress Photos ───────────────────────────────────────────────────────
+    ProgressPhoto:
+      type: object
+      required: [id, userId, imageUrl, photoType, takenAt, createdAt]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        imageUrl:
+          type: string
+        photoType:
+          type: string
+          enum: [front, side, back, custom]
+        notes:
+          type: ["string", "null"]
+        takenAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    CreateProgressPhotoInput:
+      type: object
+      required: [imageUrl, photoType]
+      properties:
+        imageUrl:
+          type: string
+          minLength: 1
+        photoType:
+          type: string
+          enum: [front, side, back, custom]
+        notes:
+          type: string
+          maxLength: 500
+        takenAt:
+          type: string
+          format: date-time
+        contentType:
+          type: string
 
     DeleteResponse:
       type: object

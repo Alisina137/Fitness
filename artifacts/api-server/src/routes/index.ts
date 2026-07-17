@@ -14,6 +14,7 @@ import subscriptionsRouter from "./subscriptions";
 import analyticsRouter from "./analytics";
 import recordsRouter from "./records";
 import goalsRouter from "./goals";
+import progressPhotosRouter from "./progress-photos";
 
 const router: IRouter = Router();
 
@@ -32,5 +33,6 @@ router.use(subscriptionsRouter);
 router.use(analyticsRouter);
 router.use(recordsRouter);
 router.use(goalsRouter);
+router.use(progressPhotosRouter);
 
 export default router;
