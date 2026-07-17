@@ -1407,6 +1407,43 @@ export const GetNutritionSummaryResponse = zod.object({
 
 
 /**
+ * @summary Get body measurement history sorted newest first
+ */
+export const GetBodyMeasurementHistoryQueryParams = zod.object({
+  "field": zod.enum(['weight', 'bodyFat', 'waist', 'chest', 'arms', 'hips', 'thighs']).optional()
+})
+
+export const GetBodyMeasurementHistoryResponseItem = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "type": zod.enum(['weight', 'measurement', 'achievement']),
+  "weightKg": zod.number().nullish(),
+  "bodyFatPercent": zod.number().nullish(),
+  "chestCm": zod.number().nullish(),
+  "waistCm": zod.number().nullish(),
+  "hipsCm": zod.number().nullish(),
+  "armCm": zod.number().nullish(),
+  "thighCm": zod.number().nullish(),
+  "notes": zod.string().nullish(),
+  "loggedAt": zod.coerce.date()
+})
+export const GetBodyMeasurementHistoryResponse = zod.array(GetBodyMeasurementHistoryResponseItem)
+
+
+/**
+ * @summary Delete a body measurement entry
+ */
+export const DeleteBodyMeasurementParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const DeleteBodyMeasurementResponse = zod.object({
+  "success": zod.boolean(),
+  "id": zod.number()
+})
+
+
+/**
  * @summary List progress entries
  */
 export const listProgressEntriesQueryLimitDefault = 30;

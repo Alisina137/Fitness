@@ -29,6 +29,8 @@ export * from './exercise';
 export * from './exerciseDifficulty';
 export * from './exerciseProgressions';
 export * from './exerciseTrainingType';
+export * from './getBodyMeasurementHistoryField';
+export * from './getBodyMeasurementHistoryParams';
 export * from './getNutritionSummaryParams';
 export * from './getRecoveryHistoryParams';
 export * from './getWorkoutAnalyticsParams';

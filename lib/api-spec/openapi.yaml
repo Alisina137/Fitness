@@ -956,6 +956,50 @@ paths:
               schema:
                 $ref: "#/components/schemas/NutritionSummary"
 
+  # ─── Body Measurements ───────────────────────────────────────────────────────
+  /body-measurements/history:
+    get:
+      operationId: getBodyMeasurementHistory
+      tags: [progress]
+      summary: Get body measurement history sorted newest first
+      parameters:
+        - name: field
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [weight, bodyFat, waist, chest, arms, hips, thighs]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProgressEntry"
+
+  /body-measurements/{id}:
+    delete:
+      operationId: deleteBodyMeasurement
+      tags: [progress]
+      summary: Delete a body measurement entry
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeleteResponse"
+        "404":
+          description: Not found
+
   # ─── Progress ────────────────────────────────────────────────────────────────
   /progress:
     get:

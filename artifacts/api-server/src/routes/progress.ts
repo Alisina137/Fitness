@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
 import { progressEntriesTable, achievementsTable, workoutCompletionsTable } from "@workspace/db";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, isNotNull } from "drizzle-orm";
 import { requireAuth, getUser } from "../lib/auth";
 import { updateAllUserGoals } from "../lib/goal-progress-service.js";
 
@@ -85,6 +85,63 @@ router.post("/progress", requireAuth, async (req, res) => {
   updateAllUserGoals(user.id).catch(() => {});
 
   res.status(201).json(serializeEntry(entry));
+});
+
+// ─── GET /api/body-measurements/history ──────────────────────────────────────
+
+const FIELD_FILTER_MAP = {
+  weight:    (t: typeof progressEntriesTable) => isNotNull(t.weightKg),
+  bodyFat:   (t: typeof progressEntriesTable) => isNotNull(t.bodyFatPercent),
+  waist:     (t: typeof progressEntriesTable) => isNotNull(t.waistCm),
+  chest:     (t: typeof progressEntriesTable) => isNotNull(t.chestCm),
+  arms:      (t: typeof progressEntriesTable) => isNotNull(t.armCm),
+  hips:      (t: typeof progressEntriesTable) => isNotNull(t.hipsCm),
+  thighs:    (t: typeof progressEntriesTable) => isNotNull(t.thighCm),
+} as const;
+
+type MeasurementField = keyof typeof FIELD_FILTER_MAP;
+
+router.get("/body-measurements/history", requireAuth, async (req, res) => {
+  const user = getUser(req);
+  const field = req.query.field as string | undefined;
+
+  const conditions = [eq(progressEntriesTable.userId, user.id)];
+
+  if (field && field in FIELD_FILTER_MAP) {
+    conditions.push(FIELD_FILTER_MAP[field as MeasurementField](progressEntriesTable));
+  }
+
+  const entries = await db
+    .select()
+    .from(progressEntriesTable)
+    .where(and(...conditions))
+    .orderBy(desc(progressEntriesTable.loggedAt));
+
+  res.json(entries.map(serializeEntry));
+});
+
+// ─── DELETE /api/body-measurements/:id ───────────────────────────────────────
+
+router.delete("/body-measurements/:id", requireAuth, async (req, res) => {
+  const user = getUser(req);
+  const id = Number(req.params.id);
+
+  if (!id || isNaN(id)) {
+    return res.status(400).json({ error: "Invalid measurement id" });
+  }
+
+  const [existing] = await db
+    .select({ id: progressEntriesTable.id })
+    .from(progressEntriesTable)
+    .where(and(eq(progressEntriesTable.id, id), eq(progressEntriesTable.userId, user.id)));
+
+  if (!existing) {
+    return res.status(404).json({ error: "Measurement not found" });
+  }
+
+  await db.delete(progressEntriesTable).where(eq(progressEntriesTable.id, id));
+
+  res.json({ deleted: true, id });
 });
 
 function serializeEntry(e: typeof progressEntriesTable.$inferSelect) {

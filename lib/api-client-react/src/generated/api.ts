@@ -33,6 +33,7 @@ import type {
   DashboardSummary,
   DeleteResponse,
   Exercise,
+  GetBodyMeasurementHistoryParams,
   GetNutritionSummaryParams,
   GetRecoveryHistoryParams,
   GetWorkoutAnalyticsParams,
@@ -3502,6 +3503,161 @@ export function useGetNutritionSummary<TData = Awaited<ReturnType<typeof getNutr
 
 
 
+
+export const getGetBodyMeasurementHistoryUrl = (params?: GetBodyMeasurementHistoryParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/body-measurements/history?${stringifiedParams}` : `/api/body-measurements/history`
+}
+
+/**
+ * @summary Get body measurement history sorted newest first
+ */
+export const getBodyMeasurementHistory = async (params?: GetBodyMeasurementHistoryParams, options?: RequestInit): Promise<ProgressEntry[]> => {
+
+  return customFetch<ProgressEntry[]>(getGetBodyMeasurementHistoryUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetBodyMeasurementHistoryQueryKey = (params?: GetBodyMeasurementHistoryParams,) => {
+    return [
+    `/api/body-measurements/history`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetBodyMeasurementHistoryQueryOptions = <TData = Awaited<ReturnType<typeof getBodyMeasurementHistory>>, TError = ErrorType<unknown>>(params?: GetBodyMeasurementHistoryParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getBodyMeasurementHistory>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetBodyMeasurementHistoryQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getBodyMeasurementHistory>>> = ({ signal }) => getBodyMeasurementHistory(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getBodyMeasurementHistory>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetBodyMeasurementHistoryQueryResult = NonNullable<Awaited<ReturnType<typeof getBodyMeasurementHistory>>>
+export type GetBodyMeasurementHistoryQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get body measurement history sorted newest first
+ */
+
+export function useGetBodyMeasurementHistory<TData = Awaited<ReturnType<typeof getBodyMeasurementHistory>>, TError = ErrorType<unknown>>(
+ params?: GetBodyMeasurementHistoryParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getBodyMeasurementHistory>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetBodyMeasurementHistoryQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getDeleteBodyMeasurementUrl = (id: number,) => {
+
+
+
+
+  return `/api/body-measurements/${id}`
+}
+
+/**
+ * @summary Delete a body measurement entry
+ */
+export const deleteBodyMeasurement = async (id: number, options?: RequestInit): Promise<DeleteResponse> => {
+
+  return customFetch<DeleteResponse>(getDeleteBodyMeasurementUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteBodyMeasurementMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteBodyMeasurement>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteBodyMeasurement>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['deleteBodyMeasurement'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteBodyMeasurement>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteBodyMeasurement(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteBodyMeasurementMutationResult = NonNullable<Awaited<ReturnType<typeof deleteBodyMeasurement>>>
+
+    export type DeleteBodyMeasurementMutationError = ErrorType<void>
+
+    /**
+ * @summary Delete a body measurement entry
+ */
+export const useDeleteBodyMeasurement = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteBodyMeasurement>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteBodyMeasurement>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getDeleteBodyMeasurementMutationOptions(options));
+    }
 
 export const getListProgressEntriesUrl = (params?: ListProgressEntriesParams,) => {
   const normalizedParams = new URLSearchParams();

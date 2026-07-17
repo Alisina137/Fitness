@@ -1368,6 +1368,23 @@ export type GetNutritionSummaryParams = {
 date?: string;
 };
 
+export type GetBodyMeasurementHistoryParams = {
+field?: GetBodyMeasurementHistoryField;
+};
+
+export type GetBodyMeasurementHistoryField = typeof GetBodyMeasurementHistoryField[keyof typeof GetBodyMeasurementHistoryField];
+
+
+export const GetBodyMeasurementHistoryField = {
+  weight: 'weight',
+  bodyFat: 'bodyFat',
+  waist: 'waist',
+  chest: 'chest',
+  arms: 'arms',
+  hips: 'hips',
+  thighs: 'thighs',
+} as const;
+
 export type ListProgressEntriesParams = {
 type?: ListProgressEntriesType;
 limit?: number;

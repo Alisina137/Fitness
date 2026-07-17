@@ -3,6 +3,7 @@ import { useGetProgressStats, useGetAchievements, useListProgressEntries } from 
 import { Trophy, TrendingUp, Calendar, Zap, Target, Star, Award, ChevronRight } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
+import { MeasurementHistory } from "@/components/measurement-history";
 
 export default function ProgressPage() {
   const { data: stats, isLoading: loadingStats } = useGetProgressStats();
@@ -85,6 +86,11 @@ export default function ProgressPage() {
               )}
             </div>
           </div>
+        </div>
+
+        {/* Measurement History */}
+        <div className="md:col-span-8">
+          <MeasurementHistory />
         </div>
 
         {/* Badges / Achievements */}
