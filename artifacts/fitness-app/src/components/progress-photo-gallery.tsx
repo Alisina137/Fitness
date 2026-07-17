@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { useGetProgressPhotosTimeline } from "@workspace/api-client-react";
 import { ImageOff, Trash2, X, ChevronDown, ZoomIn } from "lucide-react";
-import { format } from "date-fns";
+import { format, startOfWeek } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
@@ -30,6 +30,35 @@ const SORT_OPTIONS: { value: SortValue; label: string }[] = [
   { value: "newest", label: "Newest first" },
   { value: "oldest", label: "Oldest first" },
 ];
+
+type GroupValue = "none" | "month" | "week";
+
+const GROUP_OPTIONS: { value: GroupValue; label: string }[] = [
+  { value: "none", label: "No grouping" },
+  { value: "month", label: "By month" },
+  { value: "week", label: "By week" },
+];
+
+function groupKey(photo: GalleryPhoto, by: GroupValue): string {
+  const d = new Date(photo.takenAt);
+  if (by === "month") return format(d, "MMMM yyyy");
+  if (by === "week") return format(startOfWeek(d, { weekStartsOn: 1 }), "'Week of' MMM d, yyyy");
+  return "";
+}
+
+function groupPhotos(
+  photos: GalleryPhoto[],
+  by: GroupValue
+): { label: string; photos: GalleryPhoto[] }[] {
+  if (by === "none") return [{ label: "", photos }];
+  const map = new Map<string, GalleryPhoto[]>();
+  for (const p of photos) {
+    const k = groupKey(p, by);
+    if (!map.has(k)) map.set(k, []);
+    map.get(k)!.push(p);
+  }
+  return Array.from(map.entries()).map(([label, photos]) => ({ label, photos }));
+}
 
 type GalleryPhoto = {
   id: number;
@@ -177,17 +206,19 @@ function PhotoCard({
   );
 }
 
-// ─── SortDropdown ─────────────────────────────────────────────────────────────
+// ─── Shared dropdown ─────────────────────────────────────────────────────────
 
-function SortDropdown({
+function SelectDropdown({
   value,
+  options,
   onChange,
 }: {
-  value: SortValue;
-  onChange: (v: SortValue) => void;
+  value: string;
+  options: { value: string; label: string }[];
+  onChange: (v: string) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const label = SORT_OPTIONS.find((o) => o.value === value)?.label ?? "Sort";
+  const label = options.find((o) => o.value === value)?.label ?? "Select";
 
   return (
     <div className="relative">
@@ -201,8 +232,8 @@ function SortDropdown({
       {open && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-full mt-1 z-20 w-40 bg-card border border-border rounded-xl shadow-lg py-1 overflow-hidden">
-            {SORT_OPTIONS.map((opt) => (
+          <div className="absolute right-0 top-full mt-1 z-20 w-44 bg-card border border-border rounded-xl shadow-lg py-1 overflow-hidden">
+            {options.map((opt) => (
               <button
                 key={opt.value}
                 onClick={() => { onChange(opt.value); setOpen(false); }}
@@ -223,6 +254,9 @@ function SortDropdown({
   );
 }
 
+// ─── SortDropdown ─────────────────────────────────────────────────────────────
+
+
 // ─── ProgressPhotoGallery ─────────────────────────────────────────────────────
 
 export function ProgressPhotoGallery({
@@ -234,6 +268,7 @@ export function ProgressPhotoGallery({
 }) {
   const [typeFilter, setTypeFilter] = useState<FilterValue>("all");
   const [sort, setSort] = useState<SortValue>("newest");
+  const [group, setGroup] = useState<GroupValue>("none");
   const [preview, setPreview] = useState<GalleryPhoto | null>(null);
 
   const { data: allPhotos, isLoading } = useGetProgressPhotosTimeline();
@@ -328,8 +363,19 @@ export function ProgressPhotoGallery({
           ))}
         </div>
 
-        {/* Sort */}
-        <SortDropdown value={sort} onChange={setSort} />
+        {/* Sort + Group */}
+        <div className="flex items-center gap-2">
+          <SelectDropdown
+            value={sort}
+            options={SORT_OPTIONS}
+            onChange={(v) => setSort(v as SortValue)}
+          />
+          <SelectDropdown
+            value={group}
+            options={GROUP_OPTIONS}
+            onChange={(v) => setGroup(v as GroupValue)}
+          />
+        </div>
       </div>
 
       {/* Filtered-empty state */}
@@ -343,7 +389,7 @@ export function ProgressPhotoGallery({
             No {PHOTO_TYPE_LABELS[typeFilter as PhotoType]} photos found. Try a different filter.
           </p>
         </div>
-      ) : (
+      ) : group === "none" ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
           {sorted.map((photo) => (
             <PhotoCard
@@ -352,6 +398,32 @@ export function ProgressPhotoGallery({
               onPreview={setPreview}
               onDelete={onDelete}
             />
+          ))}
+        </div>
+      ) : (
+        <div className="space-y-10">
+          {groupPhotos(sorted, group).map(({ label, photos: groupedPhotos }) => (
+            <div key={label} className="space-y-4">
+              <div className="flex items-center gap-3">
+                <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-widest">
+                  {label}
+                </h2>
+                <span className="text-xs text-muted-foreground/60 font-medium">
+                  {groupedPhotos.length} photo{groupedPhotos.length !== 1 ? "s" : ""}
+                </span>
+                <div className="flex-1 h-px bg-border" />
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                {groupedPhotos.map((photo) => (
+                  <PhotoCard
+                    key={photo.id}
+                    photo={photo}
+                    onPreview={setPreview}
+                    onDelete={onDelete}
+                  />
+                ))}
+              </div>
+            </div>
           ))}
         </div>
       )}
