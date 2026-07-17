@@ -208,7 +208,7 @@ function CheckInForm({ onComplete }: { onComplete: (data: CheckInData) => void }
 
   const current = steps[step];
   const StepIcon = current.icon;
-  const progress = ((step) / steps.length) * 100;
+  const progress = ((step + 1) / steps.length) * 100;
 
   function selectSleep(v: string) {
     const next = { ...data, sleepQuality: v };
