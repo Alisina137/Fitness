@@ -1,13 +1,15 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import {
   useGetProgressPhotos,
   usePostProgressPhotos,
   useDeleteProgressPhotosId,
+  postProgressPhotos,
 } from "@workspace/api-client-react";
-import { Camera, Upload, Trash2, X, AlertTriangle, ImageOff } from "lucide-react";
+import { Camera, Upload, Trash2, X, AlertTriangle, ImageOff, CheckCircle2, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { useQueryClient } from "@tanstack/react-query";
 
 type PhotoType = "front" | "side" | "back" | "custom";
 
@@ -27,183 +29,315 @@ const PHOTO_TYPE_OPTIONS: { value: PhotoType; label: string }[] = [
 
 const ALLOWED_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif", "image/heic", "image/heif"];
 
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+interface FileEntry {
+  id: string;
+  file: File;
+  previewSrc: string;
+  photoType: PhotoType | "";
+  typeError: boolean;
+  status: "pending" | "uploading" | "done" | "error";
+  errorMsg?: string;
+}
+
 // ─── Upload Modal ─────────────────────────────────────────────────────────────
 
 function UploadModal({ onClose }: { onClose: () => void }) {
-  const [photoType, setPhotoType] = useState<PhotoType | "">("");
+  const [entries, setEntries] = useState<FileEntry[]>([]);
   const [notes, setNotes] = useState("");
   const [takenAt, setTakenAt] = useState(format(new Date(), "yyyy-MM-dd"));
-  const [imageUrl, setImageUrl] = useState("");
-  const [previewSrc, setPreviewSrc] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [globalError, setGlobalError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [doneCount, setDoneCount] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const createPhoto = usePostProgressPhotos();
+  const queryClient = useQueryClient();
 
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setError(null);
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!ALLOWED_TYPES.includes(file.type.toLowerCase())) {
-      setError("Unsupported file type. Allowed: JPEG, PNG, WebP, GIF, HEIC.");
-      return;
-    }
-    // For now store as object URL (base64 would be the prod path)
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const dataUrl = ev.target?.result as string;
-      setPreviewSrc(dataUrl);
-      setImageUrl(dataUrl);
-    };
-    reader.readAsDataURL(file);
-  }
+  const readFileAsDataUrl = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target?.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError(null);
+  const handleFilesSelected = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    setGlobalError(null);
+    const files = Array.from(e.target.files ?? []);
+    if (!files.length) return;
 
-    if (!imageUrl) {
-      setError("Please select an image.");
-      return;
-    }
-    if (!photoType) {
-      setError("Please select a photo type.");
-      return;
+    const invalidFiles = files.filter((f) => !ALLOWED_TYPES.includes(f.type.toLowerCase()));
+    if (invalidFiles.length) {
+      setGlobalError(
+        `Unsupported file type${invalidFiles.length > 1 ? "s" : ""}: ${invalidFiles.map((f) => f.name).join(", ")}. Allowed: JPEG, PNG, WebP, GIF, HEIC.`
+      );
+      // Only add the valid ones
     }
 
-    createPhoto.mutate(
-      {
-        data: {
-          imageUrl,
-          photoType,
+    const validFiles = files.filter((f) => ALLOWED_TYPES.includes(f.type.toLowerCase()));
+    if (!validFiles.length) return;
+
+    const newEntries = await Promise.all(
+      validFiles.map(async (file) => ({
+        id: `${Date.now()}-${Math.random()}`,
+        file,
+        previewSrc: await readFileAsDataUrl(file),
+        photoType: "" as PhotoType | "",
+        typeError: false,
+        status: "pending" as const,
+      }))
+    );
+
+    setEntries((prev) => [...prev, ...newEntries]);
+    // Reset input so same files can be re-added
+    e.target.value = "";
+  }, []);
+
+  const removeEntry = (id: string) =>
+    setEntries((prev) => prev.filter((e) => e.id !== id));
+
+  const setEntryType = (id: string, type: PhotoType) =>
+    setEntries((prev) =>
+      prev.map((e) => (e.id === id ? { ...e, photoType: type, typeError: false } : e))
+    );
+
+  async function handleSubmit(evt: React.FormEvent) {
+    evt.preventDefault();
+    setGlobalError(null);
+
+    if (entries.length === 0) {
+      setGlobalError("Please select at least one image.");
+      return;
+    }
+
+    // Validate all entries have a type
+    const missingType = entries.some((e) => !e.photoType);
+    if (missingType) {
+      setEntries((prev) => prev.map((e) => ({ ...e, typeError: !e.photoType })));
+      setGlobalError("Please select a photo type for each image.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    let successCount = 0;
+
+    for (const entry of entries) {
+      setEntries((prev) =>
+        prev.map((e) => (e.id === entry.id ? { ...e, status: "uploading" } : e))
+      );
+      try {
+        await postProgressPhotos({
+          imageUrl: entry.previewSrc,
+          photoType: entry.photoType as PhotoType,
           notes: notes || undefined,
           takenAt: takenAt ? new Date(takenAt).toISOString() : undefined,
-          contentType: fileInputRef.current?.files?.[0]?.type,
-        },
-      },
-      {
-        onSuccess: () => onClose(),
-        onError: (err: unknown) => {
-          const msg = err instanceof Error ? err.message : "Upload failed. Please try again.";
-          setError(msg);
-        },
+          contentType: entry.file.type,
+        });
+        setEntries((prev) =>
+          prev.map((e) => (e.id === entry.id ? { ...e, status: "done" } : e))
+        );
+        successCount++;
+        setDoneCount(successCount);
+      } catch {
+        setEntries((prev) =>
+          prev.map((e) =>
+            e.id === entry.id ? { ...e, status: "error", errorMsg: "Upload failed" } : e
+          )
+        );
       }
-    );
+    }
+
+    setIsSubmitting(false);
+
+    if (successCount > 0) {
+      // Invalidate the photos query so the gallery refreshes
+      queryClient.invalidateQueries({ queryKey: ["/api/progress-photos"] });
+      // Brief pause so user sees completion state, then close
+      setTimeout(onClose, 600);
+    }
   }
+
+  const pendingCount = entries.filter((e) => e.status === "pending").length;
+  const totalCount = entries.length;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div className="bg-card border border-border rounded-2xl w-full max-w-md shadow-2xl">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+      <div className="bg-card border border-border rounded-2xl w-full max-w-lg shadow-2xl flex flex-col max-h-[90dvh]">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
           <h2 className="font-bold text-lg flex items-center gap-2">
-            <Camera className="h-5 w-5 text-primary" /> Upload Progress Photo
+            <Camera className="h-5 w-5 text-primary" />
+            Upload Progress Photos
           </h2>
           <button
             onClick={onClose}
-            className="h-8 w-8 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+            disabled={isSubmitting}
+            className="h-8 w-8 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors disabled:opacity-40"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-5">
-          {/* Image Picker */}
-          <div>
-            <label className="block text-sm font-medium mb-2">Photo <span className="text-destructive">*</span></label>
-            <div
-              className={cn(
-                "relative border-2 border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer transition-colors overflow-hidden",
-                previewSrc ? "border-primary/40 h-48" : "border-border hover:border-primary/50 h-36"
-              )}
-              onClick={() => fileInputRef.current?.click()}
-            >
-              {previewSrc ? (
-                <img src={previewSrc} alt="Preview" className="w-full h-full object-cover" />
-              ) : (
-                <div className="flex flex-col items-center gap-2 text-muted-foreground p-4">
-                  <Upload className="h-8 w-8" />
-                  <span className="text-sm font-medium">Click to select image</span>
-                  <span className="text-xs">JPEG, PNG, WebP, GIF, HEIC</span>
-                </div>
-              )}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/jpeg,image/jpg,image/png,image/webp,image/gif,image/heic,image/heif"
-                className="hidden"
-                onChange={handleFileChange}
-              />
+        <form onSubmit={handleSubmit} className="flex flex-col min-h-0 overflow-hidden">
+          <div className="overflow-y-auto flex-1 p-6 space-y-5">
+            {/* Drop zone / file picker */}
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Photos <span className="text-destructive">*</span>
+              </label>
+              <div
+                className="border-2 border-dashed border-border hover:border-primary/50 rounded-xl flex flex-col items-center justify-center cursor-pointer transition-colors h-28 gap-2 text-muted-foreground"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <Upload className="h-7 w-7" />
+                <span className="text-sm font-medium">Click to select images</span>
+                <span className="text-xs">JPEG, PNG, WebP, GIF, HEIC — multiple allowed</span>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/png,image/webp,image/gif,image/heic,image/heif"
+                  multiple
+                  className="hidden"
+                  onChange={handleFilesSelected}
+                />
+              </div>
             </div>
-          </div>
 
-          {/* Photo Type */}
-          <div>
-            <label className="block text-sm font-medium mb-2">Photo Type <span className="text-destructive">*</span></label>
-            <div className="grid grid-cols-4 gap-2">
-              {PHOTO_TYPE_OPTIONS.map((opt) => (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => setPhotoType(opt.value)}
-                  className={cn(
-                    "py-2 rounded-lg text-sm font-medium border transition-colors",
-                    photoType === opt.value
-                      ? "bg-primary text-black border-primary"
-                      : "bg-secondary border-border text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  {opt.label}
-                </button>
-              ))}
+            {/* Selected files list */}
+            {entries.length > 0 && (
+              <div className="space-y-3">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                  {totalCount} photo{totalCount !== 1 ? "s" : ""} selected
+                </p>
+                {entries.map((entry) => (
+                  <div
+                    key={entry.id}
+                    className={cn(
+                      "flex gap-3 p-3 rounded-xl border transition-colors",
+                      entry.status === "done"
+                        ? "border-primary/30 bg-primary/5"
+                        : entry.status === "error"
+                        ? "border-destructive/30 bg-destructive/5"
+                        : "border-border bg-secondary/30"
+                    )}
+                  >
+                    {/* Thumbnail */}
+                    <div className="h-16 w-12 rounded-lg overflow-hidden shrink-0 bg-secondary">
+                      <img
+                        src={entry.previewSrc}
+                        alt="preview"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+
+                    {/* Type selector + status */}
+                    <div className="flex-1 min-w-0 space-y-2">
+                      <p className="text-xs text-muted-foreground truncate">{entry.file.name}</p>
+                      <div className="flex gap-1 flex-wrap">
+                        {PHOTO_TYPE_OPTIONS.map((opt) => (
+                          <button
+                            key={opt.value}
+                            type="button"
+                            disabled={entry.status === "done" || isSubmitting}
+                            onClick={() => setEntryType(entry.id, opt.value)}
+                            className={cn(
+                              "px-2 py-0.5 rounded text-xs font-medium border transition-colors",
+                              entry.photoType === opt.value
+                                ? "bg-primary text-black border-primary"
+                                : entry.typeError
+                                ? "bg-destructive/10 border-destructive/40 text-muted-foreground"
+                                : "bg-background border-border text-muted-foreground hover:text-foreground"
+                            )}
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
+                      {entry.typeError && (
+                        <p className="text-xs text-destructive">Select a type</p>
+                      )}
+                      {entry.status === "error" && (
+                        <p className="text-xs text-destructive">{entry.errorMsg}</p>
+                      )}
+                    </div>
+
+                    {/* Status icon / remove */}
+                    <div className="shrink-0 flex items-center">
+                      {entry.status === "done" ? (
+                        <CheckCircle2 className="h-5 w-5 text-primary" />
+                      ) : entry.status === "uploading" ? (
+                        <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
+                      ) : (
+                        <button
+                          type="button"
+                          disabled={isSubmitting}
+                          onClick={() => removeEntry(entry.id)}
+                          className="h-7 w-7 flex items-center justify-center rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-40"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Shared fields */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Date Taken</label>
+                <input
+                  type="date"
+                  value={takenAt}
+                  onChange={(e) => setTakenAt(e.target.value)}
+                  disabled={isSubmitting}
+                  className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Notes <span className="text-muted-foreground text-xs">(optional)</span>
+                </label>
+                <input
+                  type="text"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  maxLength={500}
+                  disabled={isSubmitting}
+                  placeholder="e.g. Week 4 check-in"
+                  className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                />
+              </div>
             </div>
+
+            {/* Global error */}
+            {globalError && (
+              <div className="flex items-start gap-2 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-lg px-3 py-2">
+                <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+                {globalError}
+              </div>
+            )}
           </div>
 
-          {/* Date */}
-          <div>
-            <label className="block text-sm font-medium mb-2">Date Taken</label>
-            <input
-              type="date"
-              value={takenAt}
-              onChange={(e) => setTakenAt(e.target.value)}
-              className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-            />
-          </div>
-
-          {/* Notes */}
-          <div>
-            <label className="block text-sm font-medium mb-2">Notes <span className="text-muted-foreground text-xs">(optional)</span></label>
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              maxLength={500}
-              rows={2}
-              placeholder="Any notes about this photo..."
-              className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary resize-none"
-            />
-          </div>
-
-          {/* Error */}
-          {error && (
-            <div className="flex items-center gap-2 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-lg px-3 py-2">
-              <AlertTriangle className="h-4 w-4 shrink-0" />
-              {error}
-            </div>
-          )}
-
-          {/* Actions */}
-          <div className="flex gap-3 pt-1">
+          {/* Footer */}
+          <div className="px-6 pb-6 pt-4 border-t border-border shrink-0 flex gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2.5 rounded-lg border border-border text-sm font-medium text-muted-foreground hover:bg-secondary transition-colors"
+              disabled={isSubmitting}
+              className="flex-1 py-2.5 rounded-lg border border-border text-sm font-medium text-muted-foreground hover:bg-secondary transition-colors disabled:opacity-40"
             >
               Cancel
             </button>
             <button
               type="submit"
-              disabled={createPhoto.isPending}
+              disabled={isSubmitting || entries.length === 0}
               className="flex-1 py-2.5 rounded-lg bg-primary text-black text-sm font-bold hover:bg-primary/90 transition-colors disabled:opacity-50"
             >
-              {createPhoto.isPending ? "Uploading…" : "Upload Photo"}
+              {isSubmitting
+                ? `Uploading ${doneCount + 1} of ${totalCount}…`
+                : `Upload ${totalCount > 0 ? `${totalCount} ` : ""}Photo${totalCount !== 1 ? "s" : ""}`}
             </button>
           </div>
         </form>
