@@ -1,0 +1,159 @@
+You are continuing development of an AI fitness application.
+
+CURRENT PROJECT STATE:
+
+Already implemented:
+
+- User profile system
+- Workout engine
+- AI workout generation
+- Recovery system
+- Workout analytics
+- Personal records
+
+Do not rebuild these systems.
+
+TASK:
+
+Build the Goal Management Foundation.
+
+This system will become the central place where users create and manage fitness goals.
+
+Future systems (AI Coach, Nutrition, Analytics) will use these goals.
+
+IMPLEMENT:
+
+1. Create Goal database model.
+
+Fields:
+
+- userId
+- title
+- category
+- targetValue
+- currentValue
+- unit
+- startDate
+- targetDate
+- priority
+- status
+- createdAt
+- updatedAt
+
+Allowed categories:
+
+- Weight Loss
+- Weight Gain
+- Muscle Gain
+- Strength
+- Endurance
+- Body Fat %
+- Workout Consistency
+- Custom
+
+Status:
+
+- Active
+- Completed
+- Paused
+- Cancelled
+
+
+2. Create Goal API.
+
+Create:
+
+POST /api/goals
+
+GET /api/goals
+
+GET /api/goals/:id
+
+PUT /api/goals/:id
+
+DELETE /api/goals/:id
+
+
+3. Goal validation.
+
+Rules:
+
+- User can have multiple goals.
+- Only one primary goal.
+- Target date must be after start date.
+- Target value must be valid.
+
+
+4. Create Goal Management UI.
+
+Features:
+
+- Goal list
+- Create Goal button
+- Edit Goal
+- Delete Goal
+- Mark Complete
+- Pause Goal
+
+
+5. Create Goal Details page.
+
+Display:
+
+- Goal name
+- Current progress
+- Target
+- Start date
+- Target date
+- Status
+- Priority
+
+
+6. Add search and filtering.
+
+Allow filtering by:
+
+- Active
+- Completed
+- Category
+- Priority
+
+
+7. Prepare future integration.
+
+Create a reusable service:
+
+getPrimaryGoal(userId)
+
+This service will later be used by:
+
+- AI Workout Generator
+- AI Coach
+- Nutrition Engine
+- Progress Analytics
+
+
+DO NOT:
+
+- Calculate goal progress yet.
+- Build milestones yet.
+- Modify AI workout generation.
+- Modify analytics.
+
+TECH REQUIREMENTS:
+
+- Reuse existing user profile.
+- Keep goal logic modular.
+- Follow existing architecture.
+- Add validation and error handling.
+
+COMPLETION REPORT:
+
+After finishing, provide:
+
+1. Files created
+2. Files modified
+3. Database changes
+4. API endpoints
+5. UI pages created
+6. Any issues found

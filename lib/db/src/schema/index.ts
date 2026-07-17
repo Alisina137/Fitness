@@ -6,3 +6,4 @@ export * from "./progress";
 export * from "./ai";
 export * from "./recovery";
 export * from "./subscriptions";
+export * from "./goals";

@@ -26,6 +26,7 @@ import AiCoachPage from './pages/ai-coach';
 import AiWorkoutGeneratorPage from './pages/ai-workout-generator';
 import RecoveryPage from './pages/recovery';
 import ProfilePage from './pages/profile';
+import GoalsPage from './pages/goals';
 import NotFound from '@/pages/not-found';
 
 const queryClient = new QueryClient({
@@ -55,6 +56,7 @@ function AuthenticatedRoutes() {
         <Route path="/recovery" component={RecoveryPage} />
         <Route path="/ai/generate" component={AiWorkoutGeneratorPage} />
         <Route path="/ai" component={AiCoachPage} />
+        <Route path="/goals" component={GoalsPage} />
         <Route path="/profile" component={ProfilePage} />
         <Route component={NotFound} />
       </Switch>
