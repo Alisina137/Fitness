@@ -957,6 +957,26 @@ paths:
                 $ref: "#/components/schemas/NutritionSummary"
 
   # ─── Body Measurements ───────────────────────────────────────────────────────
+  /body-measurements/chart:
+    get:
+      operationId: getBodyMeasurementChart
+      tags: [progress]
+      summary: Get chart-ready measurement data grouped by metric
+      parameters:
+        - name: range
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [30d, 90d, 1y, all]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BodyMeasurementChartData"
+
   /body-measurements/history:
     get:
       operationId: getBodyMeasurementHistory
@@ -2367,6 +2387,48 @@ components:
           type: integer
 
     # ─── Progress ──────────────────────────────────────────────────────────────
+    ChartPoint:
+      type: object
+      required: [date, value]
+      properties:
+        date:
+          type: string
+          format: date-time
+        value:
+          type: number
+
+    BodyMeasurementChartData:
+      type: object
+      properties:
+        weight:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChartPoint"
+        bodyFat:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChartPoint"
+        waist:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChartPoint"
+        chest:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChartPoint"
+        arms:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChartPoint"
+        hips:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChartPoint"
+        thighs:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChartPoint"
+
     ProgressEntry:
       type: object
       required: [id, userId, type, loggedAt]

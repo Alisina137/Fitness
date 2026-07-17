@@ -1,9 +1,10 @@
 import React from "react";
 import { useGetProgressStats, useGetAchievements, useListProgressEntries } from "@workspace/api-client-react";
-import { Trophy, TrendingUp, Calendar, Zap, Target, Star, Award, ChevronRight } from "lucide-react";
+import { Trophy, Calendar, Zap, Target, Star, Award } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import { MeasurementHistory } from "@/components/measurement-history";
+import { BodyMeasurementChart } from "@/components/body-measurement-chart";
 
 export default function ProgressPage() {
   const { data: stats, isLoading: loadingStats } = useGetProgressStats();
@@ -40,36 +41,14 @@ export default function ProgressPage() {
       </div>
 
       <div className="grid md:grid-cols-12 gap-8">
-        {/* Main Body Comp Chart Area (Simulated) */}
+        {/* Body Measurement Chart */}
         <div className="md:col-span-8 space-y-6">
-          <div className="bg-card border border-border p-6 rounded-3xl h-[400px] flex flex-col">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="font-bold text-lg flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-primary" /> Body Mass Trajectory
-              </h3>
-              <div className="text-xs font-mono bg-secondary px-3 py-1 rounded-full text-muted-foreground">LAST 30 DAYS</div>
-            </div>
-            
-            <div className="flex-1 flex items-center justify-center border border-border border-dashed rounded-xl bg-background/50 relative overflow-hidden">
-              {/* Fake chart visualization */}
-              <div className="absolute inset-0 flex items-end justify-between px-8 py-4 opacity-20 pointer-events-none">
-                {[40, 50, 45, 60, 55, 70, 65, 80].map((h, i) => (
-                  <div key={i} className="w-8 bg-primary rounded-t-sm" style={{ height: `${h}%` }} />
-                ))}
-              </div>
-              <div className="z-10 text-center space-y-2">
-                <div className="text-4xl font-bold font-mono text-primary">
-                  {stats?.weightChange ? (stats.weightChange > 0 ? `+${stats.weightChange}` : stats.weightChange) : "-1.2"} kg
-                </div>
-                <div className="text-sm text-muted-foreground font-medium">Net change this period</div>
-              </div>
-            </div>
-          </div>
+          <BodyMeasurementChart />
 
           {/* Recent Weigh-ins */}
           <div className="bg-card border border-border rounded-3xl overflow-hidden">
             <div className="px-6 py-4 border-b border-border bg-secondary/30">
-              <h3 className="font-bold">Recent Logs</h3>
+              <h3 className="font-bold">Recent Weight Logs</h3>
             </div>
             <div className="divide-y divide-border">
               {loadingHistory ? (

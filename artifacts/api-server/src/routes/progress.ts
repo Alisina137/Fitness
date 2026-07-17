@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
 import { progressEntriesTable, achievementsTable, workoutCompletionsTable } from "@workspace/db";
-import { eq, and, desc, isNotNull } from "drizzle-orm";
+import { eq, and, desc, gte, isNotNull, asc } from "drizzle-orm";
 import { requireAuth, getUser } from "../lib/auth";
 import { updateAllUserGoals } from "../lib/goal-progress-service.js";
 
@@ -85,6 +85,64 @@ router.post("/progress", requireAuth, async (req, res) => {
   updateAllUserGoals(user.id).catch(() => {});
 
   res.status(201).json(serializeEntry(entry));
+});
+
+// ─── GET /api/body-measurements/chart ────────────────────────────────────────
+
+type ChartPoint = { date: string; value: number };
+type ChartData = Record<string, ChartPoint[]>;
+
+const RANGE_TO_DAYS: Record<string, number | null> = {
+  "30d": 30,
+  "90d": 90,
+  "1y": 365,
+  "all": null,
+};
+
+const CHART_FIELD_EXTRACTORS: Array<{
+  key: string;
+  getter: (e: ReturnType<typeof serializeEntry>) => number | null | undefined;
+}> = [
+  { key: "weight",  getter: (e) => e.weightKg },
+  { key: "bodyFat", getter: (e) => e.bodyFatPercent },
+  { key: "waist",   getter: (e) => e.waistCm },
+  { key: "chest",   getter: (e) => e.chestCm },
+  { key: "arms",    getter: (e) => e.armCm },
+  { key: "hips",    getter: (e) => e.hipsCm },
+  { key: "thighs",  getter: (e) => e.thighCm },
+];
+
+router.get("/body-measurements/chart", requireAuth, async (req, res) => {
+  const user = getUser(req);
+  const range = (req.query.range as string) || "30d";
+  const days = RANGE_TO_DAYS[range] ?? 30;
+
+  const conditions = [eq(progressEntriesTable.userId, user.id)];
+  if (days !== null) {
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - days);
+    conditions.push(gte(progressEntriesTable.loggedAt, cutoff));
+  }
+
+  const entries = await db
+    .select()
+    .from(progressEntriesTable)
+    .where(and(...conditions))
+    .orderBy(asc(progressEntriesTable.loggedAt));
+
+  const serialized = entries.map(serializeEntry);
+
+  const chart: ChartData = {};
+  for (const { key, getter } of CHART_FIELD_EXTRACTORS) {
+    chart[key] = serialized
+      .map((e) => {
+        const val = getter(e);
+        return val != null ? { date: e.loggedAt as unknown as string, value: val } : null;
+      })
+      .filter((p): p is ChartPoint => p !== null);
+  }
+
+  res.json(chart);
 });
 
 // ─── GET /api/body-measurements/history ──────────────────────────────────────
