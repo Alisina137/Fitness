@@ -349,6 +349,71 @@ router.get("/body-measurements/trends", requireAuth, async (req, res) => {
   res.json(trends);
 });
 
+// ─── GET /api/body-measurements/timeline ─────────────────────────────────────
+
+router.get("/body-measurements/timeline", requireAuth, async (req, res) => {
+  const user = getUser(req);
+  const typeParam = req.query.type as string | undefined;
+
+  // Validate optional type filter
+  if (typeParam && typeParam !== "all" && !(typeParam in FIELD_FILTER_MAP)) {
+    return res.status(400).json({
+      error: "invalid_filter",
+      message: `type must be one of: all, ${Object.keys(FIELD_FILTER_MAP).join(", ")}`,
+    });
+  }
+
+  const conditions = [eq(progressEntriesTable.userId, user.id)];
+
+  // If filtering by a specific type, require that field to be non-null
+  if (typeParam && typeParam !== "all") {
+    const field = typeParam as MeasurementField;
+    conditions.push(FIELD_FILTER_MAP[field](progressEntriesTable));
+  }
+
+  const entries = await db
+    .select()
+    .from(progressEntriesTable)
+    .where(and(...conditions))
+    .orderBy(desc(progressEntriesTable.loggedAt));
+
+  if (entries.length === 0) {
+    return res.json([]);
+  }
+
+  // Explode each row into individual measurement items (one row may have multiple fields set)
+  const items: {
+    id: string;
+    entryId: number;
+    date: string;
+    measurementType: string;
+    label: string;
+    value: number;
+    unit: string;
+  }[] = [];
+
+  for (const entry of entries) {
+    const s = serializeEntry(entry);
+    for (const { key, label, unit } of METRIC_META) {
+      // If filtering by type, only include matching field
+      if (typeParam && typeParam !== "all" && typeParam !== key) continue;
+      const value = FIELD_VALUE_GETTERS[key]?.(s);
+      if (value == null) continue;
+      items.push({
+        id: `${entry.id}-${key}`,
+        entryId: entry.id,
+        date: (s.loggedAt as unknown as string),
+        measurementType: key,
+        label,
+        value,
+        unit,
+      });
+    }
+  }
+
+  res.json(items);
+});
+
 router.get("/body-measurements/history", requireAuth, async (req, res) => {
   const user = getUser(req);
   const field = req.query.field as string | undefined;

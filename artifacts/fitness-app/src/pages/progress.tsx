@@ -7,6 +7,7 @@ import { MeasurementHistory } from "@/components/measurement-history";
 import { BodyMeasurementChart } from "@/components/body-measurement-chart";
 import { BodyMeasurementComparison } from "@/components/body-measurement-comparison";
 import { BodyMeasurementTrends } from "@/components/body-measurement-trends";
+import { BodyMeasurementTimeline } from "@/components/body-measurement-timeline";
 
 export default function ProgressPage() {
   const { data: stats, isLoading: loadingStats } = useGetProgressStats();
@@ -47,6 +48,9 @@ export default function ProgressPage() {
 
       {/* Measurement Comparison */}
       <BodyMeasurementComparison />
+
+      {/* Transformation Timeline */}
+      <BodyMeasurementTimeline />
 
       <div className="grid md:grid-cols-12 gap-8">
         {/* Body Measurement Chart */}
