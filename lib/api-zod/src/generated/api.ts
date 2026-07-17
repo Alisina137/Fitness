@@ -1989,6 +1989,21 @@ export const PostProgressPhotosResponse = zod.object({
 
 
 /**
+ * @summary Get all progress photos sorted by date (newest first)
+ */
+export const GetProgressPhotosTimelineResponseItem = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "imageUrl": zod.string(),
+  "photoType": zod.enum(['front', 'side', 'back', 'custom']),
+  "notes": zod.string().nullish(),
+  "takenAt": zod.coerce.date(),
+  "createdAt": zod.coerce.date()
+})
+export const GetProgressPhotosTimelineResponse = zod.array(GetProgressPhotosTimelineResponseItem)
+
+
+/**
  * @summary Delete a progress photo
  */
 export const DeleteProgressPhotosIdParams = zod.object({

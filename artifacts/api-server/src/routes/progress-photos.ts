@@ -79,6 +79,21 @@ router.get("/progress-photos", requireAuth, async (req, res) => {
   res.json(photos.map(serializePhoto));
 });
 
+// ─── GET /api/progress-photos/timeline ───────────────────────────────────────
+// Must be registered before /:id to avoid Express matching "timeline" as an id.
+
+router.get("/progress-photos/timeline", requireAuth, async (req, res) => {
+  const user = getUser(req);
+
+  const photos = await db
+    .select()
+    .from(progressPhotosTable)
+    .where(eq(progressPhotosTable.userId, user.id))
+    .orderBy(desc(progressPhotosTable.takenAt));
+
+  res.json(photos.map(serializePhoto));
+});
+
 // ─── DELETE /api/progress-photos/:id ─────────────────────────────────────────
 
 router.delete("/progress-photos/:id", requireAuth, async (req, res) => {

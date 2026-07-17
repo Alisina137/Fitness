@@ -1488,6 +1488,22 @@ paths:
         "400":
           description: Validation error
 
+  /progress-photos/timeline:
+    get:
+      tags: [progress-photos]
+      summary: Get all progress photos sorted by date (newest first)
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Timeline of progress photos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProgressPhoto"
+
   /progress-photos/{id}:
     delete:
       tags: [progress-photos]

@@ -1,24 +1,16 @@
 import React, { useState, useRef, useCallback } from "react";
 import {
-  useGetProgressPhotos,
   usePostProgressPhotos,
   useDeleteProgressPhotosId,
   postProgressPhotos,
 } from "@workspace/api-client-react";
-import { Camera, Upload, Trash2, X, AlertTriangle, ImageOff, CheckCircle2, Loader2 } from "lucide-react";
+import { ProgressPhotoGallery } from "@/components/progress-photo-gallery";
+import { Camera, Upload, Trash2, X, AlertTriangle, CheckCircle2, Loader2 } from "lucide-react";
 import { format } from "date-fns";
-import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
 
 type PhotoType = "front" | "side" | "back" | "custom";
-
-const PHOTO_TYPE_LABELS: Record<PhotoType, string> = {
-  front: "Front",
-  side: "Side",
-  back: "Back",
-  custom: "Custom",
-};
 
 const PHOTO_TYPE_OPTIONS: { value: PhotoType; label: string }[] = [
   { value: "front", label: "Front" },
@@ -392,66 +384,11 @@ function DeleteDialog({ photoId, onCancel, onConfirm }: { photoId: number; onCan
   );
 }
 
-// ─── Photo Card ───────────────────────────────────────────────────────────────
-
-function PhotoCard({
-  photo,
-  onDelete,
-}: {
-  photo: { id: number; imageUrl: string; photoType: string; notes?: string | null; takenAt: string };
-  onDelete: (id: number) => void;
-}) {
-  return (
-    <div className="group relative bg-card border border-border rounded-2xl overflow-hidden">
-      <div className="aspect-[3/4] bg-secondary overflow-hidden">
-        <img
-          src={photo.imageUrl}
-          alt={`${photo.photoType} view`}
-          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-          onError={(e) => {
-            (e.target as HTMLImageElement).style.display = "none";
-            (e.target as HTMLImageElement).parentElement!.classList.add("flex", "items-center", "justify-center");
-          }}
-        />
-      </div>
-      <div className="p-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <span className="inline-block bg-primary/10 text-primary text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">
-              {PHOTO_TYPE_LABELS[photo.photoType as PhotoType] ?? photo.photoType}
-            </span>
-            <p className="text-xs text-muted-foreground mt-1">
-              {format(new Date(photo.takenAt), "MMM d, yyyy")}
-            </p>
-          </div>
-          <button
-            onClick={() => onDelete(photo.id)}
-            className="h-8 w-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
-            title="Delete photo"
-          >
-            <Trash2 className="h-4 w-4" />
-          </button>
-        </div>
-        {photo.notes && (
-          <p className="text-xs text-muted-foreground mt-2 line-clamp-2">{photo.notes}</p>
-        )}
-      </div>
-    </div>
-  );
-}
-
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function ProgressPhotosPage() {
   const [showUpload, setShowUpload] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
-  const [typeFilter, setTypeFilter] = useState<PhotoType | "all">("all");
-
-  const { data: photos, isLoading } = useGetProgressPhotos(
-    typeFilter !== "all" ? { type: typeFilter } : {}
-  );
-
-  const filteredPhotos = photos ?? [];
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
@@ -469,62 +406,11 @@ export default function ProgressPhotosPage() {
         </button>
       </div>
 
-      {/* Type Filter */}
-      <div className="flex gap-2 flex-wrap">
-        {(["all", "front", "side", "back", "custom"] as const).map((t) => (
-          <button
-            key={t}
-            onClick={() => setTypeFilter(t)}
-            className={cn(
-              "px-4 py-1.5 rounded-full text-sm font-medium border transition-colors",
-              typeFilter === t
-                ? "bg-primary text-black border-primary"
-                : "bg-secondary border-border text-muted-foreground hover:text-foreground"
-            )}
-          >
-            {t === "all" ? "All" : PHOTO_TYPE_LABELS[t]}
-          </button>
-        ))}
-      </div>
-
       {/* Gallery */}
-      {isLoading ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="space-y-2">
-              <Skeleton className="aspect-[3/4] rounded-2xl w-full" />
-              <Skeleton className="h-4 w-20 rounded" />
-              <Skeleton className="h-3 w-16 rounded" />
-            </div>
-          ))}
-        </div>
-      ) : filteredPhotos.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-24 text-center gap-4">
-          <div className="h-16 w-16 rounded-full bg-secondary flex items-center justify-center">
-            <ImageOff className="h-8 w-8 text-muted-foreground" />
-          </div>
-          <div>
-            <p className="font-semibold text-lg">No photos yet</p>
-            <p className="text-sm text-muted-foreground mt-1">
-              {typeFilter !== "all"
-                ? `No ${PHOTO_TYPE_LABELS[typeFilter]} photos found. Try a different filter or upload one.`
-                : "Upload your first progress photo to start tracking your transformation."}
-            </p>
-          </div>
-          <button
-            onClick={() => setShowUpload(true)}
-            className="flex items-center gap-2 bg-primary text-black font-bold px-4 py-2.5 rounded-xl hover:bg-primary/90 transition-colors text-sm"
-          >
-            <Camera className="h-4 w-4" /> Upload Photo
-          </button>
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-          {filteredPhotos.map((photo) => (
-            <PhotoCard key={photo.id} photo={photo} onDelete={setDeleteTarget} />
-          ))}
-        </div>
-      )}
+      <ProgressPhotoGallery
+        onDelete={setDeleteTarget}
+        onUpload={() => setShowUpload(true)}
+      />
 
       {/* Modals */}
       {showUpload && <UploadModal onClose={() => setShowUpload(false)} />}

@@ -5504,6 +5504,83 @@ export const usePostProgressPhotos = <TError = ErrorType<void>,
       return useMutation(getPostProgressPhotosMutationOptions(options));
     }
 
+export const getGetProgressPhotosTimelineUrl = () => {
+
+
+
+
+  return `/api/progress-photos/timeline`
+}
+
+/**
+ * @summary Get all progress photos sorted by date (newest first)
+ */
+export const getProgressPhotosTimeline = async ( options?: RequestInit): Promise<ProgressPhoto[]> => {
+
+  return customFetch<ProgressPhoto[]>(getGetProgressPhotosTimelineUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetProgressPhotosTimelineQueryKey = () => {
+    return [
+    `/api/progress-photos/timeline`
+    ] as const;
+    }
+
+
+export const getGetProgressPhotosTimelineQueryOptions = <TData = Awaited<ReturnType<typeof getProgressPhotosTimeline>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getProgressPhotosTimeline>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetProgressPhotosTimelineQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getProgressPhotosTimeline>>> = ({ signal }) => getProgressPhotosTimeline({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getProgressPhotosTimeline>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetProgressPhotosTimelineQueryResult = NonNullable<Awaited<ReturnType<typeof getProgressPhotosTimeline>>>
+export type GetProgressPhotosTimelineQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get all progress photos sorted by date (newest first)
+ */
+
+export function useGetProgressPhotosTimeline<TData = Awaited<ReturnType<typeof getProgressPhotosTimeline>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getProgressPhotosTimeline>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetProgressPhotosTimelineQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
 export const getDeleteProgressPhotosIdUrl = (id: number,) => {
 
 
