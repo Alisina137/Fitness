@@ -156,7 +156,7 @@ function GoalModal({ goal, onClose, onSave }: { goal?: Goal; onClose: () => void
 
     setSaving(true);
     try {
-      const payload = {
+      const basePayload = {
         title: form.title.trim(),
         description: form.description.trim() || undefined,
         category: form.category,
@@ -167,13 +167,17 @@ function GoalModal({ goal, onClose, onSave }: { goal?: Goal; onClose: () => void
         targetDate: form.targetDate ? new Date(form.targetDate).toISOString() : undefined,
         priority: form.priority,
         isPrimary: form.isPrimary,
-        status: "active",
       };
 
       if (goal) {
+        // Do NOT include status here — editing must never override the goal's current
+        // status. Completed/paused goals would silently revert to "active" otherwise.
+        const payload = basePayload;
         await apiFetch(`/goals/${goal.id}`, { method: "PUT", body: JSON.stringify(payload) });
         toast({ title: "Goal updated" });
       } else {
+        // New goals always start as active
+        const payload = { ...basePayload, status: "active" as const };
         const created = await apiFetch<{ id: number }>("/goals", { method: "POST", body: JSON.stringify(payload) });
         // Auto-generate milestones for new goals (non-blocking)
         apiFetch(`/goals/${created.id}/milestones/generate`, { method: "POST" }).catch(() => {});
