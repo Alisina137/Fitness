@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useRoute, useLocation, Link } from "wouter";
-import { useGetWorkout, useCompleteWorkout } from "@workspace/api-client-react";
+import { useGetWorkout, getGetWorkoutQueryKey, useCompleteWorkout } from "@workspace/api-client-react";
 import {
   ArrowLeft, CheckCircle2, Circle, ChevronRight, ChevronLeft,
   Timer, Pause, Play, SkipForward, X, Star, Flame, Trophy,
@@ -44,7 +44,7 @@ export default function WorkoutActivePage() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
-  const { data: workout, isLoading } = useGetWorkout(workoutId, { query: { enabled: !!workoutId } });
+  const { data: workout, isLoading } = useGetWorkout(workoutId, { query: { enabled: !!workoutId, queryKey: getGetWorkoutQueryKey(workoutId) } });
   const completeWorkout = useCompleteWorkout();
 
   // Session state
@@ -75,8 +75,8 @@ export default function WorkoutActivePage() {
           skipped: false,
           sets: Array.from({ length: ex.sets || 3 }, (_, i) => ({
             setNumber: i + 1,
-            repsCompleted: ex.repsMax || ex.reps || 10,
-            weightKg: ex.weightKg || 0,
+            repsCompleted: (ex as any).repsMax ?? (ex as any).reps ?? 10,
+            weightKg: (ex as any).weightKg ?? 0,
             done: false,
           })),
         }))
@@ -186,8 +186,6 @@ export default function WorkoutActivePage() {
     completeWorkout.mutate({
       id: workoutId,
       data: {
-        startTime: startTime.toISOString(),
-        endTime: endTime.toISOString(),
         durationMinutes: Math.max(durationMinutes, 1),
         caloriesBurned: Math.round(Math.max(durationMinutes, 1) * 8),
         exercisesCompleted: exerciseLogs.map(ex => ({
@@ -205,7 +203,7 @@ export default function WorkoutActivePage() {
         difficultyRating,
         rating: difficultyRating,
         notes: feedbackNotes,
-      },
+      } as any,
     }, {
       onSuccess: () => {
         setPhase("done");
@@ -421,9 +419,9 @@ export default function WorkoutActivePage() {
             <div className="bg-secondary rounded-xl px-4 py-2 text-sm font-medium">
               {totalSets} sets
             </div>
-            {exerciseMeta?.repsMin && (
+            {(exerciseMeta as any)?.repsMin && (
               <div className="bg-secondary rounded-xl px-4 py-2 text-sm font-medium">
-                {exerciseMeta.repsMin}–{exerciseMeta.repsMax} reps
+                {(exerciseMeta as any).repsMin}–{(exerciseMeta as any).repsMax} reps
               </div>
             )}
             {exerciseMeta?.restSeconds && (
@@ -431,9 +429,9 @@ export default function WorkoutActivePage() {
                 {exerciseMeta.restSeconds}s rest
               </div>
             )}
-            {exerciseMeta?.tempo && (
+            {(exerciseMeta as any)?.tempo && (
               <div className="bg-secondary rounded-xl px-4 py-2 text-sm font-medium font-mono">
-                {exerciseMeta.tempo}
+                {(exerciseMeta as any).tempo}
               </div>
             )}
           </div>

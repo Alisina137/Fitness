@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useListConversations, useCreateConversation, useGetConversationMessages, useSendMessage } from "@workspace/api-client-react";
+import { useListConversations, useCreateConversation, useGetConversationMessages, getGetConversationMessagesQueryKey, useSendMessage } from "@workspace/api-client-react";
 import { Send, Bot, User, Plus, MessageSquare, Loader2, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,7 +25,7 @@ export default function AiCoachPage() {
 
   const { data: messages, isLoading: loadingMessages, refetch: refetchMessages } = useGetConversationMessages(
     activeId || 0,
-    { query: { enabled: !!activeId } }
+    { query: { enabled: !!activeId, queryKey: getGetConversationMessagesQueryKey(activeId || 0) } }
   );
 
   const scrollToBottom = () => {

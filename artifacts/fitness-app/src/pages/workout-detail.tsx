@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useRoute, Link, useLocation } from "wouter";
 import { 
-  useGetWorkout, 
+  useGetWorkout,
+  getGetWorkoutQueryKey,
   useCompleteWorkout,
   useUpdateWorkout
 } from "@workspace/api-client-react";
@@ -26,7 +27,7 @@ export default function WorkoutDetailPage() {
   const { toast } = useToast();
   
   const { data: workout, isLoading, refetch } = useGetWorkout(id, {
-    query: { enabled: !!id }
+    query: { enabled: !!id, queryKey: getGetWorkoutQueryKey(id) }
   });
   
   const completeWorkout = useCompleteWorkout();

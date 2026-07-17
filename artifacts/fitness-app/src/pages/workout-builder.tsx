@@ -2,9 +2,11 @@ import React, { useState, useEffect } from "react";
 import { useRoute, useLocation, Link } from "wouter";
 import {
   useGetWorkout,
+  getGetWorkoutQueryKey,
   useCreateWorkout,
   useUpdateWorkout,
   useListExercises,
+  getListExercisesQueryKey,
 } from "@workspace/api-client-react";
 import {
   ArrowLeft, Plus, Search, Trash2, GripVertical, Save,
@@ -68,21 +70,21 @@ export default function WorkoutBuilderPage() {
   const [muscleFilter, setMuscleFilter] = useState("all");
 
   // Load existing workout if editing
-  const { data: existing } = useGetWorkout(editId!, { query: { enabled: !!editId } });
+  const { data: existing } = useGetWorkout(editId!, { query: { enabled: !!editId, queryKey: getGetWorkoutQueryKey(editId!) } });
   const createWorkout = useCreateWorkout();
   const updateWorkout = useUpdateWorkout();
 
   // Exercise search
   const { data: exerciseResults } = useListExercises(
     { search: search || undefined, muscleGroup: muscleFilter !== "all" ? muscleFilter : undefined, limit: 30 },
-    { query: { enabled: pickerOpen } }
+    { query: { enabled: pickerOpen, queryKey: getListExercisesQueryKey({ search: search || undefined, muscleGroup: muscleFilter !== "all" ? muscleFilter : undefined, limit: 30 }) } }
   );
 
   useEffect(() => {
     if (existing) {
       setName(existing.name);
       setDescription(existing.description || "");
-      setGoal(existing.goal || "general_fitness");
+      setGoal((existing as any).goal || "general_fitness");
       setDifficulty(existing.difficulty || "intermediate");
       setCategory(existing.category || "Strength");
       setDurationMinutes(existing.durationMinutes || 45);
@@ -91,11 +93,11 @@ export default function WorkoutBuilderPage() {
           exerciseId: e.exerciseId,
           name: e.name,
           sets: e.sets || 3,
-          repsMin: e.repsMin || e.reps || 8,
-          repsMax: e.repsMax || e.reps || 12,
-          weightKg: e.weightKg || undefined,
+          repsMin: (e as any).repsMin || e.reps || 8,
+          repsMax: (e as any).repsMax || e.reps || 12,
+          weightKg: (e as any).weightKg || undefined,
           restSeconds: e.restSeconds || 90,
-          tempo: e.tempo || "",
+          tempo: (e as any).tempo || "",
           notes: e.notes || "",
         }))
       );
@@ -168,7 +170,7 @@ export default function WorkoutBuilderPage() {
 
     if (editId) {
       updateWorkout.mutate(
-        { id: editId, data: payload },
+        { id: editId, data: payload as any },
         {
           onSuccess: () => {
             toast({ title: "Workout updated" });
@@ -179,7 +181,7 @@ export default function WorkoutBuilderPage() {
       );
     } else {
       createWorkout.mutate(
-        { data: payload },
+        { data: payload as any },
         {
           onSuccess: (data) => {
             toast({ title: "Workout created" });
@@ -474,12 +476,12 @@ export default function WorkoutBuilderPage() {
 
             {/* Results */}
             <div className="flex-1 overflow-y-auto">
-              {(exerciseResults || []).length === 0 ? (
+              {((exerciseResults as any)?.exercises ?? exerciseResults ?? []).length === 0 ? (
                 <div className="p-8 text-center text-muted-foreground text-sm">
                   {search ? "No exercises found" : "Loading…"}
                 </div>
               ) : (
-                exerciseResults!.map(ex => {
+                ((exerciseResults as any)?.exercises ?? (exerciseResults as unknown as any[]) ?? []).map((ex: any) => {
                   const alreadyAdded = exercises.some(e => e.exerciseId === ex.id);
                   return (
                     <button

@@ -61,7 +61,7 @@ export default function WorkoutSchedulePage() {
   // Build schedule, filtering out skipped dates
   const schedule: ScheduledWorkout[] = [];
   (workouts ?? []).forEach(w => {
-    const ws = (w.weeklySchedule as WeeklySchedule | null);
+    const ws = ((w as any).weeklySchedule as WeeklySchedule | null);
     const days: number[] = ws?.days ?? [];
     const skipped: string[] = ws?.skippedDates ?? [];
     days.forEach(dayOfWeek => {
@@ -86,7 +86,7 @@ export default function WorkoutSchedulePage() {
   const selectedDate = weekDays[selectedDay];
 
   const unscheduled = (workouts ?? []).filter(w => {
-    const days = (w.weeklySchedule as WeeklySchedule | null)?.days ?? [];
+    const days = ((w as any).weeklySchedule as WeeklySchedule | null)?.days ?? [];
     return days.length === 0;
   });
 
@@ -108,11 +108,11 @@ export default function WorkoutSchedulePage() {
     if (!editingWorkout) return;
     const workout = (workouts ?? []).find(w => w.id === editingWorkout.id);
     const ws: WeeklySchedule = {
-      ...(workout?.weeklySchedule as WeeklySchedule | null ?? {}),
+      ...((workout as any)?.weeklySchedule as WeeklySchedule | null ?? {}),
       days: editDays,
       frequency: editDays.length,
     };
-    await updateWorkout.mutateAsync({ id: editingWorkout.id, data: { weeklySchedule: ws } });
+    await updateWorkout.mutateAsync({ id: editingWorkout.id, data: { weeklySchedule: ws } as any });
     queryClient.invalidateQueries({ queryKey: getListWorkoutsQueryKey({ status: "active" }) });
     setEditingWorkout(null);
   }
@@ -123,7 +123,7 @@ export default function WorkoutSchedulePage() {
     const skippedDates = [...(existing.skippedDates ?? [])];
     if (!skippedDates.includes(dateStr)) skippedDates.push(dateStr);
     const ws: WeeklySchedule = { ...existing, skippedDates };
-    await updateWorkout.mutateAsync({ id: sw.workoutId, data: { weeklySchedule: ws } });
+    await updateWorkout.mutateAsync({ id: sw.workoutId, data: { weeklySchedule: ws } as any });
     queryClient.invalidateQueries({ queryKey: getListWorkoutsQueryKey({ status: "active" }) });
   }
 

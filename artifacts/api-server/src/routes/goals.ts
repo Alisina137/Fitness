@@ -83,6 +83,15 @@ router.get("/goals/primary", requireAuth, async (req, res) => {
   res.json(primary);
 });
 
+// ─── GET /api/goals/progress ──────────────────────────────────────────────────
+// Progress summary for all user goals (used by dashboard and progress page).
+// NOTE: Must be registered BEFORE /goals/:id to avoid "progress" being matched as an id.
+router.get("/goals/progress", requireAuth, async (req, res) => {
+  const user = getUser(req);
+  const summary = await getGoalProgressSummary(user.id);
+  res.json(summary);
+});
+
 // ─── GET /api/goals/:id ───────────────────────────────────────────────────────
 
 router.get("/goals/:id", requireAuth, async (req, res) => {
@@ -153,14 +162,6 @@ router.put("/goals/:id", requireAuth, async (req, res) => {
   updateGoalProgress(id).catch(() => {});
 
   res.json(serializeGoal(updated));
-});
-
-// ─── GET /api/goals/progress ──────────────────────────────────────────────────
-// Progress summary for all user goals (used by dashboard and progress page).
-router.get("/goals/progress", requireAuth, async (req, res) => {
-  const user = getUser(req);
-  const summary = await getGoalProgressSummary(user.id);
-  res.json(summary);
 });
 
 // ─── DELETE /api/goals/:id ────────────────────────────────────────────────────

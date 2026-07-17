@@ -1,5 +1,5 @@
 import React from "react";
-import { useGetWorkoutAnalytics, useGetWorkoutHistory } from "@workspace/api-client-react";
+import { useGetProgressStats, useGetWorkoutHistory } from "@workspace/api-client-react";
 import { Trophy, Flame, Clock, Calendar, TrendingUp, Target, Zap, BarChart3, ArrowLeft, Dumbbell, Star } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "wouter";
@@ -15,7 +15,10 @@ const DIFFICULTY_LABELS: Record<number, { label: string; color: string }> = {
 };
 
 export default function WorkoutAnalyticsPage() {
-  const { data: analytics, isLoading } = useGetWorkoutAnalytics({ days: 30 });
+  // useGetProgressStats covers totalWorkouts, totalMinutes, totalCaloriesBurned, streaks, etc.
+  // We cast to any so extra fields (thisWeekWorkouts, avgDifficultyRating, etc.) degrade gracefully to undefined ?? 0
+  const { data: analyticsRaw, isLoading } = useGetProgressStats();
+  const analytics = analyticsRaw as any;
   const { data: history, isLoading: historyLoading } = useGetWorkoutHistory({ limit: 10 });
 
   return (
@@ -202,7 +205,7 @@ export default function WorkoutAnalyticsPage() {
             </div>
           ) : (
             <div className="space-y-2">
-              {(analytics!.favoriteExercises ?? []).map((ex, i) => {
+              {(analytics!.favoriteExercises ?? []).map((ex: any, i: number) => {
                 const maxCount = analytics!.favoriteExercises![0]?.count ?? 1;
                 const pct = Math.round(((ex.count ?? 0) / maxCount) * 100);
                 return (
@@ -245,7 +248,7 @@ export default function WorkoutAnalyticsPage() {
             </div>
           ) : (
             <div className="space-y-3">
-              {(analytics?.recentPersonalRecords ?? []).map((pr: { id: number; exerciseName: string; recordType: string; value: number; unit: string; achievedAt: string }, i) => (
+              {(analytics?.recentPersonalRecords ?? []).map((pr: { id: number; exerciseName: string; recordType: string; value: number; unit: string; achievedAt: string }, i: number) => (
                 <div key={i} className="flex items-center gap-3 p-3 bg-yellow-400/5 border border-yellow-400/20 rounded-xl">
                   <div className="h-8 w-8 rounded-lg bg-yellow-400/10 flex items-center justify-center shrink-0">
                     <Trophy className="h-4 w-4 text-yellow-400" />
@@ -302,9 +305,9 @@ export default function WorkoutAnalyticsPage() {
                       <div className="text-xs text-muted-foreground">{session.caloriesBurned} kcal</div>
                     )}
                   </div>
-                  {session.difficultyRating && (
-                    <div className={cn("text-xs font-bold w-5 text-center", DIFFICULTY_LABELS[session.difficultyRating]?.color)}>
-                      {session.difficultyRating}
+                  {(session as any).difficultyRating && (
+                    <div className={cn("text-xs font-bold w-5 text-center", DIFFICULTY_LABELS[(session as any).difficultyRating]?.color)}>
+                      {(session as any).difficultyRating}
                     </div>
                   )}
                 </div>

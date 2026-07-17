@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useAuthStore } from "../store/auth";
-import { useGetMe, customFetch } from "@workspace/api-client-react";
+import { useGetMe, getGetMeQueryKey } from "@workspace/api-client-react";
 import { useLocation } from "wouter";
 import { Loader2 } from "lucide-react";
 
@@ -27,6 +27,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     query: {
       enabled: !!token,
       retry: false,
+      queryKey: getGetMeQueryKey(),
     }
   });
 

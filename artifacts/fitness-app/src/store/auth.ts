@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { User } from "@workspace/api-client-react/src/generated/api.schemas";
+import type { User } from "@workspace/api-client-react";
 
 interface AuthState {
   user: User | null;
