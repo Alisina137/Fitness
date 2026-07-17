@@ -1,0 +1,176 @@
+You are continuing development of an AI fitness application.
+
+CURRENT PROJECT STATE:
+
+Already implemented:
+
+- User profile system
+- Workout engine
+- AI workout generation
+- Recovery system
+- Workout analytics
+- Personal Records (PR)
+- Goal Management Foundation
+
+Do not rebuild these systems.
+
+TASK:
+
+Build the Goal Progress Engine.
+
+This system should automatically calculate and update progress for each goal.
+
+IMPLEMENT:
+
+1. Create Goal Progress Service.
+
+Create reusable functions:
+
+- updateGoalProgress(goalId)
+- updateAllUserGoals(userId)
+- calculateGoalPercentage(goalId)
+- checkGoalCompletion(goalId)
+
+Keep the logic separate from API routes.
+
+
+2. Automatic Progress Updates.
+
+Whenever any of these events occur:
+
+- Workout completed
+- Body weight updated
+- Personal Record achieved
+- User edits goal
+
+Automatically recalculate goal progress.
+
+
+3. Goal Progress Formula.
+
+Calculate:
+
+Progress % =
+(Current Value / Target Value) × 100
+
+Clamp values between:
+
+0% and 100%
+
+Store:
+
+- Current percentage
+- Remaining amount
+- Estimated completion percentage
+
+
+4. Goal Status Updates.
+
+Automatically change status:
+
+If progress reaches 100%:
+
+Status = Completed
+
+If user pauses:
+
+Status = Paused
+
+If target date passes:
+
+Status = Expired
+
+
+5. Goal Summary API.
+
+Create:
+
+GET /api/goals/progress
+
+Return:
+
+- Goal title
+- Current value
+- Target value
+- Progress %
+- Remaining value
+- Status
+
+
+6. Goal Progress Component.
+
+Create:
+
+GoalProgressCard
+
+Display:
+
+- Goal title
+- Progress bar
+- Percentage
+- Remaining amount
+- Target date
+
+
+Example:
+
+Lose 10 kg
+
+████████░░
+
+80%
+
+2 kg remaining
+
+
+7. Dashboard Integration.
+
+On the dashboard, display:
+
+"My Active Goals"
+
+Show the top 3 active goals.
+
+Each card should show:
+
+- Goal name
+- Progress
+- Status
+
+
+8. Validation.
+
+Handle:
+
+- Target value = 0
+- Invalid goal
+- Missing current value
+- Completed goals
+- Expired goals
+
+
+DO NOT:
+
+- Build milestones yet.
+- Build AI recommendations.
+- Build notifications.
+- Build charts.
+
+TECH REQUIREMENTS:
+
+- Reuse existing workout and profile data.
+- Keep calculations modular.
+- Add error handling.
+- Optimize database updates.
+
+COMPLETION REPORT:
+
+After finishing, provide:
+
+1. Files created
+2. Files modified
+3. Database changes
+4. API endpoints
+5. Progress calculation logic
+6. Example goal progress outputs
+7. Any issues found

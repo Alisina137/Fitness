@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { 
   useGetDashboardSummary, 
@@ -17,6 +17,49 @@ import {
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
+import { GoalProgressCard, GoalProgressCardSkeleton, type GoalProgress } from "@/components/goal-progress-card";
+
+// ─── Active Goals Section ─────────────────────────────────────────────────────
+
+const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") || "";
+
+function ActiveGoalsSection() {
+  const [goals, setGoals] = useState<GoalProgress[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const token = (() => {
+      try { return JSON.parse(localStorage.getItem("auth-storage") || "{}").state?.token; } catch { return null; }
+    })();
+    fetch(`${BASE}/api/goals/progress`, {
+      headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+    })
+      .then((r) => r.ok ? r.json() : [])
+      .then((data: GoalProgress[]) => setGoals(data.filter((g) => g.status === "active").slice(0, 3)))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (!loading && goals.length === 0) return null;
+
+  return (
+    <div className="bg-card border border-border p-6 rounded-3xl space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="font-bold">My Active Goals</h3>
+        <Link href="/goals" className="text-xs text-primary hover:underline">View all</Link>
+      </div>
+      {loading ? (
+        <div className="space-y-3">
+          {[1, 2].map((i) => <GoalProgressCardSkeleton key={i} compact />)}
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {goals.map((g) => <GoalProgressCard key={g.id} goal={g} compact />)}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function DashboardPage() {
   const { data: summary, isLoading: loadingSummary } = useGetDashboardSummary();
@@ -176,6 +219,9 @@ export default function DashboardPage() {
               </div>
             )}
           </div>
+
+          {/* Active Goals */}
+          <ActiveGoalsSection />
 
           {/* Activity Feed */}
           <div className="bg-card border border-border p-6 rounded-3xl">

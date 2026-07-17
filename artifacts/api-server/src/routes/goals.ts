@@ -3,6 +3,7 @@ import { db } from "@workspace/db";
 import { goalsTable, insertGoalSchema, updateGoalSchema } from "@workspace/db";
 import { requireAuth, getUser } from "../lib/auth.js";
 import { getPrimaryGoal, serializeGoal, ensureSinglePrimary } from "../lib/goals-service.js";
+import { updateGoalProgress, getGoalProgressSummary } from "../lib/goal-progress-service.js";
 import { eq, and, desc } from "drizzle-orm";
 
 const router = Router();
@@ -46,6 +47,9 @@ router.post("/goals", requireAuth, async (req, res) => {
   if (goal.isPrimary) {
     await ensureSinglePrimary(user.id, goal.id);
   }
+
+  // Seed referenceValue (starting point) and compute initial progress non-blocking
+  updateGoalProgress(goal.id).catch(() => {});
 
   res.status(201).json(serializeGoal(goal));
 });
@@ -145,7 +149,18 @@ router.put("/goals/:id", requireAuth, async (req, res) => {
     await ensureSinglePrimary(user.id, id);
   }
 
+  // Recalculate progress after any edit non-blocking
+  updateGoalProgress(id).catch(() => {});
+
   res.json(serializeGoal(updated));
+});
+
+// ─── GET /api/goals/progress ──────────────────────────────────────────────────
+// Progress summary for all user goals (used by dashboard and progress page).
+router.get("/goals/progress", requireAuth, async (req, res) => {
+  const user = getUser(req);
+  const summary = await getGoalProgressSummary(user.id);
+  res.json(summary);
 });
 
 // ─── DELETE /api/goals/:id ────────────────────────────────────────────────────

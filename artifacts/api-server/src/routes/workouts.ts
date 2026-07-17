@@ -14,6 +14,7 @@ import { requireAuth, getUser } from "../lib/auth";
 import { refreshMusclesAfterWorkout } from "../lib/recovery-engine.js";
 import { processWorkoutAnalytics } from "../lib/analytics-engine.js";
 import { detectAndSavePRs } from "../lib/pr-engine.js";
+import { updateAllUserGoals } from "../lib/goal-progress-service.js";
 
 const router = Router();
 
@@ -465,6 +466,11 @@ router.post("/workouts/:id/complete", requireAuth, async (req, res) => {
   // Detect and save all personal records (max_weight, max_reps, max_volume, streak) non-blocking
   detectAndSavePRs(user.id, completion.id).catch(() => {
     // Non-blocking: PR detection failure should not fail the completion response
+  });
+
+  // Recalculate goal progress (workout_consistency goals) non-blocking
+  updateAllUserGoals(user.id).catch(() => {
+    // Non-blocking: goal progress update failure should not fail the completion response
   });
 
   res.json(serializeCompletion(completion, workout.name));

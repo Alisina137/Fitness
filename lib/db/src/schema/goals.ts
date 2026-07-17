@@ -21,6 +21,7 @@ export const goalStatusEnum = pgEnum("goal_status", [
   "completed",
   "paused",
   "cancelled",
+  "expired",
 ]);
 
 export const goalPriorityEnum = pgEnum("goal_priority", [
@@ -45,6 +46,9 @@ export const goalsTable = pgTable("goals", {
   priority: goalPriorityEnum("priority").notNull().default("medium"),
   status: goalStatusEnum("status").notNull().default("active"),
   isPrimary: boolean("is_primary").notNull().default(false),
+  // Progress tracking (computed and cached on each update)
+  progressPercentage: numeric("progress_percentage", { precision: 5, scale: 2 }).default("0"),
+  referenceValue: numeric("reference_value", { precision: 10, scale: 2 }),  // starting value at goal creation
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

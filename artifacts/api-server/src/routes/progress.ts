@@ -3,6 +3,7 @@ import { db } from "@workspace/db";
 import { progressEntriesTable, achievementsTable, workoutCompletionsTable } from "@workspace/db";
 import { eq, and, desc } from "drizzle-orm";
 import { requireAuth, getUser } from "../lib/auth";
+import { updateAllUserGoals } from "../lib/goal-progress-service.js";
 
 const router = Router();
 
@@ -79,6 +80,10 @@ router.post("/progress", requireAuth, async (req, res) => {
     thighCm: thighCm !== undefined ? String(thighCm) : null,
     notes,
   }).returning();
+
+  // Recalculate goal progress (weight_loss/weight_gain/body_fat goals) non-blocking
+  updateAllUserGoals(user.id).catch(() => {});
+
   res.status(201).json(serializeEntry(entry));
 });
 
