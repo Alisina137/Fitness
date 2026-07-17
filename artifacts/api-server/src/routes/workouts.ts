@@ -12,6 +12,7 @@ import type { CompletedExerciseLog } from "@workspace/db";
 import { eq, and, desc, gte, count, sum, avg, sql } from "drizzle-orm";
 import { requireAuth, getUser } from "../lib/auth";
 import { refreshMusclesAfterWorkout } from "../lib/recovery-engine.js";
+import { processWorkoutAnalytics } from "../lib/analytics-engine.js";
 
 const router = Router();
 
@@ -488,6 +489,11 @@ router.post("/workouts/:id/complete", requireAuth, async (req, res) => {
       // Non-blocking: muscle recovery update failure should not fail the completion response
     });
   }
+
+  // Compute and store workout analytics (volume, sets, reps, PRs) non-blocking
+  processWorkoutAnalytics(user.id, completion.id).catch(() => {
+    // Non-blocking: analytics failure should not fail the completion response
+  });
 
   res.json(serializeCompletion(completion, workout.name));
 });

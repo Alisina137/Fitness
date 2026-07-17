@@ -1,4 +1,4 @@
-import { pgTable, serial, text, integer, boolean, timestamp, jsonb, numeric } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, integer, boolean, timestamp, jsonb, numeric, unique } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { usersTable } from "./users";
@@ -129,6 +129,45 @@ export const personalRecordsTable = pgTable("personal_records", {
   unit: text("unit").default("kg").notNull(),
   achievedAt: timestamp("achieved_at").defaultNow().notNull(),
   workoutCompletionId: integer("workout_completion_id").references(() => workoutCompletionsTable.id, { onDelete: "set null" }),
+});
+
+// ─── Workout Analytics ────────────────────────────────────────────────────────
+// One row per completed workout session — pre-computed aggregates for fast
+// dashboard queries without re-scanning exercisesCompleted JSON each time.
+
+export const workoutAnalyticsTable = pgTable("workout_analytics", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
+  workoutCompletionId: integer("workout_completion_id").notNull().references(() => workoutCompletionsTable.id, { onDelete: "cascade" }),
+  date: timestamp("date").notNull(),
+  totalExercises: integer("total_exercises").default(0).notNull(),
+  totalSets: integer("total_sets").default(0).notNull(),
+  totalReps: integer("total_reps").default(0).notNull(),
+  totalVolume: numeric("total_volume", { precision: 12, scale: 2 }).default("0").notNull(), // kg
+  workoutDuration: integer("workout_duration"),                                              // minutes
+  caloriesEstimated: integer("calories_estimated"),
+  muscleGroupsTrained: jsonb("muscle_groups_trained").default([]).$type<string[]>(),
+  difficultyRating: integer("difficulty_rating"),  // 1-5
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => [unique("workout_analytics_completion").on(t.workoutCompletionId)]);
+
+// ─── Exercise Performance ─────────────────────────────────────────────────────
+// One row per (user × exercise × workout session) — tracks per-exercise
+// progress over time and flags personal records.
+
+export const exercisePerformanceTable = pgTable("exercise_performance", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
+  exerciseId: integer("exercise_id").notNull(),
+  exerciseName: text("exercise_name").notNull(),
+  workoutCompletionId: integer("workout_completion_id").references(() => workoutCompletionsTable.id, { onDelete: "cascade" }),
+  date: timestamp("date").notNull(),
+  maxWeightKg: numeric("max_weight_kg", { precision: 8, scale: 2 }),   // heaviest set
+  totalReps: integer("total_reps").default(0).notNull(),
+  totalSets: integer("total_sets").default(0).notNull(),
+  totalVolume: numeric("total_volume", { precision: 10, scale: 2 }).default("0").notNull(), // kg
+  isPersonalRecord: boolean("is_personal_record").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 // ─── Inferred Types ───────────────────────────────────────────────────────────
