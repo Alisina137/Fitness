@@ -28,6 +28,10 @@ tags:
     description: AI coach operations
   - name: subscriptions
     description: Subscription operations
+  - name: goals
+    description: Goal management operations
+  - name: milestones
+    description: Goal milestone operations
 paths:
   /healthz:
     get:
@@ -1132,6 +1136,211 @@ paths:
                 items:
                   $ref: "#/components/schemas/SubscriptionPlan"
 
+  # ─── Goals ───────────────────────────────────────────────────────────────────
+  /goals:
+    get:
+      operationId: listGoals
+      tags: [goals]
+      summary: List all goals for the current user
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [active, completed, paused, cancelled, expired]
+        - name: category
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: priority
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [high, medium, low]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Goal"
+    post:
+      operationId: createGoal
+      tags: [goals]
+      summary: Create a new goal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GoalInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Goal"
+        "400":
+          description: Validation error
+
+  /goals/primary:
+    get:
+      operationId: getPrimaryGoal
+      tags: [goals]
+      summary: Get the user's primary active goal
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Goal"
+
+  /goals/progress:
+    get:
+      operationId: getGoalsProgress
+      tags: [goals]
+      summary: Get progress summary for all user goals
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GoalProgress"
+
+  /goals/milestones/upcoming:
+    get:
+      operationId: getUpcomingMilestone
+      tags: [milestones]
+      summary: Get the next upcoming milestone across the user's active goals
+      responses:
+        "200":
+          description: OK or null if no active goals / no milestones generated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpcomingMilestone"
+
+  /goals/{id}:
+    get:
+      operationId: getGoal
+      tags: [goals]
+      summary: Get a goal by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Goal"
+        "404":
+          description: Not found
+    put:
+      operationId: updateGoal
+      tags: [goals]
+      summary: Update a goal
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GoalUpdate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Goal"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteGoal
+      tags: [goals]
+      summary: Delete a goal
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeleteResponse"
+        "404":
+          description: Not found
+
+  /goals/{goalId}/milestones:
+    get:
+      operationId: getGoalMilestones
+      tags: [milestones]
+      summary: Get all milestones for a specific goal
+      parameters:
+        - name: goalId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GoalMilestone"
+        "404":
+          description: Goal not found
+
+  /goals/{goalId}/milestones/generate:
+    post:
+      operationId: generateMilestones
+      tags: [milestones]
+      summary: Generate the 4 default milestones (25/50/75/100%) for a goal
+      parameters:
+        - name: goalId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "201":
+          description: Milestones created (idempotent — skips existing)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GoalMilestone"
+        "404":
+          description: Goal not found
+
 components:
   schemas:
     HealthStatus:
@@ -1412,6 +1621,7 @@ components:
         progressionRules:
           type: object
           nullable: true
+          additionalProperties: false
         exercises:
           type: array
           items:
@@ -2253,6 +2463,204 @@ components:
       properties:
         content:
           type: string
+
+    # ─── Goals ─────────────────────────────────────────────────────────────────
+    Goal:
+      type: object
+      required: [id, userId, title, category, priority, status, isPrimary, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        category:
+          type: string
+          enum: [weight_loss, weight_gain, muscle_gain, strength, endurance, body_fat, workout_consistency, custom]
+        targetValue:
+          type: ["number", "null"]
+        currentValue:
+          type: ["number", "null"]
+        unit:
+          type: ["string", "null"]
+        startDate:
+          type: string
+          format: date-time
+        targetDate:
+          type: ["string", "null"]
+          format: date-time
+        priority:
+          type: string
+          enum: [high, medium, low]
+        status:
+          type: string
+          enum: [active, completed, paused, cancelled, expired]
+        isPrimary:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    GoalInput:
+      type: object
+      required: [title, category]
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+          enum: [weight_loss, weight_gain, muscle_gain, strength, endurance, body_fat, workout_consistency, custom]
+        targetValue:
+          type: number
+        currentValue:
+          type: number
+        unit:
+          type: string
+        startDate:
+          type: string
+          format: date-time
+        targetDate:
+          type: string
+          format: date-time
+        priority:
+          type: string
+          enum: [high, medium, low]
+        isPrimary:
+          type: boolean
+
+    GoalUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+          enum: [weight_loss, weight_gain, muscle_gain, strength, endurance, body_fat, workout_consistency, custom]
+        targetValue:
+          type: number
+        currentValue:
+          type: number
+        unit:
+          type: string
+        startDate:
+          type: string
+          format: date-time
+        targetDate:
+          type: string
+          format: date-time
+        priority:
+          type: string
+          enum: [high, medium, low]
+        status:
+          type: string
+          enum: [active, completed, paused, cancelled, expired]
+        isPrimary:
+          type: boolean
+
+    GoalProgress:
+      type: object
+      required: [id, title, category, status, priority, isPrimary, progressPercentage]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        category:
+          type: string
+        status:
+          type: string
+        priority:
+          type: string
+        isPrimary:
+          type: boolean
+        currentValue:
+          type: ["number", "null"]
+        targetValue:
+          type: ["number", "null"]
+        referenceValue:
+          type: ["number", "null"]
+        unit:
+          type: ["string", "null"]
+        progressPercentage:
+          type: number
+        remaining:
+          type: ["number", "null"]
+        startDate:
+          type: string
+          format: date-time
+        targetDate:
+          type: ["string", "null"]
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    GoalMilestone:
+      type: object
+      required: [id, goalId, userId, milestonePercentage, title, achieved, createdAt]
+      properties:
+        id:
+          type: integer
+        goalId:
+          type: integer
+        userId:
+          type: integer
+        milestonePercentage:
+          type: integer
+          enum: [25, 50, 75, 100]
+        milestoneValue:
+          type: ["number", "null"]
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        achieved:
+          type: boolean
+        achievedAt:
+          type: ["string", "null"]
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    UpcomingMilestone:
+      type: ["object", "null"]
+      properties:
+        goal:
+          type: object
+          required: [id, title, progressPercentage]
+          properties:
+            id:
+              type: integer
+            title:
+              type: string
+            progressPercentage:
+              type: number
+            unit:
+              type: ["string", "null"]
+            targetValue:
+              type: ["number", "null"]
+        milestone:
+          $ref: "#/components/schemas/GoalMilestone"
+
+    DeleteResponse:
+      type: object
+      required: [success, id]
+      properties:
+        success:
+          type: boolean
+        id:
+          type: integer
 
     # ─── Subscriptions ─────────────────────────────────────────────────────────
     Subscription:

@@ -1,0 +1,1 @@
+- [Zod looseObject codegen issue](zod-looseobject-codegen.md) — after every codegen run, sed-replace zod.looseObject→zod.object in lib/api-zod/src/generated/api.ts or API server crashes.

@@ -67,8 +67,24 @@ export const insertGoalSchema = createInsertSchema(goalsTable).omit({
 
 export const updateGoalSchema = insertGoalSchema.partial();
 
+// ─── Goal Milestones Table ────────────────────────────────────────────────────
+
+export const goalMilestonesTable = pgTable("goal_milestones", {
+  id: serial("id").primaryKey(),
+  goalId: integer("goal_id").notNull().references(() => goalsTable.id, { onDelete: "cascade" }),
+  userId: integer("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
+  milestonePercentage: integer("milestone_percentage").notNull(), // 25 | 50 | 75 | 100
+  milestoneValue: numeric("milestone_value", { precision: 10, scale: 2 }),
+  title: text("title").notNull(),
+  description: text("description"),
+  achieved: boolean("achieved").notNull().default(false),
+  achievedAt: timestamp("achieved_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
+export type GoalMilestone = typeof goalMilestonesTable.$inferSelect;
 export type Goal = typeof goalsTable.$inferSelect;
 export type InsertGoal = typeof goalsTable.$inferInsert;
 export type GoalCategory = Goal["category"];

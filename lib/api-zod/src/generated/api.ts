@@ -361,6 +361,148 @@ export const CreateWorkoutResponse = zod.object({
 
 
 /**
+ * @summary Submit daily recovery check-in
+ */
+export const createRecoveryCheckInBodyEnergyLevelMax = 10;
+
+export const createRecoveryCheckInBodyStressLevelMax = 10;
+
+export const createRecoveryCheckInBodyMuscleSorenessMax = 10;
+
+export const createRecoveryCheckInBodyMotivationLevelMax = 10;
+
+export const createRecoveryCheckInBodyNotesMax = 500;
+
+
+
+export const CreateRecoveryCheckInBody = zod.object({
+  "date": zod.coerce.date(),
+  "sleepQuality": zod.enum(['excellent', 'good', 'average', 'poor']),
+  "energyLevel": zod.number().min(1).max(createRecoveryCheckInBodyEnergyLevelMax),
+  "stressLevel": zod.number().min(1).max(createRecoveryCheckInBodyStressLevelMax),
+  "muscleSoreness": zod.number().min(1).max(createRecoveryCheckInBodyMuscleSorenessMax),
+  "motivationLevel": zod.number().min(1).max(createRecoveryCheckInBodyMotivationLevelMax),
+  "mood": zod.enum(['great', 'good', 'neutral', 'low']).optional(),
+  "notes": zod.string().max(createRecoveryCheckInBodyNotesMax).optional()
+})
+
+export const CreateRecoveryCheckInResponse = zod.object({
+  "recoveryScore": zod.number(),
+  "readiness": zod.object({
+
+}),
+  "fatigue": zod.object({
+
+}).optional(),
+  "message": zod.string()
+})
+
+
+/**
+ * @summary Get today's recovery data
+ */
+export const GetTodayRecoveryResponse = zod.object({
+  "checkedInToday": zod.boolean(),
+  "checkIn": zod.object({
+  "id": zod.number(),
+  "date": zod.string(),
+  "sleepQuality": zod.string(),
+  "energyLevel": zod.number(),
+  "stressLevel": zod.number(),
+  "muscleSoreness": zod.number(),
+  "motivationLevel": zod.number(),
+  "mood": zod.string().nullish(),
+  "notes": zod.string().nullish(),
+  "recoveryScore": zod.number().nullish(),
+  "createdAt": zod.coerce.date().optional()
+}).optional(),
+  "profile": zod.object({
+
+}).optional(),
+  "score": zod.number().nullish(),
+  "readiness": zod.object({
+
+}).optional(),
+  "muscles": zod.array(zod.object({
+  "id": zod.number(),
+  "muscleGroup": zod.string(),
+  "lastTrainedDate": zod.coerce.date().nullish(),
+  "trainingVolume": zod.number(),
+  "sorenessLevel": zod.number(),
+  "recoveryPercentage": zod.number(),
+  "updatedAt": zod.coerce.date().optional()
+})).optional(),
+  "recommendation": zod.string().nullish()
+})
+
+
+/**
+ * @summary Get recovery check-in history
+ */
+export const getRecoveryHistoryQueryDaysDefault = 30;
+export const getRecoveryHistoryQueryDaysMax = 90;
+
+
+
+export const GetRecoveryHistoryQueryParams = zod.object({
+  "days": zod.coerce.number().max(getRecoveryHistoryQueryDaysMax).default(getRecoveryHistoryQueryDaysDefault).describe('Number of days to look back')
+})
+
+export const GetRecoveryHistoryResponseItem = zod.object({
+  "id": zod.number(),
+  "date": zod.string(),
+  "sleepQuality": zod.string(),
+  "energyLevel": zod.number(),
+  "stressLevel": zod.number(),
+  "muscleSoreness": zod.number(),
+  "motivationLevel": zod.number(),
+  "mood": zod.string().nullish(),
+  "notes": zod.string().nullish(),
+  "recoveryScore": zod.number().nullish(),
+  "createdAt": zod.coerce.date().optional()
+})
+export const GetRecoveryHistoryResponse = zod.array(GetRecoveryHistoryResponseItem)
+
+
+/**
+ * @summary Get per-muscle recovery status
+ */
+export const GetMuscleRecoveryResponseItem = zod.object({
+  "id": zod.number(),
+  "muscleGroup": zod.string(),
+  "lastTrainedDate": zod.coerce.date().nullish(),
+  "trainingVolume": zod.number(),
+  "sorenessLevel": zod.number(),
+  "recoveryPercentage": zod.number(),
+  "updatedAt": zod.coerce.date().optional()
+})
+export const GetMuscleRecoveryResponse = zod.array(GetMuscleRecoveryResponseItem)
+
+
+/**
+ * @summary Get today's training recommendation based on recovery
+ */
+export const GetRecoveryRecommendationResponse = zod.object({
+  "hasRecommendation": zod.boolean(),
+  "score": zod.number().optional(),
+  "readiness": zod.object({
+
+}).optional(),
+  "recommendation": zod.string().optional(),
+  "muscles": zod.array(zod.object({
+  "id": zod.number(),
+  "muscleGroup": zod.string(),
+  "lastTrainedDate": zod.coerce.date().nullish(),
+  "trainingVolume": zod.number(),
+  "sorenessLevel": zod.number(),
+  "recoveryPercentage": zod.number(),
+  "updatedAt": zod.coerce.date().optional()
+})).optional(),
+  "message": zod.string().optional()
+})
+
+
+/**
  * @summary Get today's scheduled workout
  */
 export const GetTodayWorkoutResponse = zod.object({
@@ -1443,5 +1585,263 @@ export const ListSubscriptionPlansResponseItem = zod.object({
   "isPopular": zod.boolean().optional()
 })
 export const ListSubscriptionPlansResponse = zod.array(ListSubscriptionPlansResponseItem)
+
+
+/**
+ * @summary List all goals for the current user
+ */
+export const ListGoalsQueryParams = zod.object({
+  "status": zod.enum(['active', 'completed', 'paused', 'cancelled', 'expired']).optional(),
+  "category": zod.coerce.string().optional(),
+  "priority": zod.enum(['high', 'medium', 'low']).optional()
+})
+
+export const ListGoalsResponseItem = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "category": zod.enum(['weight_loss', 'weight_gain', 'muscle_gain', 'strength', 'endurance', 'body_fat', 'workout_consistency', 'custom']),
+  "targetValue": zod.number().nullish(),
+  "currentValue": zod.number().nullish(),
+  "unit": zod.string().nullish(),
+  "startDate": zod.coerce.date().optional(),
+  "targetDate": zod.coerce.date().nullish(),
+  "priority": zod.enum(['high', 'medium', 'low']),
+  "status": zod.enum(['active', 'completed', 'paused', 'cancelled', 'expired']),
+  "isPrimary": zod.boolean(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+export const ListGoalsResponse = zod.array(ListGoalsResponseItem)
+
+
+/**
+ * @summary Create a new goal
+ */
+export const CreateGoalBody = zod.object({
+  "title": zod.string(),
+  "description": zod.string().optional(),
+  "category": zod.enum(['weight_loss', 'weight_gain', 'muscle_gain', 'strength', 'endurance', 'body_fat', 'workout_consistency', 'custom']),
+  "targetValue": zod.number().optional(),
+  "currentValue": zod.number().optional(),
+  "unit": zod.string().optional(),
+  "startDate": zod.coerce.date().optional(),
+  "targetDate": zod.coerce.date().optional(),
+  "priority": zod.enum(['high', 'medium', 'low']).optional(),
+  "isPrimary": zod.boolean().optional()
+})
+
+export const CreateGoalResponse = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "category": zod.enum(['weight_loss', 'weight_gain', 'muscle_gain', 'strength', 'endurance', 'body_fat', 'workout_consistency', 'custom']),
+  "targetValue": zod.number().nullish(),
+  "currentValue": zod.number().nullish(),
+  "unit": zod.string().nullish(),
+  "startDate": zod.coerce.date().optional(),
+  "targetDate": zod.coerce.date().nullish(),
+  "priority": zod.enum(['high', 'medium', 'low']),
+  "status": zod.enum(['active', 'completed', 'paused', 'cancelled', 'expired']),
+  "isPrimary": zod.boolean(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Get the user's primary active goal
+ */
+export const GetPrimaryGoalResponse = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "category": zod.enum(['weight_loss', 'weight_gain', 'muscle_gain', 'strength', 'endurance', 'body_fat', 'workout_consistency', 'custom']),
+  "targetValue": zod.number().nullish(),
+  "currentValue": zod.number().nullish(),
+  "unit": zod.string().nullish(),
+  "startDate": zod.coerce.date().optional(),
+  "targetDate": zod.coerce.date().nullish(),
+  "priority": zod.enum(['high', 'medium', 'low']),
+  "status": zod.enum(['active', 'completed', 'paused', 'cancelled', 'expired']),
+  "isPrimary": zod.boolean(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Get progress summary for all user goals
+ */
+export const GetGoalsProgressResponseItem = zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "category": zod.string(),
+  "status": zod.string(),
+  "priority": zod.string(),
+  "isPrimary": zod.boolean(),
+  "currentValue": zod.number().nullish(),
+  "targetValue": zod.number().nullish(),
+  "referenceValue": zod.number().nullish(),
+  "unit": zod.string().nullish(),
+  "progressPercentage": zod.number(),
+  "remaining": zod.number().nullish(),
+  "startDate": zod.coerce.date().optional(),
+  "targetDate": zod.coerce.date().nullish(),
+  "updatedAt": zod.coerce.date().optional()
+})
+export const GetGoalsProgressResponse = zod.array(GetGoalsProgressResponseItem)
+
+
+/**
+ * @summary Get the next upcoming milestone across the user's active goals
+ */
+export const GetUpcomingMilestoneResponse = zod.object({
+  "goal": zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "progressPercentage": zod.number(),
+  "unit": zod.string().nullish(),
+  "targetValue": zod.number().nullish()
+}).optional(),
+  "milestone": zod.object({
+  "id": zod.number(),
+  "goalId": zod.number(),
+  "userId": zod.number(),
+  "milestonePercentage": zod.union([zod.literal(25),zod.literal(50),zod.literal(75),zod.literal(100)]),
+  "milestoneValue": zod.number().nullish(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "achieved": zod.boolean(),
+  "achievedAt": zod.coerce.date().nullish(),
+  "createdAt": zod.coerce.date()
+}).optional()
+}).nullable()
+
+
+/**
+ * @summary Get a goal by ID
+ */
+export const GetGoalParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const GetGoalResponse = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "category": zod.enum(['weight_loss', 'weight_gain', 'muscle_gain', 'strength', 'endurance', 'body_fat', 'workout_consistency', 'custom']),
+  "targetValue": zod.number().nullish(),
+  "currentValue": zod.number().nullish(),
+  "unit": zod.string().nullish(),
+  "startDate": zod.coerce.date().optional(),
+  "targetDate": zod.coerce.date().nullish(),
+  "priority": zod.enum(['high', 'medium', 'low']),
+  "status": zod.enum(['active', 'completed', 'paused', 'cancelled', 'expired']),
+  "isPrimary": zod.boolean(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Update a goal
+ */
+export const UpdateGoalParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UpdateGoalBody = zod.object({
+  "title": zod.string().optional(),
+  "description": zod.string().optional(),
+  "category": zod.enum(['weight_loss', 'weight_gain', 'muscle_gain', 'strength', 'endurance', 'body_fat', 'workout_consistency', 'custom']).optional(),
+  "targetValue": zod.number().optional(),
+  "currentValue": zod.number().optional(),
+  "unit": zod.string().optional(),
+  "startDate": zod.coerce.date().optional(),
+  "targetDate": zod.coerce.date().optional(),
+  "priority": zod.enum(['high', 'medium', 'low']).optional(),
+  "status": zod.enum(['active', 'completed', 'paused', 'cancelled', 'expired']).optional(),
+  "isPrimary": zod.boolean().optional()
+})
+
+export const UpdateGoalResponse = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "category": zod.enum(['weight_loss', 'weight_gain', 'muscle_gain', 'strength', 'endurance', 'body_fat', 'workout_consistency', 'custom']),
+  "targetValue": zod.number().nullish(),
+  "currentValue": zod.number().nullish(),
+  "unit": zod.string().nullish(),
+  "startDate": zod.coerce.date().optional(),
+  "targetDate": zod.coerce.date().nullish(),
+  "priority": zod.enum(['high', 'medium', 'low']),
+  "status": zod.enum(['active', 'completed', 'paused', 'cancelled', 'expired']),
+  "isPrimary": zod.boolean(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Delete a goal
+ */
+export const DeleteGoalParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const DeleteGoalResponse = zod.object({
+  "success": zod.boolean(),
+  "id": zod.number()
+})
+
+
+/**
+ * @summary Get all milestones for a specific goal
+ */
+export const GetGoalMilestonesParams = zod.object({
+  "goalId": zod.coerce.number()
+})
+
+export const GetGoalMilestonesResponseItem = zod.object({
+  "id": zod.number(),
+  "goalId": zod.number(),
+  "userId": zod.number(),
+  "milestonePercentage": zod.union([zod.literal(25),zod.literal(50),zod.literal(75),zod.literal(100)]),
+  "milestoneValue": zod.number().nullish(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "achieved": zod.boolean(),
+  "achievedAt": zod.coerce.date().nullish(),
+  "createdAt": zod.coerce.date()
+})
+export const GetGoalMilestonesResponse = zod.array(GetGoalMilestonesResponseItem)
+
+
+/**
+ * @summary Generate the 4 default milestones (25/50/75/100%) for a goal
+ */
+export const GenerateMilestonesParams = zod.object({
+  "goalId": zod.coerce.number()
+})
+
+export const GenerateMilestonesResponseItem = zod.object({
+  "id": zod.number(),
+  "goalId": zod.number(),
+  "userId": zod.number(),
+  "milestonePercentage": zod.union([zod.literal(25),zod.literal(50),zod.literal(75),zod.literal(100)]),
+  "milestoneValue": zod.number().nullish(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "achieved": zod.boolean(),
+  "achievedAt": zod.coerce.date().nullish(),
+  "createdAt": zod.coerce.date()
+})
+export const GenerateMilestonesResponse = zod.array(GenerateMilestonesResponseItem)
 
 

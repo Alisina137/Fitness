@@ -1,8 +1,10 @@
-import React, { useState, useMemo } from "react";
-import { Target, Plus, Edit2, Trash2, CheckCircle, PauseCircle, Star, Filter, Trophy, Dumbbell, TrendingUp, Zap, Heart, BarChart3, ListChecks, Pencil, X } from "lucide-react";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
+import { Target, Plus, Edit2, Trash2, CheckCircle, PauseCircle, Star, Filter, Trophy, Dumbbell, TrendingUp, Zap, Heart, BarChart3, ListChecks, Pencil, X, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format, formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
+import { MilestoneCard, MilestoneCardSkeleton, type Milestone } from "@/components/milestone-card";
+import { MilestoneCelebrationModal } from "@/components/milestone-celebration-modal";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -170,7 +172,9 @@ function GoalModal({ goal, onClose, onSave }: { goal?: Goal; onClose: () => void
         await apiFetch(`/goals/${goal.id}`, { method: "PUT", body: JSON.stringify(payload) });
         toast({ title: "Goal updated" });
       } else {
-        await apiFetch("/goals", { method: "POST", body: JSON.stringify(payload) });
+        const created = await apiFetch<{ id: number }>("/goals", { method: "POST", body: JSON.stringify(payload) });
+        // Auto-generate milestones for new goals (non-blocking)
+        apiFetch(`/goals/${created.id}/milestones/generate`, { method: "POST" }).catch(() => {});
         toast({ title: "Goal created 🎯" });
       }
       onSave();
@@ -303,16 +307,41 @@ function GoalModal({ goal, onClose, onSave }: { goal?: Goal; onClose: () => void
 
 // ─── GoalCard ─────────────────────────────────────────────────────────────────
 
-function GoalCard({ goal, onEdit, onDelete, onStatusChange }: {
+function GoalCard({ goal, onEdit, onDelete, onStatusChange, onCelebrate }: {
   goal: Goal;
   onEdit: () => void;
   onDelete: () => void;
   onStatusChange: (s: GoalStatus) => void;
+  onCelebrate?: (milestone: Milestone, goalTitle: string) => void;
 }) {
   const cat = CATEGORY_CONFIG[goal.category];
   const status = STATUS_CONFIG[goal.status];
   const pri = PRIORITY_CONFIG[goal.priority];
   const Icon = cat.icon;
+
+  const [showMilestones, setShowMilestones] = useState(false);
+  const [milestones, setMilestones] = useState<Milestone[]>([]);
+  const [loadingMilestones, setLoadingMilestones] = useState(false);
+
+  const loadMilestones = useCallback(async () => {
+    if (milestones.length > 0) return; // cached
+    setLoadingMilestones(true);
+    try {
+      const data = await apiFetch<Milestone[]>(`/goals/${goal.id}/milestones`);
+      setMilestones(data);
+      // Check for newly achieved milestones to celebrate (achieved in last 10 minutes)
+      if (onCelebrate) {
+        const recent = data.filter((m) => m.achieved && m.achievedAt &&
+          Date.now() - new Date(m.achievedAt).getTime() < 10 * 60 * 1000);
+        if (recent.length > 0) onCelebrate(recent[recent.length - 1], goal.title);
+      }
+    } catch { /* ignore */ } finally { setLoadingMilestones(false); }
+  }, [goal.id, goal.title, milestones.length, onCelebrate]);
+
+  const toggleMilestones = () => {
+    if (!showMilestones) loadMilestones();
+    setShowMilestones((v) => !v);
+  };
 
   const progressPct = goal.targetValue && goal.currentValue
     ? Math.min(100, Math.round((goal.currentValue / goal.targetValue) * 100))
@@ -404,11 +433,45 @@ function GoalCard({ goal, onEdit, onDelete, onStatusChange }: {
             <Zap className="h-3.5 w-3.5" /> Resume
           </button>
         )}
+        <button onClick={toggleMilestones}
+          className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-primary hover:bg-primary/5 transition-colors">
+          <Trophy className="h-3.5 w-3.5" />
+          {showMilestones ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+        </button>
         <button onClick={onDelete}
           className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors">
           <Trash2 className="h-3.5 w-3.5" />
         </button>
       </div>
+
+      {/* Milestone panel */}
+      {showMilestones && (
+        <div className="space-y-2 pt-1 border-t border-border/30">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Milestones</p>
+          {loadingMilestones ? (
+            <div className="space-y-2">
+              {[1, 2, 3, 4].map((i) => <MilestoneCardSkeleton key={i} />)}
+            </div>
+          ) : milestones.length === 0 ? (
+            <div className="text-center py-4 text-xs text-muted-foreground">
+              <p>No milestones generated yet.</p>
+              <button
+                onClick={async () => {
+                  setLoadingMilestones(true);
+                  try {
+                    const data = await apiFetch<Milestone[]>(`/goals/${goal.id}/milestones/generate`, { method: "POST" });
+                    setMilestones(data);
+                  } catch { /* ignore */ } finally { setLoadingMilestones(false); }
+                }}
+                className="mt-2 text-primary underline underline-offset-2">Generate milestones</button>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {milestones.map((m) => <MilestoneCard key={m.id} milestone={m} />)}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -424,6 +487,8 @@ export default function GoalsPage() {
   const [filterPriority, setFilterPriority] = useState<GoalPriority | "all">("all");
   const [modalOpen, setModalOpen] = useState(false);
   const [editGoal, setEditGoal] = useState<Goal | undefined>(undefined);
+  const [celebrationMilestone, setCelebrationMilestone] = useState<Milestone | null>(null);
+  const [celebrationGoalTitle, setCelebrationGoalTitle] = useState<string>("");
 
   const filtered = useMemo(() => {
     return goals.filter((g) => {
@@ -573,12 +638,13 @@ export default function GoalsPage() {
               onEdit={() => openEdit(g)}
               onDelete={() => handleDelete(g.id)}
               onStatusChange={(s) => handleStatusChange(g.id, s)}
+              onCelebrate={(m, title) => { setCelebrationMilestone(m); setCelebrationGoalTitle(title); }}
             />
           ))}
         </div>
       )}
 
-      {/* Modal */}
+      {/* Goal modal */}
       {modalOpen && (
         <GoalModal
           goal={editGoal}
@@ -586,6 +652,13 @@ export default function GoalsPage() {
           onSave={reload}
         />
       )}
+
+      {/* Celebration modal */}
+      <MilestoneCelebrationModal
+        milestone={celebrationMilestone}
+        goalTitle={celebrationGoalTitle}
+        onClose={() => setCelebrationMilestone(null)}
+      />
     </div>
   );
 }

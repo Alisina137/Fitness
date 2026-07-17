@@ -1,12 +1,52 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
-import { goalsTable, insertGoalSchema, updateGoalSchema } from "@workspace/db";
+import { goalsTable, goalMilestonesTable, insertGoalSchema, updateGoalSchema } from "@workspace/db";
 import { requireAuth, getUser } from "../lib/auth.js";
 import { getPrimaryGoal, serializeGoal, ensureSinglePrimary } from "../lib/goals-service.js";
 import { updateGoalProgress, getGoalProgressSummary } from "../lib/goal-progress-service.js";
-import { eq, and, desc } from "drizzle-orm";
+import {
+  generateGoalMilestones,
+  checkMilestones,
+  getUpcomingMilestone,
+  serializeMilestone,
+} from "../lib/milestone-service.js";
+import { eq, and, desc, asc } from "drizzle-orm";
 
 const router = Router();
+
+// ─── GET /api/goals/milestones/upcoming ───────────────────────────────────────
+// Must be registered BEFORE /goals/:id to prevent "milestones" matching as id.
+
+router.get("/goals/milestones/upcoming", requireAuth, async (req, res) => {
+  const user = getUser(req);
+
+  // Find the user's primary or first active goal, then get its upcoming milestone
+  const activeGoals = await db
+    .select({ id: goalsTable.id, title: goalsTable.title, progressPercentage: goalsTable.progressPercentage, isPrimary: goalsTable.isPrimary, category: goalsTable.category, targetValue: goalsTable.targetValue, unit: goalsTable.unit })
+    .from(goalsTable)
+    .where(and(eq(goalsTable.userId, user.id), eq(goalsTable.status, "active")))
+    .orderBy(desc(goalsTable.isPrimary), desc(goalsTable.createdAt));
+
+  if (activeGoals.length === 0) return res.json(null);
+
+  for (const goal of activeGoals) {
+    const milestone = await getUpcomingMilestone(goal.id);
+    if (milestone) {
+      return res.json({
+        goal: {
+          id: goal.id,
+          title: goal.title,
+          progressPercentage: Number(goal.progressPercentage ?? 0),
+          unit: goal.unit,
+          targetValue: goal.targetValue !== null ? Number(goal.targetValue) : null,
+        },
+        milestone: serializeMilestone(milestone),
+      });
+    }
+  }
+
+  return res.json(null);
+});
 
 // ─── POST /api/goals ──────────────────────────────────────────────────────────
 
@@ -49,7 +89,11 @@ router.post("/goals", requireAuth, async (req, res) => {
   }
 
   // Seed referenceValue (starting point) and compute initial progress non-blocking
-  updateGoalProgress(goal.id).catch(() => {});
+  // Then auto-generate milestones and run initial check
+  updateGoalProgress(goal.id)
+    .then(() => generateGoalMilestones(goal.id))
+    .then(() => checkMilestones(goal.id))
+    .catch(() => {});
 
   res.status(201).json(serializeGoal(goal));
 });
@@ -158,10 +202,56 @@ router.put("/goals/:id", requireAuth, async (req, res) => {
     await ensureSinglePrimary(user.id, id);
   }
 
-  // Recalculate progress after any edit non-blocking
-  updateGoalProgress(id).catch(() => {});
+  // Recalculate progress after any edit, then check milestones non-blocking
+  updateGoalProgress(id).then(() => checkMilestones(id)).catch(() => {});
 
   res.json(serializeGoal(updated));
+});
+
+// ─── POST /api/goals/:goalId/milestones/generate ──────────────────────────────
+
+router.post("/goals/:goalId/milestones/generate", requireAuth, async (req, res) => {
+  const user = getUser(req);
+  const goalId = Number(req.params.goalId);
+  if (!Number.isFinite(goalId)) return res.status(400).json({ error: "Invalid goalId." });
+
+  const [goal] = await db
+    .select()
+    .from(goalsTable)
+    .where(and(eq(goalsTable.id, goalId), eq(goalsTable.userId, user.id)))
+    .limit(1);
+
+  if (!goal) return res.status(404).json({ error: "Goal not found." });
+  if (goal.status === "cancelled") return res.status(400).json({ error: "Cannot generate milestones for a cancelled goal." });
+
+  const milestones = await generateGoalMilestones(goalId);
+  await checkMilestones(goalId);
+
+  res.status(201).json(milestones.map(serializeMilestone));
+});
+
+// ─── GET /api/goals/:goalId/milestones ────────────────────────────────────────
+
+router.get("/goals/:goalId/milestones", requireAuth, async (req, res) => {
+  const user = getUser(req);
+  const goalId = Number(req.params.goalId);
+  if (!Number.isFinite(goalId)) return res.status(400).json({ error: "Invalid goalId." });
+
+  const [goal] = await db
+    .select({ id: goalsTable.id })
+    .from(goalsTable)
+    .where(and(eq(goalsTable.id, goalId), eq(goalsTable.userId, user.id)))
+    .limit(1);
+
+  if (!goal) return res.status(404).json({ error: "Goal not found." });
+
+  const milestones = await db
+    .select()
+    .from(goalMilestonesTable)
+    .where(eq(goalMilestonesTable.goalId, goalId))
+    .orderBy(asc(goalMilestonesTable.milestonePercentage));
+
+  res.json(milestones.map(serializeMilestone));
 });
 
 // ─── DELETE /api/goals/:id ────────────────────────────────────────────────────

@@ -676,6 +676,120 @@ export interface WorkoutAnalytics {
   recentPersonalRecords?: WorkoutAnalyticsRecentPersonalRecordsItem[];
 }
 
+export type DailyCheckInInputSleepQuality = typeof DailyCheckInInputSleepQuality[keyof typeof DailyCheckInInputSleepQuality];
+
+
+export const DailyCheckInInputSleepQuality = {
+  excellent: 'excellent',
+  good: 'good',
+  average: 'average',
+  poor: 'poor',
+} as const;
+
+export type DailyCheckInInputMood = typeof DailyCheckInInputMood[keyof typeof DailyCheckInInputMood];
+
+
+export const DailyCheckInInputMood = {
+  great: 'great',
+  good: 'good',
+  neutral: 'neutral',
+  low: 'low',
+} as const;
+
+export interface DailyCheckInInput {
+  date: string;
+  sleepQuality: DailyCheckInInputSleepQuality;
+  /**
+     * @minimum 1
+     * @maximum 10
+     */
+  energyLevel: number;
+  /**
+     * @minimum 1
+     * @maximum 10
+     */
+  stressLevel: number;
+  /**
+     * @minimum 1
+     * @maximum 10
+     */
+  muscleSoreness: number;
+  /**
+     * @minimum 1
+     * @maximum 10
+     */
+  motivationLevel: number;
+  mood?: DailyCheckInInputMood;
+  /** @maxLength 500 */
+  notes?: string;
+}
+
+export interface DailyCheckIn {
+  id: number;
+  date: string;
+  sleepQuality: string;
+  energyLevel: number;
+  stressLevel: number;
+  muscleSoreness: number;
+  motivationLevel: number;
+  /** @nullable */
+  mood?: string | null;
+  /** @nullable */
+  notes?: string | null;
+  /** @nullable */
+  recoveryScore?: number | null;
+  createdAt?: string;
+}
+
+export type CheckInResultReadiness = { [key: string]: unknown };
+
+export type CheckInResultFatigue = { [key: string]: unknown };
+
+export interface CheckInResult {
+  recoveryScore: number;
+  readiness: CheckInResultReadiness;
+  fatigue?: CheckInResultFatigue;
+  message: string;
+}
+
+export interface MuscleRecovery {
+  id: number;
+  muscleGroup: string;
+  /** @nullable */
+  lastTrainedDate?: string | null;
+  trainingVolume: number;
+  sorenessLevel: number;
+  recoveryPercentage: number;
+  updatedAt?: string;
+}
+
+export type TodayRecoveryProfile = { [key: string]: unknown };
+
+export type TodayRecoveryReadiness = { [key: string]: unknown };
+
+export interface TodayRecovery {
+  checkedInToday: boolean;
+  checkIn?: DailyCheckIn;
+  profile?: TodayRecoveryProfile;
+  /** @nullable */
+  score?: number | null;
+  readiness?: TodayRecoveryReadiness;
+  muscles?: MuscleRecovery[];
+  /** @nullable */
+  recommendation?: string | null;
+}
+
+export type RecoveryRecommendationReadiness = { [key: string]: unknown };
+
+export interface RecoveryRecommendation {
+  hasRecommendation: boolean;
+  score?: number;
+  readiness?: RecoveryRecommendationReadiness;
+  recommendation?: string;
+  muscles?: MuscleRecovery[];
+  message?: string;
+}
+
 export type AiWorkoutRequestConstraints = { [key: string]: unknown };
 
 export interface AiWorkoutRequest {
@@ -919,6 +1033,220 @@ export interface MessageInput {
   content: string;
 }
 
+export type GoalCategory = typeof GoalCategory[keyof typeof GoalCategory];
+
+
+export const GoalCategory = {
+  weight_loss: 'weight_loss',
+  weight_gain: 'weight_gain',
+  muscle_gain: 'muscle_gain',
+  strength: 'strength',
+  endurance: 'endurance',
+  body_fat: 'body_fat',
+  workout_consistency: 'workout_consistency',
+  custom: 'custom',
+} as const;
+
+export type GoalPriority = typeof GoalPriority[keyof typeof GoalPriority];
+
+
+export const GoalPriority = {
+  high: 'high',
+  medium: 'medium',
+  low: 'low',
+} as const;
+
+export type GoalStatus = typeof GoalStatus[keyof typeof GoalStatus];
+
+
+export const GoalStatus = {
+  active: 'active',
+  completed: 'completed',
+  paused: 'paused',
+  cancelled: 'cancelled',
+  expired: 'expired',
+} as const;
+
+export interface Goal {
+  id: number;
+  userId: number;
+  title: string;
+  /** @nullable */
+  description?: string | null;
+  category: GoalCategory;
+  /** @nullable */
+  targetValue?: number | null;
+  /** @nullable */
+  currentValue?: number | null;
+  /** @nullable */
+  unit?: string | null;
+  startDate?: string;
+  /** @nullable */
+  targetDate?: string | null;
+  priority: GoalPriority;
+  status: GoalStatus;
+  isPrimary: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type GoalInputCategory = typeof GoalInputCategory[keyof typeof GoalInputCategory];
+
+
+export const GoalInputCategory = {
+  weight_loss: 'weight_loss',
+  weight_gain: 'weight_gain',
+  muscle_gain: 'muscle_gain',
+  strength: 'strength',
+  endurance: 'endurance',
+  body_fat: 'body_fat',
+  workout_consistency: 'workout_consistency',
+  custom: 'custom',
+} as const;
+
+export type GoalInputPriority = typeof GoalInputPriority[keyof typeof GoalInputPriority];
+
+
+export const GoalInputPriority = {
+  high: 'high',
+  medium: 'medium',
+  low: 'low',
+} as const;
+
+export interface GoalInput {
+  title: string;
+  description?: string;
+  category: GoalInputCategory;
+  targetValue?: number;
+  currentValue?: number;
+  unit?: string;
+  startDate?: string;
+  targetDate?: string;
+  priority?: GoalInputPriority;
+  isPrimary?: boolean;
+}
+
+export type GoalUpdateCategory = typeof GoalUpdateCategory[keyof typeof GoalUpdateCategory];
+
+
+export const GoalUpdateCategory = {
+  weight_loss: 'weight_loss',
+  weight_gain: 'weight_gain',
+  muscle_gain: 'muscle_gain',
+  strength: 'strength',
+  endurance: 'endurance',
+  body_fat: 'body_fat',
+  workout_consistency: 'workout_consistency',
+  custom: 'custom',
+} as const;
+
+export type GoalUpdatePriority = typeof GoalUpdatePriority[keyof typeof GoalUpdatePriority];
+
+
+export const GoalUpdatePriority = {
+  high: 'high',
+  medium: 'medium',
+  low: 'low',
+} as const;
+
+export type GoalUpdateStatus = typeof GoalUpdateStatus[keyof typeof GoalUpdateStatus];
+
+
+export const GoalUpdateStatus = {
+  active: 'active',
+  completed: 'completed',
+  paused: 'paused',
+  cancelled: 'cancelled',
+  expired: 'expired',
+} as const;
+
+export interface GoalUpdate {
+  title?: string;
+  description?: string;
+  category?: GoalUpdateCategory;
+  targetValue?: number;
+  currentValue?: number;
+  unit?: string;
+  startDate?: string;
+  targetDate?: string;
+  priority?: GoalUpdatePriority;
+  status?: GoalUpdateStatus;
+  isPrimary?: boolean;
+}
+
+export interface GoalProgress {
+  id: number;
+  title: string;
+  category: string;
+  status: string;
+  priority: string;
+  isPrimary: boolean;
+  /** @nullable */
+  currentValue?: number | null;
+  /** @nullable */
+  targetValue?: number | null;
+  /** @nullable */
+  referenceValue?: number | null;
+  /** @nullable */
+  unit?: string | null;
+  progressPercentage: number;
+  /** @nullable */
+  remaining?: number | null;
+  startDate?: string;
+  /** @nullable */
+  targetDate?: string | null;
+  updatedAt?: string;
+}
+
+export type GoalMilestoneMilestonePercentage = typeof GoalMilestoneMilestonePercentage[keyof typeof GoalMilestoneMilestonePercentage];
+
+
+export const GoalMilestoneMilestonePercentage = {
+  NUMBER_25: 25,
+  NUMBER_50: 50,
+  NUMBER_75: 75,
+  NUMBER_100: 100,
+} as const;
+
+export interface GoalMilestone {
+  id: number;
+  goalId: number;
+  userId: number;
+  milestonePercentage: GoalMilestoneMilestonePercentage;
+  /** @nullable */
+  milestoneValue?: number | null;
+  title: string;
+  /** @nullable */
+  description?: string | null;
+  achieved: boolean;
+  /** @nullable */
+  achievedAt?: string | null;
+  createdAt: string;
+}
+
+export type UpcomingMilestoneGoal = {
+  id: number;
+  title: string;
+  progressPercentage: number;
+  /** @nullable */
+  unit?: string | null;
+  /** @nullable */
+  targetValue?: number | null;
+};
+
+/**
+ * @nullable
+ */
+export type UpcomingMilestone = {
+  goal?: UpcomingMilestoneGoal;
+  milestone?: GoalMilestone;
+} | null;
+
+export interface DeleteResponse {
+  success: boolean;
+  id: number;
+}
+
 export type SubscriptionStatus = typeof SubscriptionStatus[keyof typeof SubscriptionStatus];
 
 
@@ -968,6 +1296,14 @@ export const ListWorkoutsStatus = {
   completed: 'completed',
   all: 'all',
 } as const;
+
+export type GetRecoveryHistoryParams = {
+/**
+ * Number of days to look back
+ * @maximum 90
+ */
+days?: number;
+};
 
 export type GetWorkoutHistoryParams = {
 limit?: number;
@@ -1044,5 +1380,31 @@ export const ListProgressEntriesType = {
   weight: 'weight',
   measurement: 'measurement',
   achievement: 'achievement',
+} as const;
+
+export type ListGoalsParams = {
+status?: ListGoalsStatus;
+category?: string;
+priority?: ListGoalsPriority;
+};
+
+export type ListGoalsStatus = typeof ListGoalsStatus[keyof typeof ListGoalsStatus];
+
+
+export const ListGoalsStatus = {
+  active: 'active',
+  completed: 'completed',
+  paused: 'paused',
+  cancelled: 'cancelled',
+  expired: 'expired',
+} as const;
+
+export type ListGoalsPriority = typeof ListGoalsPriority[keyof typeof ListGoalsPriority];
+
+
+export const ListGoalsPriority = {
+  high: 'high',
+  medium: 'medium',
+  low: 'low',
 } as const;
 

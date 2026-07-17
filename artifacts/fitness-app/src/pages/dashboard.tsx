@@ -3,7 +3,8 @@ import { Link } from "wouter";
 import { 
   useGetDashboardSummary, 
   useGetRecentActivity,
-  useCompleteWorkout
+  useCompleteWorkout,
+  useGetUpcomingMilestone,
 } from "@workspace/api-client-react";
 import { 
   Activity, 
@@ -12,12 +13,60 @@ import {
   Target, 
   ChevronRight, 
   CheckCircle2,
-  Utensils
+  Utensils,
+  Trophy,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import { GoalProgressCard, GoalProgressCardSkeleton, type GoalProgress } from "@/components/goal-progress-card";
+import { MilestoneCard, type Milestone } from "@/components/milestone-card";
+
+// ─── Upcoming Milestone Section ───────────────────────────────────────────────
+
+function UpcomingMilestoneSection() {
+  const { data, isLoading } = useGetUpcomingMilestone();
+
+  if (isLoading) {
+    return (
+      <div className="bg-card border border-border p-6 rounded-3xl space-y-4 animate-pulse">
+        <div className="h-4 bg-secondary rounded w-1/2" />
+        <div className="h-16 bg-secondary rounded-2xl" />
+      </div>
+    );
+  }
+
+  if (!data || !data.milestone) return null;
+
+  const { goal, milestone } = data;
+  const remaining = milestone.milestonePercentage - goal.progressPercentage;
+
+  return (
+    <div className="bg-card border border-border p-6 rounded-3xl space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="font-bold flex items-center gap-2">
+          <Trophy className="h-4 w-4 text-primary" /> Next Milestone
+        </h3>
+        <Link href="/goals" className="text-xs text-primary hover:underline">View goals</Link>
+      </div>
+
+      <div className="space-y-2">
+        <p className="text-xs text-muted-foreground truncate">{goal.title}</p>
+        <MilestoneCard milestone={milestone as Milestone} />
+        <div className="flex items-center justify-between text-xs text-muted-foreground pt-1">
+          <span>Current: <span className="font-semibold text-foreground">{Math.round(goal.progressPercentage)}%</span></span>
+          <span><span className="font-semibold text-primary">{Math.round(remaining)}%</span> to go</span>
+        </div>
+        <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
+          <div
+            className="h-full bg-primary rounded-full transition-all"
+            style={{ width: `${Math.min(100, (goal.progressPercentage / milestone.milestonePercentage) * 100)}%` }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // ─── Active Goals Section ─────────────────────────────────────────────────────
 
@@ -222,6 +271,9 @@ export default function DashboardPage() {
 
           {/* Active Goals */}
           <ActiveGoalsSection />
+
+          {/* Upcoming Milestone */}
+          <UpcomingMilestoneSection />
 
           {/* Activity Feed */}
           <div className="bg-card border border-border p-6 rounded-3xl">

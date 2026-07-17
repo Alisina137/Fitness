@@ -1,0 +1,169 @@
+You are continuing development of an AI fitness application.
+
+CURRENT PROJECT STATE:
+
+Already implemented:
+
+- User profile system
+- Workout engine
+- AI workout generation
+- Recovery system
+- Workout analytics
+- Personal Records (PR)
+- Goal Management
+- Goal Progress Engine
+
+Do not rebuild these systems.
+
+TASK:
+
+Build the Goal Milestones & Achievement Engine.
+
+This system should automatically detect and celebrate progress toward goals.
+
+IMPLEMENT:
+
+1. Create Goal Milestone model.
+
+Fields:
+
+- id
+- goalId
+- userId
+- milestonePercentage
+- milestoneValue
+- title
+- description
+- achieved
+- achievedAt
+- createdAt
+
+Default milestones:
+
+- 25%
+- 50%
+- 75%
+- 100%
+
+
+2. Create Milestone Service.
+
+Create reusable functions:
+
+- generateGoalMilestones(goalId)
+- checkMilestones(goalId)
+- markMilestoneCompleted(milestoneId)
+- getUpcomingMilestone(goalId)
+
+Run milestone checks whenever goal progress changes.
+
+
+3. Automatic milestone detection.
+
+When a goal reaches:
+
+25%
+
+50%
+
+75%
+
+100%
+
+Automatically:
+
+- Mark milestone as completed.
+- Save achievement.
+- Prevent duplicate milestone awards.
+
+
+4. Create API endpoints.
+
+POST /api/goals/:goalId/milestones/generate
+
+GET /api/goals/:goalId/milestones
+
+GET /api/goals/milestones/upcoming
+
+
+5. Create Milestone Card component.
+
+Display:
+
+- Milestone title
+- Percentage
+- Achievement status
+- Achievement date (if completed)
+
+Example:
+
+✔ 50% Complete
+
+"You've completed half of your goal!"
+
+
+6. Dashboard integration.
+
+Add an "Upcoming Milestone" card.
+
+Show:
+
+- Current goal
+- Next milestone
+- Remaining progress
+
+
+7. Celebration modal.
+
+When a milestone is achieved:
+
+Show:
+
+- Confetti animation
+- Success modal
+- Motivational message
+
+Example:
+
+🎉 Congratulations!
+
+"You've reached 75% of your Muscle Gain goal."
+
+
+8. Validation.
+
+Handle:
+
+- Duplicate milestones
+- Completed goals
+- Deleted goals
+- Goals with custom targets
+
+
+DO NOT:
+
+- Build badge collection.
+- Build social sharing.
+- Build AI Coach messages.
+- Build push notifications.
+
+These will be added later.
+
+TECH REQUIREMENTS:
+
+- Reuse Goal Progress Engine.
+- Keep milestone logic modular.
+- Add error handling.
+- Maintain backward compatibility.
+
+COMPLETION REPORT:
+
+After finishing, provide:
+
+1. Files created
+2. Files modified
+3. Database changes
+4. API endpoints
+5. Milestone detection flow
+6. Example milestone outputs
+7. Any issues found
