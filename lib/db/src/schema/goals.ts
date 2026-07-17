@@ -55,6 +55,8 @@ export const goalsTable = pgTable("goals", {
 
 // ─── Zod schemas ──────────────────────────────────────────────────────────────
 
+const dateOrString = z.union([z.date(), z.string().transform((s) => new Date(s))]);
+
 export const insertGoalSchema = createInsertSchema(goalsTable).omit({
   id: true,
   userId: true,
@@ -63,6 +65,8 @@ export const insertGoalSchema = createInsertSchema(goalsTable).omit({
 }).extend({
   targetValue: z.union([z.string(), z.number()]).optional(),
   currentValue: z.union([z.string(), z.number()]).optional(),
+  startDate: dateOrString.optional(),
+  targetDate: dateOrString.optional().nullable(),
 });
 
 export const updateGoalSchema = insertGoalSchema.partial();
