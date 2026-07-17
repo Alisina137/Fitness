@@ -10,7 +10,6 @@ import {
   workoutCompletionsTable,
   workoutAnalyticsTable,
   exercisePerformanceTable,
-  personalRecordsTable,
   exercisesTable,
   userProfilesTable,
 } from "@workspace/db";
@@ -199,7 +198,7 @@ export async function processWorkoutAnalytics(
       },
     });
 
-  // Save ExercisePerformance rows + detect PRs
+  // Save ExercisePerformance rows (PR detection is handled by pr-engine.ts)
   await Promise.all(
     nonSkipped.map(async (ex) => {
       if (!ex.exerciseId) return;
@@ -214,38 +213,6 @@ export async function processWorkoutAnalytics(
         0,
       );
 
-      // Check if this is a PR (max weight for this user × exercise)
-      const [existingPR] = await db
-        .select({ value: personalRecordsTable.value })
-        .from(personalRecordsTable)
-        .where(
-          and(
-            eq(personalRecordsTable.userId, userId),
-            eq(personalRecordsTable.exerciseId, ex.exerciseId),
-            eq(personalRecordsTable.recordType, "max_weight"),
-          ),
-        )
-        .limit(1);
-
-      const prevBest = existingPR ? Number(existingPR.value) : 0;
-      const isPersonalRecord = maxWeightKg !== null && maxWeightKg > prevBest;
-
-      if (isPersonalRecord && maxWeightKg !== null) {
-        await db
-          .insert(personalRecordsTable)
-          .values({
-            userId,
-            exerciseId: ex.exerciseId,
-            exerciseName: ex.name,
-            recordType: "max_weight",
-            value: maxWeightKg.toString(),
-            unit: "kg",
-            achievedAt: completion.completedAt,
-            workoutCompletionId: completionId,
-          })
-          .onConflictDoNothing();
-      }
-
       await db.insert(exercisePerformanceTable).values({
         userId,
         exerciseId: ex.exerciseId,
@@ -256,7 +223,7 @@ export async function processWorkoutAnalytics(
         totalReps: exTotalReps,
         totalSets: exTotalSets,
         totalVolume: exVolume.toString(),
-        isPersonalRecord,
+        isPersonalRecord: false, // updated by pr-engine after detection
       });
     }),
   );

@@ -1,0 +1,310 @@
+You are continuing development of an AI fitness application.
+
+CURRENT PROJECT STATE:
+
+Already implemented:
+
+- React + TypeScript frontend
+- Tailwind CSS design system
+- Authentication
+- User profile system
+- Exercise database
+- Workout program engine
+- Workout execution tracking
+- Workout history
+- AI workout generation engine
+- Recovery intelligence system
+- Workout analytics foundation
+
+Existing workout data includes:
+
+- Exercises completed
+- Sets
+- Reps
+- Weight used
+- Training dates
+- Exercise performance history
+
+Do not rebuild these systems.
+
+TASK:
+
+Build the Personal Records (PR) System.
+
+The purpose:
+
+Automatically detect and celebrate user achievements.
+
+Examples:
+
+- Heaviest weight lifted
+- Most repetitions completed
+- Highest total volume
+- Longest workout streak
+- Fastest completion time
+
+This system will later power:
+
+- User motivation
+- AI Coach messages
+- Progress dashboard
+- Achievement system
+
+
+IMPLEMENT:
+
+
+1. Create Personal Record Database Model
+
+Create:
+
+PersonalRecord
+
+Fields:
+
+- userId
+- exerciseId
+- recordType
+- previousValue
+- newValue
+- improvementPercentage
+- achievedDate
+- createdAt
+
+
+recordType examples:
+
+- max_weight
+- max_reps
+- max_volume
+- fastest_time
+- longest_streak
+
+
+2. Create PR Detection Service
+
+Create service functions:
+
+checkNewPersonalRecord()
+
+calculateImprovement()
+
+savePersonalRecord()
+
+
+This service should run automatically after workout completion.
+
+
+3. Add Max Weight Detection
+
+Example:
+
+Previous:
+
+Bench Press:
+80kg
+
+
+New workout:
+
+85kg
+
+
+Create PR:
+
++5kg improvement
+
+
+4. Add Max Repetition Detection
+
+Example:
+
+Previous:
+
+20 reps
+
+
+New:
+
+25 reps
+
+
+Create PR.
+
+
+5. Add Volume Record Detection
+
+Calculate:
+
+Weight × Reps × Sets
+
+
+Compare previous performance.
+
+Example:
+
+Previous volume:
+
+3000kg
+
+
+New volume:
+
+3500kg
+
+
+Create PR.
+
+
+6. Add Workout Streak Records
+
+Track:
+
+- Consecutive workout days
+- Consecutive weekly goals completed
+
+
+Example:
+
+30 day workout streak
+
+
+Create achievement.
+
+
+7. Create PR API Endpoints
+
+
+Create:
+
+
+GET
+
+/api/records
+
+
+Return:
+
+All user records.
+
+
+---
+
+
+GET
+
+/api/records/latest
+
+
+Return:
+
+Most recent achievements.
+
+
+---
+
+
+GET
+
+/api/records/:exerciseId
+
+
+Return:
+
+Exercise-specific records.
+
+
+8. Create PR UI Components
+
+
+Create:
+
+
+PersonalRecordCard
+
+
+Display:
+
+Example:
+
+
+🏆 New Personal Record
+
+Bench Press
+
+85kg
+
+Previous:
+
+80kg
+
+Improvement:
+
++6.25%
+
+
+9. Add Achievement Notification
+
+When a PR happens:
+
+Show:
+
+- Success message
+- Achievement animation
+- Record details
+
+
+Example:
+
+"Congratulations! You broke your Bench Press record."
+
+
+10. Add Validation
+
+Handle:
+
+- First workout (no previous record)
+- Missing weight data
+- Bodyweight exercises
+- Duplicate records
+
+
+For bodyweight exercises:
+
+Track:
+
+- Maximum reps
+- Volume
+- Time
+
+
+DO NOT:
+
+- Build social sharing yet.
+- Build leaderboard yet.
+- Build achievement badges yet.
+- Modify workout tracking.
+- Modify analytics calculations.
+
+
+TECH REQUIREMENTS:
+
+- Reuse existing exercise and workout data.
+- Do not duplicate exercise models.
+- Keep PR detection modular.
+- Run efficiently after workout completion.
+- Add proper error handling.
+- Maintain backward compatibility.
+
+
+COMPLETION REPORT:
+
+After finishing, provide:
+
+1. Files created
+2. Files modified
+3. Database changes
+4. API endpoints
+5. PR detection logic
+6. Example records created
+7. Any issues found

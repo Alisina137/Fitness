@@ -122,10 +122,12 @@ export type CompletedSetLog = {
 export const personalRecordsTable = pgTable("personal_records", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
-  exerciseId: integer("exercise_id").notNull(),
+  exerciseId: integer("exercise_id").notNull(),        // 0 = streak/global records
   exerciseName: text("exercise_name").notNull(),
-  recordType: text("record_type").notNull(),  // max_weight | max_reps | max_volume
-  value: numeric("value", { precision: 8, scale: 2 }).notNull(),
+  recordType: text("record_type").notNull(),           // max_weight | max_reps | max_volume | fastest_time | longest_streak
+  value: numeric("value", { precision: 10, scale: 2 }).notNull(),
+  previousValue: numeric("previous_value", { precision: 10, scale: 2 }),
+  improvementPercentage: numeric("improvement_percentage", { precision: 6, scale: 2 }),
   unit: text("unit").default("kg").notNull(),
   achievedAt: timestamp("achieved_at").defaultNow().notNull(),
   workoutCompletionId: integer("workout_completion_id").references(() => workoutCompletionsTable.id, { onDelete: "set null" }),

@@ -13,6 +13,7 @@ import { eq, and, desc, gte, count, sum, avg, sql } from "drizzle-orm";
 import { requireAuth, getUser } from "../lib/auth";
 import { refreshMusclesAfterWorkout } from "../lib/recovery-engine.js";
 import { processWorkoutAnalytics } from "../lib/analytics-engine.js";
+import { detectAndSavePRs } from "../lib/pr-engine.js";
 
 const router = Router();
 
@@ -449,40 +450,6 @@ router.post("/workouts/:id/complete", requireAuth, async (req, res) => {
     .set({ completionCount: workout.completionCount + 1, updatedAt: new Date() })
     .where(eq(workoutPlansTable.id, id));
 
-  // Check for personal records
-  if (exercisesCompleted && Array.isArray(exercisesCompleted)) {
-    for (const ex of exercisesCompleted as Array<{exerciseId: number; name: string; sets: Array<{repsCompleted?: number; weightKg?: number}>}>) {
-      if (!ex.sets?.length) continue;
-      const maxWeight = Math.max(...ex.sets.map(s => s.weightKg || 0));
-      if (maxWeight > 0) {
-        const [existingPR] = await db.select().from(personalRecordsTable)
-          .where(and(
-            eq(personalRecordsTable.userId, user.id),
-            eq(personalRecordsTable.exerciseId, ex.exerciseId),
-            eq(personalRecordsTable.recordType, "max_weight"),
-          )).limit(1);
-
-        if (!existingPR || maxWeight > Number(existingPR.value)) {
-          if (existingPR) {
-            await db.update(personalRecordsTable)
-              .set({ value: String(maxWeight), achievedAt: new Date(), workoutCompletionId: completion.id })
-              .where(eq(personalRecordsTable.id, existingPR.id));
-          } else {
-            await db.insert(personalRecordsTable).values({
-              userId: user.id,
-              exerciseId: ex.exerciseId,
-              exerciseName: ex.name,
-              recordType: "max_weight",
-              value: String(maxWeight),
-              unit: "kg",
-              workoutCompletionId: completion.id,
-            });
-          }
-        }
-      }
-    }
-  }
-
   // Update muscle recovery data based on exercises completed in this session
   if (exercisesCompleted && Array.isArray(exercisesCompleted) && exercisesCompleted.length > 0) {
     refreshMusclesAfterWorkout(user.id, exercisesCompleted as import("@workspace/db").CompletedExerciseLog[]).catch(() => {
@@ -490,9 +457,14 @@ router.post("/workouts/:id/complete", requireAuth, async (req, res) => {
     });
   }
 
-  // Compute and store workout analytics (volume, sets, reps, PRs) non-blocking
+  // Compute and store workout analytics (volume, sets, reps) non-blocking
   processWorkoutAnalytics(user.id, completion.id).catch(() => {
     // Non-blocking: analytics failure should not fail the completion response
+  });
+
+  // Detect and save all personal records (max_weight, max_reps, max_volume, streak) non-blocking
+  detectAndSavePRs(user.id, completion.id).catch(() => {
+    // Non-blocking: PR detection failure should not fail the completion response
   });
 
   res.json(serializeCompletion(completion, workout.name));

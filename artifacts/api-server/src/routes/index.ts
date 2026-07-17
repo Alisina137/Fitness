@@ -12,6 +12,7 @@ import aiWorkoutRouter from "./ai-workout";
 import recoveryRouter from "./recovery";
 import subscriptionsRouter from "./subscriptions";
 import analyticsRouter from "./analytics";
+import recordsRouter from "./records";
 
 const router: IRouter = Router();
 
@@ -28,5 +29,6 @@ router.use(aiWorkoutRouter);
 router.use(recoveryRouter);
 router.use(subscriptionsRouter);
 router.use(analyticsRouter);
+router.use(recordsRouter);
 
 export default router;
