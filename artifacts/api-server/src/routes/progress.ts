@@ -250,6 +250,105 @@ router.get("/body-measurements/compare", requireAuth, async (req, res) => {
   });
 });
 
+// ─── GET /api/body-measurements/trends ───────────────────────────────────────
+
+type TrendDirection = "improving" | "stable" | "declining";
+
+/** How many kg/cm/% per week is considered "significant" movement */
+const STABILITY_THRESHOLD: Record<string, number> = {
+  weight: 0.2, bodyFat: 0.1,
+  waist: 0.2, chest: 0.2, arms: 0.2, hips: 0.2, thighs: 0.2,
+};
+
+/**
+ * For each metric, is a positive weekly change good or bad?
+ * true  = higher is better (e.g. chest/arm size when building muscle)
+ * false = lower is better (e.g. weight, body fat, waist)
+ */
+const POSITIVE_IS_GOOD: Record<string, boolean> = {
+  weight: false, bodyFat: false, waist: false, hips: false, thighs: false,
+  chest: true, arms: true,
+};
+
+const METRIC_META: { key: MeasurementField; label: string; unit: string }[] = [
+  { key: "weight",  label: "Weight",   unit: "kg" },
+  { key: "bodyFat", label: "Body Fat", unit: "%" },
+  { key: "waist",   label: "Waist",    unit: "cm" },
+  { key: "chest",   label: "Chest",    unit: "cm" },
+  { key: "arms",    label: "Arms",     unit: "cm" },
+  { key: "hips",    label: "Hips",     unit: "cm" },
+  { key: "thighs",  label: "Thighs",   unit: "cm" },
+];
+
+function classifyTrend(avgWeeklyChange: number, field: string): TrendDirection {
+  const threshold = STABILITY_THRESHOLD[field] ?? 0.2;
+  if (Math.abs(avgWeeklyChange) < threshold) return "stable";
+  const positiveIsGood = POSITIVE_IS_GOOD[field] ?? false;
+  return avgWeeklyChange > 0
+    ? positiveIsGood ? "improving" : "declining"
+    : positiveIsGood ? "declining" : "improving";
+}
+
+router.get("/body-measurements/trends", requireAuth, async (req, res) => {
+  const user = getUser(req);
+
+  // Look back 90 days for trend data
+  const ninetyDaysAgo = new Date();
+  ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+
+  const allEntries = await db
+    .select()
+    .from(progressEntriesTable)
+    .where(and(
+      eq(progressEntriesTable.userId, user.id),
+      gte(progressEntriesTable.loggedAt, ninetyDaysAgo),
+    ))
+    .orderBy(asc(progressEntriesTable.loggedAt));
+
+  const serialized = allEntries.map(serializeEntry);
+
+  const trends = METRIC_META.map(({ key, label, unit }) => {
+    const getter = FIELD_VALUE_GETTERS[key];
+    const points = serialized
+      .map((e) => ({ value: getter(e), date: e.loggedAt as unknown as string }))
+      .filter((p): p is { value: number; date: string } => p.value != null);
+
+    if (points.length === 0) {
+      return { measurementType: key, label, unit, status: "no_data" as const };
+    }
+    if (points.length === 1) {
+      return {
+        measurementType: key, label, unit,
+        status: "insufficient_data" as const,
+        currentValue: points[0].value,
+        lastUpdated: points[0].date,
+        dataPoints: 1,
+      };
+    }
+
+    const first = points[0];
+    const last  = points[points.length - 1];
+    const msElapsed = new Date(last.date).getTime() - new Date(first.date).getTime();
+    const weeksElapsed = Math.max(msElapsed / (7 * 24 * 60 * 60 * 1000), 1 / 7);
+    const avgWeeklyChange = Math.round(((last.value - first.value) / weeksElapsed) * 100) / 100;
+    const trend = classifyTrend(avgWeeklyChange, key);
+
+    return {
+      measurementType: key,
+      label,
+      unit,
+      status: "ok" as const,
+      trend,
+      avgWeeklyChange,
+      currentValue: last.value,
+      lastUpdated: last.date,
+      dataPoints: points.length,
+    };
+  });
+
+  res.json(trends);
+});
+
 router.get("/body-measurements/history", requireAuth, async (req, res) => {
   const user = getUser(req);
   const field = req.query.field as string | undefined;
