@@ -957,6 +957,44 @@ paths:
                 $ref: "#/components/schemas/NutritionSummary"
 
   # ─── Body Measurements ───────────────────────────────────────────────────────
+  /body-measurements/compare:
+    get:
+      operationId: getBodyMeasurementComparison
+      tags: [progress]
+      summary: Compare a measurement between two dates
+      parameters:
+        - name: measurementType
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [weight, bodyFat, waist, chest, arms, hips, thighs]
+        - name: startDate
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: endDate
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+      responses:
+        "200":
+          description: Comparison result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BodyMeasurementComparisonResult"
+        "400":
+          description: Invalid parameters
+        "404":
+          description: No data found
+        "422":
+          description: Only one measurement exists
+
   /body-measurements/chart:
     get:
       operationId: getBodyMeasurementChart
@@ -2387,6 +2425,29 @@ components:
           type: integer
 
     # ─── Progress ──────────────────────────────────────────────────────────────
+    BodyMeasurementComparisonResult:
+      type: object
+      required: [measurementType, startValue, endValue, difference, percentageChange, startDate, endDate, dataPoints]
+      properties:
+        measurementType:
+          type: string
+        startValue:
+          type: number
+        endValue:
+          type: number
+        difference:
+          type: number
+        percentageChange:
+          type: number
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+        dataPoints:
+          type: integer
+
     ChartPoint:
       type: object
       required: [date, value]

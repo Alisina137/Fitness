@@ -5,6 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import { MeasurementHistory } from "@/components/measurement-history";
 import { BodyMeasurementChart } from "@/components/body-measurement-chart";
+import { BodyMeasurementComparison } from "@/components/body-measurement-comparison";
 
 export default function ProgressPage() {
   const { data: stats, isLoading: loadingStats } = useGetProgressStats();
@@ -39,6 +40,9 @@ export default function ProgressPage() {
           </div>
         ))}
       </div>
+
+      {/* Measurement Comparison */}
+      <BodyMeasurementComparison />
 
       <div className="grid md:grid-cols-12 gap-8">
         {/* Body Measurement Chart */}

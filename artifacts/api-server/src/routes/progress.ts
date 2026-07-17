@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
 import { progressEntriesTable, achievementsTable, workoutCompletionsTable } from "@workspace/db";
-import { eq, and, desc, gte, isNotNull, asc } from "drizzle-orm";
+import { eq, and, desc, gte, lte, isNotNull, asc } from "drizzle-orm";
 import { requireAuth, getUser } from "../lib/auth";
 import { updateAllUserGoals } from "../lib/goal-progress-service.js";
 
@@ -158,6 +158,97 @@ const FIELD_FILTER_MAP = {
 } as const;
 
 type MeasurementField = keyof typeof FIELD_FILTER_MAP;
+
+// Map field key → value getter (reuses CHART_FIELD_EXTRACTORS order)
+const FIELD_VALUE_GETTERS = Object.fromEntries(
+  CHART_FIELD_EXTRACTORS.map(({ key, getter }) => [key, getter])
+) as Record<string, (e: ReturnType<typeof serializeEntry>) => number | null | undefined>;
+
+// ─── GET /api/body-measurements/compare ──────────────────────────────────────
+
+router.get("/body-measurements/compare", requireAuth, async (req, res) => {
+  const user = getUser(req);
+  const { measurementType, startDate, endDate } = req.query as Record<string, string>;
+
+  // Validate measurementType
+  if (!measurementType || !(measurementType in FIELD_FILTER_MAP)) {
+    return res.status(400).json({
+      error: "invalid_type",
+      message: `measurementType must be one of: ${Object.keys(FIELD_FILTER_MAP).join(", ")}`,
+    });
+  }
+
+  // Validate and parse dates
+  const start = startDate ? new Date(startDate) : null;
+  const end   = endDate   ? new Date(endDate)   : new Date();
+
+  if (start && isNaN(start.getTime())) {
+    return res.status(400).json({ error: "invalid_range", message: "Invalid startDate format" });
+  }
+  if (isNaN(end.getTime())) {
+    return res.status(400).json({ error: "invalid_range", message: "Invalid endDate format" });
+  }
+  if (start && start >= end) {
+    return res.status(400).json({ error: "invalid_range", message: "startDate must be before endDate" });
+  }
+
+  // Build query conditions
+  const field = measurementType as MeasurementField;
+  const conditions = [
+    eq(progressEntriesTable.userId, user.id),
+    FIELD_FILTER_MAP[field](progressEntriesTable),
+  ];
+  if (start) conditions.push(gte(progressEntriesTable.loggedAt, start));
+  conditions.push(lte(progressEntriesTable.loggedAt, end));
+
+  const entries = await db
+    .select()
+    .from(progressEntriesTable)
+    .where(and(...conditions))
+    .orderBy(asc(progressEntriesTable.loggedAt));
+
+  // Validate result count
+  if (entries.length === 0) {
+    return res.status(404).json({
+      error: "no_data",
+      message: "No measurements found for this period and type",
+    });
+  }
+  if (entries.length === 1) {
+    const only = serializeEntry(entries[0]);
+    return res.status(422).json({
+      error: "insufficient_data",
+      message: "At least two measurements are needed to compare",
+      onlyValue: FIELD_VALUE_GETTERS[field]?.(only) ?? null,
+      onlyDate:  only.loggedAt,
+    });
+  }
+
+  const first = serializeEntry(entries[0]);
+  const last  = serializeEntry(entries[entries.length - 1]);
+
+  const getValue = (e: ReturnType<typeof serializeEntry>) =>
+    (FIELD_VALUE_GETTERS[field]?.(e) ?? 0) as number;
+
+  const startValue      = getValue(first);
+  const endValue        = getValue(last);
+  const difference      = Math.round((endValue - startValue) * 100) / 100;
+  const percentageChange =
+    startValue !== 0
+      ? Math.round(((endValue - startValue) / Math.abs(startValue)) * 1000) / 10
+      : 0;
+
+  res.json({
+    measurementType,
+    startValue,
+    endValue,
+    difference,
+    percentageChange,
+    startDate:  first.loggedAt,
+    endDate:    last.loggedAt,
+    dataPoints: entries.length,
+  });
+});
 
 router.get("/body-measurements/history", requireAuth, async (req, res) => {
   const user = getUser(req);
