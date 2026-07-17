@@ -19,12 +19,14 @@ type Goal = {
   category: GoalCategory;
   targetValue?: number | null;
   currentValue?: number | null;
+  referenceValue?: number | null;
   unit?: string | null;
   startDate: string;
   targetDate?: string | null;
   priority: GoalPriority;
   status: GoalStatus;
   isPrimary: boolean;
+  progressPercentage: number;
   createdAt: string;
   updatedAt: string;
 };
@@ -343,8 +345,8 @@ function GoalCard({ goal, onEdit, onDelete, onStatusChange, onCelebrate }: {
     setShowMilestones((v) => !v);
   };
 
-  const progressPct = goal.targetValue && goal.currentValue
-    ? Math.min(100, Math.round((goal.currentValue / goal.targetValue) * 100))
+  const progressPct = goal.targetValue != null
+    ? Math.min(100, Math.max(0, Math.round(goal.progressPercentage)))
     : null;
 
   const daysLeft = goal.targetDate
