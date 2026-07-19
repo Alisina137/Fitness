@@ -46,6 +46,7 @@ import type {
   GetProgressMonthlyReportParams,
   GetProgressPhotosCompareParams,
   GetProgressPhotosParams,
+  GetProgressWeeklySummaryParams,
   GetRecoveryHistoryParams,
   GetWorkoutAnalyticsParams,
   GetWorkoutHistoryParams,
@@ -88,6 +89,7 @@ import type {
   User,
   UserProfile,
   UserProfileUpdate,
+  WeeklySummary,
   WorkoutAnalytics,
   WorkoutCompletion,
   WorkoutCompletionInput,
@@ -4140,6 +4142,91 @@ export function useGetProgressStats<TData = Awaited<ReturnType<typeof getProgres
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getGetProgressStatsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetProgressWeeklySummaryUrl = (params: GetProgressWeeklySummaryParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/progress/weekly-summary?${stringifiedParams}` : `/api/progress/weekly-summary`
+}
+
+/**
+ * Returns aggregated fitness stats for a 7-day window starting on weekStartDate. Returns zeros for weeks with no data.
+ * @summary Get weekly fitness summary
+ */
+export const getProgressWeeklySummary = async (params: GetProgressWeeklySummaryParams, options?: RequestInit): Promise<WeeklySummary> => {
+
+  return customFetch<WeeklySummary>(getGetProgressWeeklySummaryUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetProgressWeeklySummaryQueryKey = (params?: GetProgressWeeklySummaryParams,) => {
+    return [
+    `/api/progress/weekly-summary`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetProgressWeeklySummaryQueryOptions = <TData = Awaited<ReturnType<typeof getProgressWeeklySummary>>, TError = ErrorType<ErrorResponse>>(params: GetProgressWeeklySummaryParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getProgressWeeklySummary>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetProgressWeeklySummaryQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getProgressWeeklySummary>>> = ({ signal }) => getProgressWeeklySummary(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getProgressWeeklySummary>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetProgressWeeklySummaryQueryResult = NonNullable<Awaited<ReturnType<typeof getProgressWeeklySummary>>>
+export type GetProgressWeeklySummaryQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Get weekly fitness summary
+ */
+
+export function useGetProgressWeeklySummary<TData = Awaited<ReturnType<typeof getProgressWeeklySummary>>, TError = ErrorType<ErrorResponse>>(
+ params: GetProgressWeeklySummaryParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getProgressWeeklySummary>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetProgressWeeklySummaryQueryOptions(params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

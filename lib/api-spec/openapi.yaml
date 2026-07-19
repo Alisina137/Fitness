@@ -1134,6 +1134,34 @@ paths:
               schema:
                 $ref: "#/components/schemas/ProgressStats"
 
+  /progress/weekly-summary:
+    get:
+      operationId: getProgressWeeklySummary
+      tags: [progress]
+      summary: Get weekly fitness summary
+      description: Returns aggregated fitness stats for a 7-day window starting on weekStartDate. Returns zeros for weeks with no data.
+      parameters:
+        - name: weekStartDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          description: Start date of the week (YYYY-MM-DD, Monday recommended)
+      responses:
+        "200":
+          description: Weekly summary data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WeeklySummary"
+        "400":
+          description: Invalid date
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /progress/monthly-report:
     get:
       operationId: getProgressMonthlyReport
@@ -3171,6 +3199,41 @@ components:
           type: string
         message:
           type: string
+
+    # ─── Weekly Summary ─────────────────────────────────────────────────────────
+    WeeklySummary:
+      type: object
+      required:
+        - weekStartDate
+        - weekEndDate
+        - totalWorkouts
+        - totalWorkoutMinutes
+        - totalPersonalRecords
+        - goalsCompleted
+        - recoveryCheckIns
+      properties:
+        weekStartDate:
+          type: string
+          format: date
+        weekEndDate:
+          type: string
+          format: date
+        totalWorkouts:
+          type: integer
+        totalWorkoutMinutes:
+          type: integer
+        caloriesBurned:
+          type: integer
+          nullable: true
+        totalPersonalRecords:
+          type: integer
+        goalsCompleted:
+          type: integer
+        recoveryCheckIns:
+          type: integer
+        avgRecoveryScore:
+          type: number
+          nullable: true
 
     # ─── Monthly Report ─────────────────────────────────────────────────────────
     MonthlyReport:

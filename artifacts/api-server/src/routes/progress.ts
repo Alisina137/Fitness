@@ -7,6 +7,8 @@ import {
   personalRecordsTable,
   progressPhotosTable,
   goalsTable,
+  dailyCheckInsTable,
+  recoveryScoresTable,
 } from "@workspace/db";
 import { eq, and, desc, gte, lte, lt, isNotNull, asc, count } from "drizzle-orm";
 import { requireAuth, getUser } from "../lib/auth";
@@ -14,6 +16,118 @@ import { updateAllUserGoals } from "../lib/goal-progress-service.js";
 import { getUserProgressSummary } from "../lib/progress-analysis-service.js";
 
 const router = Router();
+
+// ─── GET /api/progress/weekly-summary ────────────────────────────────────────
+
+router.get("/progress/weekly-summary", requireAuth, async (req, res) => {
+  const user = getUser(req);
+  const { weekStartDate } = req.query as Record<string, string>;
+
+  // Validate date format
+  if (!weekStartDate || !/^\d{4}-\d{2}-\d{2}$/.test(weekStartDate)) {
+    return res.status(400).json({
+      error: "invalid_params",
+      message: "weekStartDate is required and must be in YYYY-MM-DD format",
+    });
+  }
+
+  const startTs = new Date(weekStartDate);
+  if (isNaN(startTs.getTime())) {
+    return res.status(400).json({
+      error: "invalid_params",
+      message: "weekStartDate is not a valid date",
+    });
+  }
+
+  const endTs = new Date(startTs);
+  endTs.setDate(endTs.getDate() + 7);
+  const weekEndDate = endTs.toISOString().split("T")[0];
+
+  const [
+    workoutRows,
+    prCountResult,
+    goalsCompletedResult,
+    checkInRows,
+    recoveryScoreRows,
+  ] = await Promise.all([
+    // Workout completions: count + duration + calories
+    db
+      .select({
+        durationMinutes: workoutCompletionsTable.durationMinutes,
+        caloriesBurned:  workoutCompletionsTable.caloriesBurned,
+      })
+      .from(workoutCompletionsTable)
+      .where(and(
+        eq(workoutCompletionsTable.userId, user.id),
+        gte(workoutCompletionsTable.completedAt, startTs),
+        lt(workoutCompletionsTable.completedAt, endTs),
+      )),
+
+    // Personal records
+    db
+      .select({ count: count() })
+      .from(personalRecordsTable)
+      .where(and(
+        eq(personalRecordsTable.userId, user.id),
+        gte(personalRecordsTable.achievedAt, startTs),
+        lt(personalRecordsTable.achievedAt, endTs),
+      )),
+
+    // Goals completed (by updatedAt within the week)
+    db
+      .select({ count: count() })
+      .from(goalsTable)
+      .where(and(
+        eq(goalsTable.userId, user.id),
+        eq(goalsTable.status, "completed"),
+        gte(goalsTable.updatedAt, startTs),
+        lt(goalsTable.updatedAt, endTs),
+      )),
+
+    // Recovery daily check-ins (date column is YYYY-MM-DD string)
+    db
+      .select({ recoveryScore: dailyCheckInsTable.recoveryScore })
+      .from(dailyCheckInsTable)
+      .where(and(
+        eq(dailyCheckInsTable.userId, user.id),
+        gte(dailyCheckInsTable.date, weekStartDate),
+        lt(dailyCheckInsTable.date,  weekEndDate),
+      )),
+
+    // Recovery scores for avg
+    db
+      .select({ recoveryScore: recoveryScoresTable.recoveryScore })
+      .from(recoveryScoresTable)
+      .where(and(
+        eq(recoveryScoresTable.userId, user.id),
+        gte(recoveryScoresTable.date, weekStartDate),
+        lt(recoveryScoresTable.date,  weekEndDate),
+      )),
+  ]);
+
+  const totalWorkouts       = workoutRows.length;
+  const totalWorkoutMinutes = workoutRows.reduce((s, r) => s + (r.durationMinutes ?? 0), 0);
+  const rawCalories         = workoutRows.reduce((s, r) => s + (r.caloriesBurned ?? 0), 0);
+  const caloriesBurned      = rawCalories > 0 ? rawCalories : null;
+
+  const scoresWithData = recoveryScoreRows.filter((r) => r.recoveryScore != null);
+  const avgRecoveryScore =
+    scoresWithData.length > 0
+      ? Math.round(scoresWithData.reduce((s, r) => s + r.recoveryScore, 0) / scoresWithData.length)
+      : null;
+
+  res.json({
+    weekStartDate,
+    weekEndDate,
+    totalWorkouts,
+    totalWorkoutMinutes,
+    caloriesBurned,
+    totalPersonalRecords: prCountResult[0]?.count         ?? 0,
+    goalsCompleted:       goalsCompletedResult[0]?.count  ?? 0,
+    recoveryCheckIns:     checkInRows.length,
+    avgRecoveryScore,
+  });
+});
 
 // ─── GET /api/progress/monthly-report ────────────────────────────────────────
 

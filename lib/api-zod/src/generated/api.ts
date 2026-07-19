@@ -1589,6 +1589,27 @@ export const GetProgressStatsResponse = zod.object({
 
 
 /**
+ * Returns aggregated fitness stats for a 7-day window starting on weekStartDate. Returns zeros for weeks with no data.
+ * @summary Get weekly fitness summary
+ */
+export const GetProgressWeeklySummaryQueryParams = zod.object({
+  "weekStartDate": zod.date().describe('Start date of the week (YYYY-MM-DD, Monday recommended)')
+})
+
+export const GetProgressWeeklySummaryResponse = zod.object({
+  "weekStartDate": zod.coerce.date(),
+  "weekEndDate": zod.coerce.date(),
+  "totalWorkouts": zod.number(),
+  "totalWorkoutMinutes": zod.number(),
+  "caloriesBurned": zod.number().nullish(),
+  "totalPersonalRecords": zod.number(),
+  "goalsCompleted": zod.number(),
+  "recoveryCheckIns": zod.number(),
+  "avgRecoveryScore": zod.number().nullish()
+})
+
+
+/**
  * Returns aggregated progress stats for a given month and year. Returns zeros for months with no data.
  * @summary Get monthly progress report
  */

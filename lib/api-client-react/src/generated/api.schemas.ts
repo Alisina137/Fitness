@@ -1395,6 +1395,18 @@ export interface ErrorResponse {
   message?: string;
 }
 
+export interface WeeklySummary {
+  weekStartDate: string;
+  weekEndDate: string;
+  totalWorkouts: number;
+  totalWorkoutMinutes: number;
+  caloriesBurned?: number | null;
+  totalPersonalRecords: number;
+  goalsCompleted: number;
+  recoveryCheckIns: number;
+  avgRecoveryScore?: number | null;
+}
+
 export interface MonthlyReport {
   /**
      * @minimum 1
@@ -1598,6 +1610,13 @@ export const ListProgressEntriesType = {
   measurement: 'measurement',
   achievement: 'achievement',
 } as const;
+
+export type GetProgressWeeklySummaryParams = {
+/**
+ * Start date of the week (YYYY-MM-DD, Monday recommended)
+ */
+weekStartDate: string;
+};
 
 export type GetProgressMonthlyReportParams = {
 /**
