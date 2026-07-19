@@ -8,6 +8,7 @@ import { BodyMeasurementChart } from "@/components/body-measurement-chart";
 import { BodyMeasurementComparison } from "@/components/body-measurement-comparison";
 import { BodyMeasurementTrends } from "@/components/body-measurement-trends";
 import { BodyMeasurementTimeline } from "@/components/body-measurement-timeline";
+import { ProgressSummaryCard } from "@/components/progress-summary-card";
 
 export default function ProgressPage() {
   const { data: stats, isLoading: loadingStats } = useGetProgressStats();
@@ -20,6 +21,9 @@ export default function ProgressPage() {
         <h1 className="text-3xl font-bold tracking-tight">Performance Data</h1>
         <p className="text-muted-foreground mt-1">Long-term trends and physiological adaptations.</p>
       </div>
+
+      {/* AI Progress Summary */}
+      <ProgressSummaryCard />
 
       {/* Top Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

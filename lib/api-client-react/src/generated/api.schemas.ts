@@ -1289,6 +1289,45 @@ export interface ProgressPhoto {
   createdAt: string;
 }
 
+export type PhotoReminderResponseFrequency = typeof PhotoReminderResponseFrequency[keyof typeof PhotoReminderResponseFrequency];
+
+
+export const PhotoReminderResponseFrequency = {
+  weekly: 'weekly',
+  every2weeks: 'every2weeks',
+  monthly: 'monthly',
+  disabled: 'disabled',
+} as const;
+
+export interface PhotoReminderResponse {
+  frequency: PhotoReminderResponseFrequency;
+  /** @nullable */
+  lastPhotoDate?: string | null;
+  /** @nullable */
+  nextReminderDate?: string | null;
+  isDue: boolean;
+}
+
+export type UpdateReminderInputFrequency = typeof UpdateReminderInputFrequency[keyof typeof UpdateReminderInputFrequency];
+
+
+export const UpdateReminderInputFrequency = {
+  weekly: 'weekly',
+  every2weeks: 'every2weeks',
+  monthly: 'monthly',
+  disabled: 'disabled',
+} as const;
+
+export interface UpdateReminderInput {
+  frequency: UpdateReminderInputFrequency;
+}
+
+export interface ComparePhotosResponse {
+  before: ProgressPhoto;
+  after: ProgressPhoto;
+  daysBetween: number;
+}
+
 export type CreateProgressPhotoInputPhotoType = typeof CreateProgressPhotoInputPhotoType[keyof typeof CreateProgressPhotoInputPhotoType];
 
 
@@ -1349,6 +1388,52 @@ export interface SubscriptionPlan {
   interval: SubscriptionPlanInterval;
   features: string[];
   isPopular?: boolean;
+}
+
+export interface ErrorResponse {
+  error: string;
+  message?: string;
+}
+
+export type ProgressSummaryGoals = {
+  active: number;
+  completed: number;
+};
+
+export type ProgressSummaryBodyMeasurements = {
+  latestDate: string | null;
+  latestWeight: number | null;
+  latestBodyFat: number | null;
+};
+
+export type ProgressSummaryProgressPhotos = {
+  total: number;
+};
+
+export type ProgressSummaryWorkouts = {
+  totalCompleted: number;
+  currentStreak: number;
+};
+
+export type ProgressSummaryPersonalRecordsLatest = {
+  exerciseName: string;
+  recordType: string;
+  value: number;
+  unit: string;
+  achievedAt: string;
+} | null;
+
+export type ProgressSummaryPersonalRecords = {
+  total: number;
+  latest: ProgressSummaryPersonalRecordsLatest;
+};
+
+export interface ProgressSummary {
+  goals: ProgressSummaryGoals;
+  bodyMeasurements: ProgressSummaryBodyMeasurements;
+  progressPhotos: ProgressSummaryProgressPhotos;
+  workouts: ProgressSummaryWorkouts;
+  personalRecords: ProgressSummaryPersonalRecords;
 }
 
 export type ListWorkoutsParams = {
@@ -1538,6 +1623,11 @@ export const GetProgressPhotosType = {
   back: 'back',
   custom: 'custom',
 } as const;
+
+export type GetProgressPhotosCompareParams = {
+beforePhotoId: number;
+afterPhotoId: number;
+};
 
 export type DeleteProgressPhotosId200 = {
   deleted: boolean;

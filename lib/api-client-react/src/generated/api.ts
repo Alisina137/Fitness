@@ -28,6 +28,7 @@ import type {
   BodyMeasurementChartData,
   BodyMeasurementComparisonResult,
   CheckInResult,
+  ComparePhotosResponse,
   Conversation,
   ConversationInput,
   CreateProgressPhotoInput,
@@ -36,11 +37,13 @@ import type {
   DashboardSummary,
   DeleteProgressPhotosId200,
   DeleteResponse,
+  ErrorResponse,
   Exercise,
   GetBodyMeasurementChartParams,
   GetBodyMeasurementComparisonParams,
   GetBodyMeasurementHistoryParams,
   GetNutritionSummaryParams,
+  GetProgressPhotosCompareParams,
   GetProgressPhotosParams,
   GetRecoveryHistoryParams,
   GetWorkoutAnalyticsParams,
@@ -66,10 +69,12 @@ import type {
   NutritionEntry,
   NutritionEntryInput,
   NutritionSummary,
+  PhotoReminderResponse,
   ProgressEntry,
   ProgressEntryInput,
   ProgressPhoto,
   ProgressStats,
+  ProgressSummary,
   RecoveryRecommendation,
   RegisterInput,
   Subscription,
@@ -77,6 +82,7 @@ import type {
   TodayRecovery,
   TodayWorkout,
   UpcomingMilestone,
+  UpdateReminderInput,
   User,
   UserProfile,
   UserProfileUpdate,
@@ -4144,6 +4150,84 @@ export function useGetProgressStats<TData = Awaited<ReturnType<typeof getProgres
 
 
 
+export const getGetProgressSummaryUrl = () => {
+
+
+
+
+  return `/api/progress/summary`
+}
+
+/**
+ * Returns aggregated progress data across goals, workouts, measurements, photos, and personal records. Handles new users and missing data gracefully.
+ * @summary Get aggregated progress summary
+ */
+export const getProgressSummary = async ( options?: RequestInit): Promise<ProgressSummary> => {
+
+  return customFetch<ProgressSummary>(getGetProgressSummaryUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetProgressSummaryQueryKey = () => {
+    return [
+    `/api/progress/summary`
+    ] as const;
+    }
+
+
+export const getGetProgressSummaryQueryOptions = <TData = Awaited<ReturnType<typeof getProgressSummary>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getProgressSummary>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetProgressSummaryQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getProgressSummary>>> = ({ signal }) => getProgressSummary({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getProgressSummary>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetProgressSummaryQueryResult = NonNullable<Awaited<ReturnType<typeof getProgressSummary>>>
+export type GetProgressSummaryQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get aggregated progress summary
+ */
+
+export function useGetProgressSummary<TData = Awaited<ReturnType<typeof getProgressSummary>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getProgressSummary>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetProgressSummaryQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
 export const getListConversationsUrl = () => {
 
 
@@ -5580,6 +5664,238 @@ export function useGetProgressPhotosTimeline<TData = Awaited<ReturnType<typeof g
 
 
 
+
+export const getGetProgressPhotosCompareUrl = (params: GetProgressPhotosCompareParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/progress-photos/compare?${stringifiedParams}` : `/api/progress-photos/compare`
+}
+
+/**
+ * @summary Compare two progress photos
+ */
+export const getProgressPhotosCompare = async (params: GetProgressPhotosCompareParams, options?: RequestInit): Promise<ComparePhotosResponse> => {
+
+  return customFetch<ComparePhotosResponse>(getGetProgressPhotosCompareUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetProgressPhotosCompareQueryKey = (params?: GetProgressPhotosCompareParams,) => {
+    return [
+    `/api/progress-photos/compare`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetProgressPhotosCompareQueryOptions = <TData = Awaited<ReturnType<typeof getProgressPhotosCompare>>, TError = ErrorType<ErrorResponse>>(params: GetProgressPhotosCompareParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getProgressPhotosCompare>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetProgressPhotosCompareQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getProgressPhotosCompare>>> = ({ signal }) => getProgressPhotosCompare(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getProgressPhotosCompare>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetProgressPhotosCompareQueryResult = NonNullable<Awaited<ReturnType<typeof getProgressPhotosCompare>>>
+export type GetProgressPhotosCompareQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Compare two progress photos
+ */
+
+export function useGetProgressPhotosCompare<TData = Awaited<ReturnType<typeof getProgressPhotosCompare>>, TError = ErrorType<ErrorResponse>>(
+ params: GetProgressPhotosCompareParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getProgressPhotosCompare>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetProgressPhotosCompareQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetProgressPhotosReminderUrl = () => {
+
+
+
+
+  return `/api/progress-photos/reminder`
+}
+
+/**
+ * @summary Get current reminder settings and status
+ */
+export const getProgressPhotosReminder = async ( options?: RequestInit): Promise<PhotoReminderResponse> => {
+
+  return customFetch<PhotoReminderResponse>(getGetProgressPhotosReminderUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetProgressPhotosReminderQueryKey = () => {
+    return [
+    `/api/progress-photos/reminder`
+    ] as const;
+    }
+
+
+export const getGetProgressPhotosReminderQueryOptions = <TData = Awaited<ReturnType<typeof getProgressPhotosReminder>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getProgressPhotosReminder>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetProgressPhotosReminderQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getProgressPhotosReminder>>> = ({ signal }) => getProgressPhotosReminder({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getProgressPhotosReminder>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetProgressPhotosReminderQueryResult = NonNullable<Awaited<ReturnType<typeof getProgressPhotosReminder>>>
+export type GetProgressPhotosReminderQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get current reminder settings and status
+ */
+
+export function useGetProgressPhotosReminder<TData = Awaited<ReturnType<typeof getProgressPhotosReminder>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getProgressPhotosReminder>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetProgressPhotosReminderQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getPutProgressPhotosReminderUrl = () => {
+
+
+
+
+  return `/api/progress-photos/reminder`
+}
+
+/**
+ * @summary Update reminder frequency
+ */
+export const putProgressPhotosReminder = async (updateReminderInput: UpdateReminderInput, options?: RequestInit): Promise<PhotoReminderResponse> => {
+
+  return customFetch<PhotoReminderResponse>(getPutProgressPhotosReminderUrl(),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(updateReminderInput)
+  }
+);}
+
+
+
+
+
+export const getPutProgressPhotosReminderMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putProgressPhotosReminder>>, TError,{data: BodyType<UpdateReminderInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof putProgressPhotosReminder>>, TError,{data: BodyType<UpdateReminderInput>}, TContext> => {
+
+const mutationKey = ['putProgressPhotosReminder'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putProgressPhotosReminder>>, {data: BodyType<UpdateReminderInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  putProgressPhotosReminder(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutProgressPhotosReminderMutationResult = NonNullable<Awaited<ReturnType<typeof putProgressPhotosReminder>>>
+    export type PutProgressPhotosReminderMutationBody = BodyType<UpdateReminderInput>
+    export type PutProgressPhotosReminderMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Update reminder frequency
+ */
+export const usePutProgressPhotosReminder = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putProgressPhotosReminder>>, TError,{data: BodyType<UpdateReminderInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof putProgressPhotosReminder>>,
+        TError,
+        {data: BodyType<UpdateReminderInput>},
+        TContext
+      > => {
+      return useMutation(getPutProgressPhotosReminderMutationOptions(options));
+    }
 
 export const getDeleteProgressPhotosIdUrl = (id: number,) => {
 

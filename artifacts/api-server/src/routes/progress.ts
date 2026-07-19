@@ -4,8 +4,18 @@ import { progressEntriesTable, achievementsTable, workoutCompletionsTable } from
 import { eq, and, desc, gte, lte, isNotNull, asc } from "drizzle-orm";
 import { requireAuth, getUser } from "../lib/auth";
 import { updateAllUserGoals } from "../lib/goal-progress-service.js";
+import { getUserProgressSummary } from "../lib/progress-analysis-service.js";
 
 const router = Router();
+
+// ─── GET /api/progress/summary ───────────────────────────────────────────────
+// Must be registered before /progress/:anything to avoid param collisions.
+
+router.get("/progress/summary", requireAuth, async (req, res) => {
+  const user = getUser(req);
+  const summary = await getUserProgressSummary(user.id);
+  res.json(summary);
+});
 
 router.get("/progress/achievements", requireAuth, async (req, res) => {
   const user = getUser(req);

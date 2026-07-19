@@ -1589,6 +1589,40 @@ export const GetProgressStatsResponse = zod.object({
 
 
 /**
+ * Returns aggregated progress data across goals, workouts, measurements, photos, and personal records. Handles new users and missing data gracefully.
+ * @summary Get aggregated progress summary
+ */
+export const GetProgressSummaryResponse = zod.object({
+  "goals": zod.object({
+  "active": zod.number(),
+  "completed": zod.number()
+}),
+  "bodyMeasurements": zod.object({
+  "latestDate": zod.coerce.date().nullable(),
+  "latestWeight": zod.number().nullable(),
+  "latestBodyFat": zod.number().nullable()
+}),
+  "progressPhotos": zod.object({
+  "total": zod.number()
+}),
+  "workouts": zod.object({
+  "totalCompleted": zod.number(),
+  "currentStreak": zod.number()
+}),
+  "personalRecords": zod.object({
+  "total": zod.number(),
+  "latest": zod.object({
+  "exerciseName": zod.string(),
+  "recordType": zod.string(),
+  "value": zod.number(),
+  "unit": zod.string(),
+  "achievedAt": zod.coerce.date()
+}).nullable()
+})
+})
+
+
+/**
  * @summary List AI coach conversations
  */
 export const ListConversationsResponseItem = zod.object({
@@ -2001,6 +2035,63 @@ export const GetProgressPhotosTimelineResponseItem = zod.object({
   "createdAt": zod.coerce.date()
 })
 export const GetProgressPhotosTimelineResponse = zod.array(GetProgressPhotosTimelineResponseItem)
+
+
+/**
+ * @summary Compare two progress photos
+ */
+export const GetProgressPhotosCompareQueryParams = zod.object({
+  "beforePhotoId": zod.coerce.number(),
+  "afterPhotoId": zod.coerce.number()
+})
+
+export const GetProgressPhotosCompareResponse = zod.object({
+  "before": zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "imageUrl": zod.string(),
+  "photoType": zod.enum(['front', 'side', 'back', 'custom']),
+  "notes": zod.string().nullish(),
+  "takenAt": zod.coerce.date(),
+  "createdAt": zod.coerce.date()
+}),
+  "after": zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "imageUrl": zod.string(),
+  "photoType": zod.enum(['front', 'side', 'back', 'custom']),
+  "notes": zod.string().nullish(),
+  "takenAt": zod.coerce.date(),
+  "createdAt": zod.coerce.date()
+}),
+  "daysBetween": zod.number()
+})
+
+
+/**
+ * @summary Get current reminder settings and status
+ */
+export const GetProgressPhotosReminderResponse = zod.object({
+  "frequency": zod.enum(['weekly', 'every2weeks', 'monthly', 'disabled']),
+  "lastPhotoDate": zod.coerce.date().nullish(),
+  "nextReminderDate": zod.coerce.date().nullish(),
+  "isDue": zod.boolean()
+})
+
+
+/**
+ * @summary Update reminder frequency
+ */
+export const PutProgressPhotosReminderBody = zod.object({
+  "frequency": zod.enum(['weekly', 'every2weeks', 'monthly', 'disabled'])
+})
+
+export const PutProgressPhotosReminderResponse = zod.object({
+  "frequency": zod.enum(['weekly', 'every2weeks', 'monthly', 'disabled']),
+  "lastPhotoDate": zod.coerce.date().nullish(),
+  "nextReminderDate": zod.coerce.date().nullish(),
+  "isDue": zod.boolean()
+})
 
 
 /**

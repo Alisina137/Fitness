@@ -1,0 +1,106 @@
+You are continuing development of an AI fitness application.
+
+IMPORTANT IMPLEMENTATION RULES
+
+- Implement ONLY the features requested in this prompt.
+- Do NOT add extra features.
+- Do NOT modify existing systems unless required.
+- If something appears to be missing, DO NOT implement it.
+- Add it to the Suggestions section of the completion report.
+- Future prompts will implement the remaining functionality.
+
+CURRENT PROJECT STATE
+
+Already implemented:
+
+- User Profiles
+- Workout Engine
+- Goal System
+- Body Measurement System
+- Progress Photos
+- Progress Photo Timeline
+- Before & After Comparison
+- Progress Photo Reminders
+
+Do not rebuild existing systems.
+
+TASK
+
+Build the AI Progress Analysis Foundation.
+
+This prompt does NOT generate AI responses yet.
+It prepares the application by collecting all progress data into one reusable service.
+
+IMPLEMENT
+
+1. Create Progress Analysis Service.
+
+Create:
+
+getUserProgressSummary(userId)
+
+The service should gather existing data from:
+
+- Goals
+- Body Measurements
+- Progress Photos
+- Workout Analytics
+- Personal Records
+
+Return a single structured object.
+
+2. Calculate basic statistics.
+
+Include:
+
+- Active goals
+- Goals completed
+- Latest body measurements
+- Total progress photos
+- Total workouts completed
+- Latest personal record
+- Current workout streak (if available)
+
+3. Create API.
+
+GET /api/progress/summary
+
+Return the progress summary.
+
+4. Create ProgressSummaryCard.
+
+Display:
+
+- Workouts completed
+- Active goals
+- Latest measurement date
+- Progress photos
+- Personal records
+
+5. Add validation.
+
+Handle:
+
+- New users
+- Missing data
+- Empty history
+
+TECH REQUIREMENTS
+
+- Reuse existing services.
+- Do not create new database tables.
+- Do not call an AI model yet.
+- Keep the service reusable for future AI Coach features.
+
+COMPLETION REPORT
+
+Provide:
+
+- Files created
+- Files modified
+- API endpoints
+- Components created
+
+Suggestions:
+
+List features that should be implemented later but are outside the scope of this prompt.
