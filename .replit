@@ -9,28 +9,6 @@ args = ["pnpm", "store", "prune"]
 env = { "CI" = "true" }
 
 [workflows]
-runButton = "Project"
-
-[[workflows.workflow]]
-name = "Project"
-mode = "parallel"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "FitCore Frontend"
-
-[[workflows.workflow]]
-name = "FitCore Frontend"
-author = "agent"
-
-[workflows.workflow.metadata]
-outputType = "webview"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "PORT=5173 BASE_PATH=/ pnpm --filter @workspace/fitness-app run dev"
-waitForPort = 5173
 
 [agent]
 stack = "PNPM_WORKSPACE"
