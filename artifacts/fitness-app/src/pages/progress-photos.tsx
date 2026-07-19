@@ -5,7 +5,8 @@ import {
   postProgressPhotos,
 } from "@workspace/api-client-react";
 import { ProgressPhotoGallery } from "@/components/progress-photo-gallery";
-import { Camera, Upload, Trash2, X, AlertTriangle, CheckCircle2, Loader2 } from "lucide-react";
+import { BeforeAfterComparison } from "@/components/before-after-comparison";
+import { Camera, Upload, Trash2, X, AlertTriangle, CheckCircle2, Loader2, ArrowLeftRight, Images } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
@@ -397,7 +398,15 @@ function DeleteDialog({ photoId, onCancel, onConfirm }: { photoId: number; onCan
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
+type ActiveTab = "gallery" | "compare";
+
+const TABS: { value: ActiveTab; label: string; Icon: React.ElementType }[] = [
+  { value: "gallery", label: "Gallery", Icon: Images },
+  { value: "compare", label: "Before & After", Icon: ArrowLeftRight },
+];
+
 export default function ProgressPhotosPage() {
+  const [activeTab, setActiveTab] = useState<ActiveTab>("gallery");
   const [showUpload, setShowUpload] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
 
@@ -417,11 +426,34 @@ export default function ProgressPhotosPage() {
         </button>
       </div>
 
-      {/* Gallery */}
-      <ProgressPhotoGallery
-        onDelete={setDeleteTarget}
-        onUpload={() => setShowUpload(true)}
-      />
+      {/* Tabs */}
+      <div className="flex gap-1 p-1 bg-secondary rounded-xl w-fit">
+        {TABS.map(({ value, label, Icon }) => (
+          <button
+            key={value}
+            onClick={() => setActiveTab(value)}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+              activeTab === value
+                ? "bg-card text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <Icon className="h-4 w-4" />
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {/* Content */}
+      {activeTab === "gallery" ? (
+        <ProgressPhotoGallery
+          onDelete={setDeleteTarget}
+          onUpload={() => setShowUpload(true)}
+        />
+      ) : (
+        <BeforeAfterComparison />
+      )}
 
       {/* Modals */}
       {showUpload && <UploadModal onClose={() => setShowUpload(false)} />}

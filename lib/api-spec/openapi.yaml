@@ -1504,6 +1504,43 @@ paths:
                 items:
                   $ref: "#/components/schemas/ProgressPhoto"
 
+  /progress-photos/compare:
+    get:
+      tags: [progress-photos]
+      summary: Compare two progress photos
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: beforePhotoId
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: afterPhotoId
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Photo comparison result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ComparePhotosResponse"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Photo not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /progress-photos/{id}:
     delete:
       tags: [progress-photos]
@@ -2931,6 +2968,17 @@ components:
         createdAt:
           type: string
           format: date-time
+
+    ComparePhotosResponse:
+      type: object
+      required: [before, after, daysBetween]
+      properties:
+        before:
+          $ref: "#/components/schemas/ProgressPhoto"
+        after:
+          $ref: "#/components/schemas/ProgressPhoto"
+        daysBetween:
+          type: integer
 
     CreateProgressPhotoInput:
       type: object
