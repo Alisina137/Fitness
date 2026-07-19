@@ -3211,6 +3211,7 @@ components:
         - totalPersonalRecords
         - goalsCompleted
         - recoveryCheckIns
+        - comparison
       properties:
         weekStartDate:
           type: string
@@ -3234,6 +3235,32 @@ components:
         avgRecoveryScore:
           type: number
           nullable: true
+        comparison:
+          type: object
+          required:
+            - prevWeekStartDate
+            - deltaTotalWorkouts
+            - deltaTotalWorkoutMinutes
+            - deltaTotalPersonalRecords
+            - deltaGoalsCompleted
+            - deltaRecoveryCheckIns
+          properties:
+            prevWeekStartDate:
+              type: string
+              format: date
+            deltaTotalWorkouts:
+              type: integer
+            deltaTotalWorkoutMinutes:
+              type: integer
+            deltaCaloriesBurned:
+              type: integer
+              nullable: true
+            deltaTotalPersonalRecords:
+              type: integer
+            deltaGoalsCompleted:
+              type: integer
+            deltaRecoveryCheckIns:
+              type: integer
 
     # ─── Monthly Report ─────────────────────────────────────────────────────────
     MonthlyReport:

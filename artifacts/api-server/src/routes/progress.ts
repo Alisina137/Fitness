@@ -43,72 +43,80 @@ router.get("/progress/weekly-summary", requireAuth, async (req, res) => {
   endTs.setDate(endTs.getDate() + 7);
   const weekEndDate = endTs.toISOString().split("T")[0];
 
+  // Previous week bounds (for comparison)
+  const prevStartTs = new Date(startTs);
+  prevStartTs.setDate(prevStartTs.getDate() - 7);
+  const prevWeekStartDate = prevStartTs.toISOString().split("T")[0];
+  const prevWeekEndDate   = weekStartDate; // exclusive — same as current week start
+
   const [
     workoutRows,
     prCountResult,
     goalsCompletedResult,
     checkInRows,
     recoveryScoreRows,
+    // Previous week equivalents
+    prevWorkoutRows,
+    prevPrCountResult,
+    prevGoalsCompletedResult,
+    prevCheckInRows,
   ] = await Promise.all([
-    // Workout completions: count + duration + calories
+    // ── Current week ──────────────────────────────────────────────────────────
     db
-      .select({
-        durationMinutes: workoutCompletionsTable.durationMinutes,
-        caloriesBurned:  workoutCompletionsTable.caloriesBurned,
-      })
+      .select({ durationMinutes: workoutCompletionsTable.durationMinutes, caloriesBurned: workoutCompletionsTable.caloriesBurned })
       .from(workoutCompletionsTable)
-      .where(and(
-        eq(workoutCompletionsTable.userId, user.id),
-        gte(workoutCompletionsTable.completedAt, startTs),
-        lt(workoutCompletionsTable.completedAt, endTs),
-      )),
+      .where(and(eq(workoutCompletionsTable.userId, user.id), gte(workoutCompletionsTable.completedAt, startTs), lt(workoutCompletionsTable.completedAt, endTs))),
 
-    // Personal records
     db
       .select({ count: count() })
       .from(personalRecordsTable)
-      .where(and(
-        eq(personalRecordsTable.userId, user.id),
-        gte(personalRecordsTable.achievedAt, startTs),
-        lt(personalRecordsTable.achievedAt, endTs),
-      )),
+      .where(and(eq(personalRecordsTable.userId, user.id), gte(personalRecordsTable.achievedAt, startTs), lt(personalRecordsTable.achievedAt, endTs))),
 
-    // Goals completed (by updatedAt within the week)
     db
       .select({ count: count() })
       .from(goalsTable)
-      .where(and(
-        eq(goalsTable.userId, user.id),
-        eq(goalsTable.status, "completed"),
-        gte(goalsTable.updatedAt, startTs),
-        lt(goalsTable.updatedAt, endTs),
-      )),
+      .where(and(eq(goalsTable.userId, user.id), eq(goalsTable.status, "completed"), gte(goalsTable.updatedAt, startTs), lt(goalsTable.updatedAt, endTs))),
 
-    // Recovery daily check-ins (date column is YYYY-MM-DD string)
     db
       .select({ recoveryScore: dailyCheckInsTable.recoveryScore })
       .from(dailyCheckInsTable)
-      .where(and(
-        eq(dailyCheckInsTable.userId, user.id),
-        gte(dailyCheckInsTable.date, weekStartDate),
-        lt(dailyCheckInsTable.date,  weekEndDate),
-      )),
+      .where(and(eq(dailyCheckInsTable.userId, user.id), gte(dailyCheckInsTable.date, weekStartDate), lt(dailyCheckInsTable.date, weekEndDate))),
 
-    // Recovery scores for avg
     db
       .select({ recoveryScore: recoveryScoresTable.recoveryScore })
       .from(recoveryScoresTable)
-      .where(and(
-        eq(recoveryScoresTable.userId, user.id),
-        gte(recoveryScoresTable.date, weekStartDate),
-        lt(recoveryScoresTable.date,  weekEndDate),
-      )),
+      .where(and(eq(recoveryScoresTable.userId, user.id), gte(recoveryScoresTable.date, weekStartDate), lt(recoveryScoresTable.date, weekEndDate))),
+
+    // ── Previous week ─────────────────────────────────────────────────────────
+    db
+      .select({ durationMinutes: workoutCompletionsTable.durationMinutes, caloriesBurned: workoutCompletionsTable.caloriesBurned })
+      .from(workoutCompletionsTable)
+      .where(and(eq(workoutCompletionsTable.userId, user.id), gte(workoutCompletionsTable.completedAt, prevStartTs), lt(workoutCompletionsTable.completedAt, startTs))),
+
+    db
+      .select({ count: count() })
+      .from(personalRecordsTable)
+      .where(and(eq(personalRecordsTable.userId, user.id), gte(personalRecordsTable.achievedAt, prevStartTs), lt(personalRecordsTable.achievedAt, startTs))),
+
+    db
+      .select({ count: count() })
+      .from(goalsTable)
+      .where(and(eq(goalsTable.userId, user.id), eq(goalsTable.status, "completed"), gte(goalsTable.updatedAt, prevStartTs), lt(goalsTable.updatedAt, startTs))),
+
+    db
+      .select({ recoveryScore: dailyCheckInsTable.recoveryScore })
+      .from(dailyCheckInsTable)
+      .where(and(eq(dailyCheckInsTable.userId, user.id), gte(dailyCheckInsTable.date, prevWeekStartDate), lt(dailyCheckInsTable.date, prevWeekEndDate))),
   ]);
 
+  // ── Current week aggregates ────────────────────────────────────────────────
   const totalWorkouts       = workoutRows.length;
   const totalWorkoutMinutes = workoutRows.reduce((s, r) => s + (r.durationMinutes ?? 0), 0);
   const rawCalories         = workoutRows.reduce((s, r) => s + (r.caloriesBurned ?? 0), 0);
   const caloriesBurned      = rawCalories > 0 ? rawCalories : null;
+  const totalPersonalRecords = prCountResult[0]?.count        ?? 0;
+  const goalsCompleted       = goalsCompletedResult[0]?.count ?? 0;
+  const recoveryCheckIns     = checkInRows.length;
 
   const scoresWithData = recoveryScoreRows.filter((r) => r.recoveryScore != null);
   const avgRecoveryScore =
@@ -116,16 +124,40 @@ router.get("/progress/weekly-summary", requireAuth, async (req, res) => {
       ? Math.round(scoresWithData.reduce((s, r) => s + r.recoveryScore, 0) / scoresWithData.length)
       : null;
 
+  // ── Previous week aggregates ───────────────────────────────────────────────
+  const prevTotalWorkouts       = prevWorkoutRows.length;
+  const prevTotalWorkoutMinutes = prevWorkoutRows.reduce((s, r) => s + (r.durationMinutes ?? 0), 0);
+  const prevRawCalories         = prevWorkoutRows.reduce((s, r) => s + (r.caloriesBurned ?? 0), 0);
+  const prevCaloriesBurned      = prevRawCalories > 0 ? prevRawCalories : null;
+  const prevTotalPersonalRecords = prevPrCountResult[0]?.count        ?? 0;
+  const prevGoalsCompleted       = prevGoalsCompletedResult[0]?.count ?? 0;
+  const prevRecoveryCheckIns     = prevCheckInRows.length;
+
+  // ── Deltas (current − previous) ────────────────────────────────────────────
+  const comparison = {
+    prevWeekStartDate,
+    deltaTotalWorkouts:       totalWorkouts       - prevTotalWorkouts,
+    deltaTotalWorkoutMinutes: totalWorkoutMinutes - prevTotalWorkoutMinutes,
+    deltaCaloriesBurned:
+      caloriesBurned != null || prevCaloriesBurned != null
+        ? (caloriesBurned ?? 0) - (prevCaloriesBurned ?? 0)
+        : null,
+    deltaTotalPersonalRecords: totalPersonalRecords - prevTotalPersonalRecords,
+    deltaGoalsCompleted:       goalsCompleted       - prevGoalsCompleted,
+    deltaRecoveryCheckIns:     recoveryCheckIns     - prevRecoveryCheckIns,
+  };
+
   res.json({
     weekStartDate,
     weekEndDate,
     totalWorkouts,
     totalWorkoutMinutes,
     caloriesBurned,
-    totalPersonalRecords: prCountResult[0]?.count         ?? 0,
-    goalsCompleted:       goalsCompletedResult[0]?.count  ?? 0,
-    recoveryCheckIns:     checkInRows.length,
+    totalPersonalRecords,
+    goalsCompleted,
+    recoveryCheckIns,
     avgRecoveryScore,
+    comparison,
   });
 });
 
