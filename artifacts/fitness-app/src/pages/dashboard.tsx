@@ -21,6 +21,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import { GoalProgressCard, GoalProgressCardSkeleton, type GoalProgress } from "@/components/goal-progress-card";
 import { MilestoneCard, type Milestone } from "@/components/milestone-card";
+import { PhotoReminderDashboardCard } from "@/components/photo-reminder-dashboard-card";
 
 // ─── Upcoming Milestone Section ───────────────────────────────────────────────
 
@@ -268,6 +269,9 @@ export default function DashboardPage() {
               </div>
             )}
           </div>
+
+          {/* Progress Photo Reminder */}
+          <PhotoReminderDashboardCard />
 
           {/* Active Goals */}
           <ActiveGoalsSection />

@@ -6,7 +6,8 @@ import {
 } from "@workspace/api-client-react";
 import { ProgressPhotoGallery } from "@/components/progress-photo-gallery";
 import { BeforeAfterComparison } from "@/components/before-after-comparison";
-import { Camera, Upload, Trash2, X, AlertTriangle, CheckCircle2, Loader2, ArrowLeftRight, Images } from "lucide-react";
+import { PhotoReminderSettings } from "@/components/photo-reminder-settings";
+import { Camera, Upload, Trash2, X, AlertTriangle, CheckCircle2, Loader2, ArrowLeftRight, Images, Bell } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
@@ -398,11 +399,12 @@ function DeleteDialog({ photoId, onCancel, onConfirm }: { photoId: number; onCan
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
-type ActiveTab = "gallery" | "compare";
+type ActiveTab = "gallery" | "compare" | "reminders";
 
 const TABS: { value: ActiveTab; label: string; Icon: React.ElementType }[] = [
   { value: "gallery", label: "Gallery", Icon: Images },
   { value: "compare", label: "Before & After", Icon: ArrowLeftRight },
+  { value: "reminders", label: "Reminders", Icon: Bell },
 ];
 
 export default function ProgressPhotosPage() {
@@ -451,8 +453,10 @@ export default function ProgressPhotosPage() {
           onDelete={setDeleteTarget}
           onUpload={() => setShowUpload(true)}
         />
-      ) : (
+      ) : activeTab === "compare" ? (
         <BeforeAfterComparison />
+      ) : (
+        <PhotoReminderSettings />
       )}
 
       {/* Modals */}

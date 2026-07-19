@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
-import { ImageOff, RotateCcw } from "lucide-react";
+import { ImageOff, RotateCcw, Maximize2, Minimize2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -14,16 +14,21 @@ export interface BeforeAfterSliderProps {
   className?: string;
 }
 
-// ─── BeforeAfterSlider ────────────────────────────────────────────────────────
+// ─── SliderCore ───────────────────────────────────────────────────────────────
+// Renders the actual interactive slider. Used in both normal and fullscreen mode.
 
-export function BeforeAfterSlider({
+function SliderCore({
   beforeSrc,
   afterSrc,
   beforeLabel = "Before",
   afterLabel = "After",
   aspectRatio = "3/4",
-  className,
-}: BeforeAfterSliderProps) {
+  isFullscreen = false,
+  onToggleFullscreen,
+}: Omit<BeforeAfterSliderProps, "className"> & {
+  isFullscreen?: boolean;
+  onToggleFullscreen?: () => void;
+}) {
   const [position, setPosition] = useState(50); // 0–100 percent
   const [isDragging, setIsDragging] = useState(false);
   const [beforeError, setBeforeError] = useState(false);
@@ -84,6 +89,16 @@ export function BeforeAfterSlider({
     };
   }, [isDragging, positionFromClientX]);
 
+  // ── Close fullscreen on Escape ─────────────────────────────────────────────
+  useEffect(() => {
+    if (!isFullscreen) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onToggleFullscreen?.();
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [isFullscreen, onToggleFullscreen]);
+
   const reset = () => setPosition(50);
   const atCenter = Math.round(position) === 50;
 
@@ -91,10 +106,7 @@ export function BeforeAfterSlider({
   if (beforeError && afterError) {
     return (
       <div
-        className={cn(
-          "flex flex-col items-center justify-center gap-3 bg-secondary rounded-2xl border border-border text-muted-foreground",
-          className
-        )}
+        className="flex flex-col items-center justify-center gap-3 bg-secondary rounded-2xl border border-border text-muted-foreground"
         style={{ aspectRatio }}
       >
         <ImageOff className="h-10 w-10" />
@@ -103,13 +115,22 @@ export function BeforeAfterSlider({
     );
   }
 
+  // In fullscreen, let the container fill the available space instead of using
+  // aspect-ratio so the image is as large as possible.
+  const containerStyle = isFullscreen
+    ? { width: "100%", height: "100%" }
+    : { aspectRatio };
+
   return (
-    <div className={cn("space-y-3", className)}>
+    <div className={cn("space-y-3", isFullscreen && "flex flex-col h-full")}>
       {/* ── Slider container ─────────────────────────────────────────────── */}
       <div
         ref={containerRef}
-        className="relative overflow-hidden rounded-2xl border border-border bg-secondary select-none touch-none cursor-ew-resize"
-        style={{ aspectRatio }}
+        className={cn(
+          "relative overflow-hidden rounded-2xl border border-border bg-secondary select-none touch-none cursor-ew-resize",
+          isFullscreen && "flex-1 rounded-none border-0"
+        )}
+        style={containerStyle}
         onMouseDown={handleMouseDown}
         onTouchStart={handleTouchStart}
         aria-label="Before and after image comparison slider"
@@ -225,6 +246,26 @@ export function BeforeAfterSlider({
           {afterLabel}
         </span>
 
+        {/* Fullscreen toggle ────────────────────────────────────────────── */}
+        {onToggleFullscreen && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleFullscreen();
+            }}
+            onMouseDown={(e) => e.stopPropagation()}
+            className="absolute bottom-3 right-3 z-20 h-8 w-8 flex items-center justify-center rounded-lg bg-black/55 text-white backdrop-blur-sm hover:bg-black/75 transition-colors"
+            aria-label={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
+          >
+            {isFullscreen ? (
+              <Minimize2 className="h-4 w-4" />
+            ) : (
+              <Maximize2 className="h-4 w-4" />
+            )}
+          </button>
+        )}
+
         {/* Invisible full-area drag target on top while dragging ──────── */}
         {isDragging && (
           <div className="absolute inset-0 z-30 cursor-ew-resize" />
@@ -232,7 +273,7 @@ export function BeforeAfterSlider({
       </div>
 
       {/* ── Reset button ─────────────────────────────────────────────────── */}
-      <div className="flex justify-end">
+      <div className={cn("flex justify-end", isFullscreen && "px-4 pb-4")}>
         <button
           type="button"
           onClick={reset}
@@ -249,5 +290,78 @@ export function BeforeAfterSlider({
         </button>
       </div>
     </div>
+  );
+}
+
+// ─── BeforeAfterSlider ────────────────────────────────────────────────────────
+
+export function BeforeAfterSlider({
+  beforeSrc,
+  afterSrc,
+  beforeLabel = "Before",
+  afterLabel = "After",
+  aspectRatio = "3/4",
+  className,
+}: BeforeAfterSliderProps) {
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const toggleFullscreen = useCallback(() => setIsFullscreen((v) => !v), []);
+
+  return (
+    <>
+      {/* ── Normal in-page view ─────────────────────────────────────────── */}
+      <div className={className}>
+        <SliderCore
+          beforeSrc={beforeSrc}
+          afterSrc={afterSrc}
+          beforeLabel={beforeLabel}
+          afterLabel={afterLabel}
+          aspectRatio={aspectRatio}
+          isFullscreen={false}
+          onToggleFullscreen={toggleFullscreen}
+        />
+      </div>
+
+      {/* ── Fullscreen overlay ──────────────────────────────────────────── */}
+      {isFullscreen && (
+        <div
+          className="fixed inset-0 z-50 bg-black flex flex-col animate-in fade-in duration-150"
+          onClick={(e) => {
+            // Close when clicking the backdrop (outside the slider)
+            if (e.target === e.currentTarget) toggleFullscreen();
+          }}
+        >
+          {/* Top bar */}
+          <div className="flex items-center justify-between px-4 py-3 bg-black/80 border-b border-white/10 shrink-0">
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-bold uppercase tracking-widest text-white/60">
+                Before &amp; After
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={toggleFullscreen}
+              className="h-8 w-8 flex items-center justify-center rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+              aria-label="Exit fullscreen"
+            >
+              <Minimize2 className="h-4 w-4" />
+            </button>
+          </div>
+
+          {/* Slider fills remaining space */}
+          <div className="flex-1 overflow-hidden">
+            <SliderCore
+              beforeSrc={beforeSrc}
+              afterSrc={afterSrc}
+              beforeLabel={beforeLabel}
+              afterLabel={afterLabel}
+              aspectRatio={aspectRatio}
+              isFullscreen={true}
+              onToggleFullscreen={toggleFullscreen}
+            />
+          </div>
+        </div>
+      )}
+    </>
   );
 }

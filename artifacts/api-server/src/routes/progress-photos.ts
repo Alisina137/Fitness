@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
-import { progressPhotosTable } from "@workspace/db";
+import { progressPhotosTable, photoReminderSettingsTable } from "@workspace/db";
 import { requireAuth, getUser } from "../lib/auth.js";
 import { eq, and, desc } from "drizzle-orm";
 import { z } from "zod";
@@ -145,6 +145,111 @@ router.get("/progress-photos/compare", requireAuth, async (req, res) => {
     after: serializePhoto(after),
     daysBetween,
   });
+});
+
+// ─── Reminder helpers ─────────────────────────────────────────────────────────
+
+const REMINDER_FREQUENCIES = ["weekly", "every2weeks", "monthly", "disabled"] as const;
+type ReminderFrequency = typeof REMINDER_FREQUENCIES[number];
+
+const REMINDER_INTERVAL_DAYS: Record<ReminderFrequency, number | null> = {
+  weekly: 7,
+  every2weeks: 14,
+  monthly: 30,
+  disabled: null,
+};
+
+function computeReminderInfo(frequency: ReminderFrequency, lastPhotoDate: Date | null) {
+  const intervalDays = REMINDER_INTERVAL_DAYS[frequency];
+
+  if (frequency === "disabled") {
+    return {
+      frequency,
+      lastPhotoDate: lastPhotoDate ? lastPhotoDate.toISOString() : null,
+      nextReminderDate: null,
+      isDue: false,
+    };
+  }
+
+  if (!lastPhotoDate) {
+    // Never uploaded a photo — reminder is immediately due
+    return {
+      frequency,
+      lastPhotoDate: null,
+      nextReminderDate: null,
+      isDue: true,
+    };
+  }
+
+  const nextDate = new Date(lastPhotoDate.getTime() + (intervalDays as number) * 24 * 60 * 60 * 1000);
+  const isDue = new Date() >= nextDate;
+
+  return {
+    frequency,
+    lastPhotoDate: lastPhotoDate.toISOString(),
+    nextReminderDate: nextDate.toISOString(),
+    isDue,
+  };
+}
+
+const UpdateReminderSchema = z.object({
+  frequency: z.enum(REMINDER_FREQUENCIES, {
+    error: `frequency must be one of: ${REMINDER_FREQUENCIES.join(", ")}`,
+  }),
+});
+
+// ─── GET /api/progress-photos/reminder ───────────────────────────────────────
+// Must be registered before /:id to avoid Express matching "reminder" as an id.
+
+router.get("/progress-photos/reminder", requireAuth, async (req, res) => {
+  const user = getUser(req);
+
+  const [settings] = await db
+    .select()
+    .from(photoReminderSettingsTable)
+    .where(eq(photoReminderSettingsTable.userId, user.id));
+
+  const frequency: ReminderFrequency = (settings?.frequency as ReminderFrequency) ?? "weekly";
+
+  const [latestPhoto] = await db
+    .select({ takenAt: progressPhotosTable.takenAt })
+    .from(progressPhotosTable)
+    .where(eq(progressPhotosTable.userId, user.id))
+    .orderBy(desc(progressPhotosTable.takenAt))
+    .limit(1);
+
+  res.json(computeReminderInfo(frequency, latestPhoto?.takenAt ?? null));
+});
+
+// ─── PUT /api/progress-photos/reminder ───────────────────────────────────────
+
+router.put("/progress-photos/reminder", requireAuth, async (req, res) => {
+  const user = getUser(req);
+
+  const parsed = UpdateReminderSchema.safeParse(req.body);
+  if (!parsed.success) {
+    const firstIssue = parsed.error.issues[0];
+    return res.status(400).json({ error: firstIssue?.message || "Validation failed" });
+  }
+
+  const { frequency } = parsed.data;
+
+  await db
+    .insert(photoReminderSettingsTable)
+    .values({ userId: user.id, frequency })
+    .onConflictDoUpdate({
+      target: photoReminderSettingsTable.userId,
+      set: { frequency, updatedAt: new Date() },
+    });
+
+  const [latestPhoto] = await db
+    .select({ takenAt: progressPhotosTable.takenAt })
+    .from(progressPhotosTable)
+    .where(eq(progressPhotosTable.userId, user.id))
+    .orderBy(desc(progressPhotosTable.takenAt))
+    .limit(1);
+
+  res.json(computeReminderInfo(frequency, latestPhoto?.takenAt ?? null));
 });
 
 // ─── DELETE /api/progress-photos/:id ─────────────────────────────────────────

@@ -15,3 +15,26 @@ export const progressPhotosTable = pgTable("progress_photos", {
 
 export type ProgressPhoto = typeof progressPhotosTable.$inferSelect;
 export type InsertProgressPhoto = typeof progressPhotosTable.$inferInsert;
+
+// ─── Photo Reminder Settings ──────────────────────────────────────────────────
+
+export const reminderFrequencyEnum = pgEnum("reminder_frequency", [
+  "weekly",
+  "every2weeks",
+  "monthly",
+  "disabled",
+]);
+
+export const photoReminderSettingsTable = pgTable("photo_reminder_settings", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id")
+    .notNull()
+    .unique()
+    .references(() => usersTable.id, { onDelete: "cascade" }),
+  frequency: reminderFrequencyEnum("frequency").notNull().default("weekly"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export type PhotoReminderSettings = typeof photoReminderSettingsTable.$inferSelect;
+export type InsertPhotoReminderSettings = typeof photoReminderSettingsTable.$inferInsert;
