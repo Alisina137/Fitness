@@ -4,6 +4,7 @@ import { ImageOff, ArrowLeftRight, ChevronDown } from "lucide-react";
 import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { BeforeAfterSlider } from "@/components/before-after-slider";
 
 // ─── Types & constants ────────────────────────────────────────────────────────
 
@@ -477,12 +478,13 @@ export function BeforeAfterComparison() {
                 </span>
               </div>
 
-              {/* Side-by-side photos */}
-              <div className="flex gap-4 md:gap-6">
-                <ComparePhotoPanel label="Before" photo={comparison.before} />
-                <div className="w-px bg-border shrink-0 self-stretch" />
-                <ComparePhotoPanel label="After" photo={comparison.after} />
-              </div>
+              {/* Interactive slider */}
+              <BeforeAfterSlider
+                beforeSrc={comparison.before.imageUrl}
+                afterSrc={comparison.after.imageUrl}
+                beforeLabel={`Before · ${format(new Date(comparison.before.takenAt), "MMM d, yyyy")}`}
+                afterLabel={`After · ${format(new Date(comparison.after.takenAt), "MMM d, yyyy")}`}
+              />
             </>
           ) : null}
         </div>
