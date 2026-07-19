@@ -13,6 +13,11 @@ interface ReminderInfo {
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") || "";
 
+// localStorage key that stores the dismissal token.
+// Format: ISO date string of nextReminderDate, or a "never-uploaded:<YYYY-MM-DD>"
+// sentinel for users who have never taken a photo.
+const STORAGE_KEY = "photo-reminder-dismissed-token";
+
 function getToken(): string | null {
   try {
     return JSON.parse(localStorage.getItem("auth-storage") || "{}").state?.token ?? null;
@@ -21,29 +26,79 @@ function getToken(): string | null {
   }
 }
 
+/**
+ * Derive a stable dismissal token from the API response.
+ *
+ * - When nextReminderDate is present, use it directly — dismissal expires
+ *   the moment a new reminder period starts.
+ * - When nextReminderDate is null (user has never uploaded a photo), use a
+ *   "never-uploaded:<today>" sentinel so the card is suppressed for the rest
+ *   of the calendar day but reappears the next time they visit.
+ */
+function deriveDismissalToken(info: ReminderInfo): string {
+  if (info.nextReminderDate) return info.nextReminderDate;
+  // Sentinel: dismissed for today only
+  const today = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
+  return `never-uploaded:${today}`;
+}
+
+function readStoredToken(): string | null {
+  try {
+    return localStorage.getItem(STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function writeStoredToken(token: string) {
+  try {
+    localStorage.setItem(STORAGE_KEY, token);
+  } catch { /* storage unavailable */ }
+}
+
 // ─── PhotoReminderDashboardCard ───────────────────────────────────────────────
 // Renders a dismissible card when a progress photo reminder is due.
-// Renders nothing when reminder is not due, disabled, or dismissed.
+// Dismissal persists across page loads until the next reminder period begins.
 
 export function PhotoReminderDashboardCard() {
-  const [isDue, setIsDue] = useState(false);
+  const [info, setInfo] = useState<ReminderInfo | null>(null);
   const [dismissed, setDismissed] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    const token = getToken();
+    const authToken = getToken();
     fetch(`${BASE}/api/progress-photos/reminder`, {
-      headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      headers: { ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}) },
     })
       .then((r) => (r.ok ? r.json() : null))
       .then((data: ReminderInfo | null) => {
-        if (data?.isDue) setIsDue(true);
+        if (!data?.isDue) {
+          setLoaded(true);
+          return;
+        }
+
+        setInfo(data);
+
+        // Check if this reminder period was already dismissed
+        const stored = readStoredToken();
+        const current = deriveDismissalToken(data);
+        if (stored === current) {
+          setDismissed(true);
+        }
+
+        setLoaded(true);
       })
-      .catch(() => {})
-      .finally(() => setLoaded(true));
+      .catch(() => setLoaded(true));
   }, []);
 
-  if (!loaded || !isDue || dismissed) return null;
+  function handleDismiss() {
+    setDismissed(true);
+    if (info) {
+      writeStoredToken(deriveDismissalToken(info));
+    }
+  }
+
+  if (!loaded || !info?.isDue || dismissed) return null;
 
   return (
     <div className="bg-card border border-primary/30 p-5 rounded-3xl relative overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
@@ -76,7 +131,7 @@ export function PhotoReminderDashboardCard() {
         {/* Dismiss */}
         <button
           type="button"
-          onClick={() => setDismissed(true)}
+          onClick={handleDismiss}
           className="h-7 w-7 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors shrink-0"
           aria-label="Dismiss reminder"
         >
