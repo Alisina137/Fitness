@@ -68,11 +68,25 @@ type HistoryItem = CheckIn;
 
 // ─── API helpers ────────────────────────────────────────────────────────────
 
+const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") || "";
+
+function getAuthToken(): string | null {
+  try {
+    return JSON.parse(localStorage.getItem("auth-storage") || "{}").state?.token ?? null;
+  } catch {
+    return null;
+  }
+}
+
 async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`/api${path}`, {
+  const token = getAuthToken();
+  const res = await fetch(`${BASE}/api${path}`, {
     ...options,
-    credentials: "include",
-    headers: { "Content-Type": "application/json", ...options?.headers },
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...options?.headers,
+    },
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: "Request failed" }));
