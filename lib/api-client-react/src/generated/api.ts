@@ -43,6 +43,7 @@ import type {
   GetBodyMeasurementComparisonParams,
   GetBodyMeasurementHistoryParams,
   GetNutritionSummaryParams,
+  GetProgressMonthlyReportParams,
   GetProgressPhotosCompareParams,
   GetProgressPhotosParams,
   GetRecoveryHistoryParams,
@@ -65,6 +66,7 @@ import type {
   Message,
   MessageInput,
   MessageResponse,
+  MonthlyReport,
   MuscleRecovery,
   NutritionEntry,
   NutritionEntryInput,
@@ -4138,6 +4140,91 @@ export function useGetProgressStats<TData = Awaited<ReturnType<typeof getProgres
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getGetProgressStatsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetProgressMonthlyReportUrl = (params: GetProgressMonthlyReportParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/progress/monthly-report?${stringifiedParams}` : `/api/progress/monthly-report`
+}
+
+/**
+ * Returns aggregated progress stats for a given month and year. Returns zeros for months with no data.
+ * @summary Get monthly progress report
+ */
+export const getProgressMonthlyReport = async (params: GetProgressMonthlyReportParams, options?: RequestInit): Promise<MonthlyReport> => {
+
+  return customFetch<MonthlyReport>(getGetProgressMonthlyReportUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetProgressMonthlyReportQueryKey = (params?: GetProgressMonthlyReportParams,) => {
+    return [
+    `/api/progress/monthly-report`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetProgressMonthlyReportQueryOptions = <TData = Awaited<ReturnType<typeof getProgressMonthlyReport>>, TError = ErrorType<ErrorResponse>>(params: GetProgressMonthlyReportParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getProgressMonthlyReport>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetProgressMonthlyReportQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getProgressMonthlyReport>>> = ({ signal }) => getProgressMonthlyReport(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getProgressMonthlyReport>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetProgressMonthlyReportQueryResult = NonNullable<Awaited<ReturnType<typeof getProgressMonthlyReport>>>
+export type GetProgressMonthlyReportQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Get monthly progress report
+ */
+
+export function useGetProgressMonthlyReport<TData = Awaited<ReturnType<typeof getProgressMonthlyReport>>, TError = ErrorType<ErrorResponse>>(
+ params: GetProgressMonthlyReportParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getProgressMonthlyReport>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetProgressMonthlyReportQueryOptions(params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

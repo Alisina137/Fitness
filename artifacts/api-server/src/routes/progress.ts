@@ -1,12 +1,107 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
-import { progressEntriesTable, achievementsTable, workoutCompletionsTable } from "@workspace/db";
-import { eq, and, desc, gte, lte, isNotNull, asc } from "drizzle-orm";
+import {
+  progressEntriesTable,
+  achievementsTable,
+  workoutCompletionsTable,
+  personalRecordsTable,
+  progressPhotosTable,
+  goalsTable,
+} from "@workspace/db";
+import { eq, and, desc, gte, lte, lt, isNotNull, asc, count } from "drizzle-orm";
 import { requireAuth, getUser } from "../lib/auth";
 import { updateAllUserGoals } from "../lib/goal-progress-service.js";
 import { getUserProgressSummary } from "../lib/progress-analysis-service.js";
 
 const router = Router();
+
+// ─── GET /api/progress/monthly-report ────────────────────────────────────────
+
+router.get("/progress/monthly-report", requireAuth, async (req, res) => {
+  const user = getUser(req);
+  const month = Number(req.query.month);
+  const year  = Number(req.query.year);
+
+  if (
+    !month || !year ||
+    isNaN(month) || isNaN(year) ||
+    month < 1 || month > 12 ||
+    year < 2000 || year > 2100
+  ) {
+    return res.status(400).json({
+      error: "invalid_params",
+      message: "month must be 1–12 and year must be 2000–2100",
+    });
+  }
+
+  const startDate = new Date(year, month - 1, 1);
+  const endDate   = new Date(year, month, 1); // exclusive upper bound
+
+  const [
+    workoutRows,
+    prCountResult,
+    measurementCountResult,
+    photoCountResult,
+    goalsCompletedResult,
+  ] = await Promise.all([
+    db
+      .select({ durationMinutes: workoutCompletionsTable.durationMinutes })
+      .from(workoutCompletionsTable)
+      .where(and(
+        eq(workoutCompletionsTable.userId, user.id),
+        gte(workoutCompletionsTable.completedAt, startDate),
+        lt(workoutCompletionsTable.completedAt, endDate),
+      )),
+
+    db
+      .select({ count: count() })
+      .from(personalRecordsTable)
+      .where(and(
+        eq(personalRecordsTable.userId, user.id),
+        gte(personalRecordsTable.achievedAt, startDate),
+        lt(personalRecordsTable.achievedAt, endDate),
+      )),
+
+    db
+      .select({ count: count() })
+      .from(progressEntriesTable)
+      .where(and(
+        eq(progressEntriesTable.userId, user.id),
+        gte(progressEntriesTable.loggedAt, startDate),
+        lt(progressEntriesTable.loggedAt, endDate),
+      )),
+
+    db
+      .select({ count: count() })
+      .from(progressPhotosTable)
+      .where(and(
+        eq(progressPhotosTable.userId, user.id),
+        gte(progressPhotosTable.createdAt, startDate),
+        lt(progressPhotosTable.createdAt, endDate),
+      )),
+
+    db
+      .select({ count: count() })
+      .from(goalsTable)
+      .where(and(
+        eq(goalsTable.userId, user.id),
+        eq(goalsTable.status, "completed"),
+        gte(goalsTable.updatedAt, startDate),
+        lt(goalsTable.updatedAt, endDate),
+      )),
+  ]);
+
+  res.json({
+    month,
+    year,
+    totalWorkouts:         workoutRows.length,
+    totalWorkoutMinutes:   workoutRows.reduce((s, r) => s + (r.durationMinutes ?? 0), 0),
+    totalPersonalRecords:  prCountResult[0]?.count         ?? 0,
+    bodyMeasurementsAdded: measurementCountResult[0]?.count ?? 0,
+    progressPhotosAdded:   photoCountResult[0]?.count       ?? 0,
+    goalsCompleted:        goalsCompletedResult[0]?.count   ?? 0,
+  });
+});
 
 // ─── GET /api/progress/summary ───────────────────────────────────────────────
 // Must be registered before /progress/:anything to avoid param collisions.

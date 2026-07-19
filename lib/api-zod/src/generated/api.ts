@@ -1589,6 +1589,38 @@ export const GetProgressStatsResponse = zod.object({
 
 
 /**
+ * Returns aggregated progress stats for a given month and year. Returns zeros for months with no data.
+ * @summary Get monthly progress report
+ */
+export const getProgressMonthlyReportQueryMonthMax = 12;
+
+export const getProgressMonthlyReportQueryYearMin = 2000;
+export const getProgressMonthlyReportQueryYearMax = 2100;
+
+
+
+export const GetProgressMonthlyReportQueryParams = zod.object({
+  "month": zod.coerce.number().min(1).max(getProgressMonthlyReportQueryMonthMax).describe('Month number (1–12)'),
+  "year": zod.coerce.number().min(getProgressMonthlyReportQueryYearMin).max(getProgressMonthlyReportQueryYearMax).describe('Four-digit year')
+})
+
+export const getProgressMonthlyReportResponseMonthMax = 12;
+
+
+
+export const GetProgressMonthlyReportResponse = zod.object({
+  "month": zod.number().min(1).max(getProgressMonthlyReportResponseMonthMax),
+  "year": zod.number(),
+  "totalWorkouts": zod.number(),
+  "totalWorkoutMinutes": zod.number(),
+  "totalPersonalRecords": zod.number(),
+  "bodyMeasurementsAdded": zod.number(),
+  "progressPhotosAdded": zod.number(),
+  "goalsCompleted": zod.number()
+})
+
+
+/**
  * Returns aggregated progress data across goals, workouts, measurements, photos, and personal records. Handles new users and missing data gracefully.
  * @summary Get aggregated progress summary
  */

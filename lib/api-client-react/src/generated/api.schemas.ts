@@ -1395,6 +1395,21 @@ export interface ErrorResponse {
   message?: string;
 }
 
+export interface MonthlyReport {
+  /**
+     * @minimum 1
+     * @maximum 12
+     */
+  month: number;
+  year: number;
+  totalWorkouts: number;
+  totalWorkoutMinutes: number;
+  totalPersonalRecords: number;
+  bodyMeasurementsAdded: number;
+  progressPhotosAdded: number;
+  goalsCompleted: number;
+}
+
 export type ProgressSummaryGoals = {
   active: number;
   completed: number;
@@ -1583,6 +1598,21 @@ export const ListProgressEntriesType = {
   measurement: 'measurement',
   achievement: 'achievement',
 } as const;
+
+export type GetProgressMonthlyReportParams = {
+/**
+ * Month number (1–12)
+ * @minimum 1
+ * @maximum 12
+ */
+month: number;
+/**
+ * Four-digit year
+ * @minimum 2000
+ * @maximum 2100
+ */
+year: number;
+};
 
 export type ListGoalsParams = {
 status?: ListGoalsStatus;

@@ -28,6 +28,7 @@ import AiWorkoutGeneratorPage from './pages/ai-workout-generator';
 import RecoveryPage from './pages/recovery';
 import ProfilePage from './pages/profile';
 import GoalsPage from './pages/goals';
+import MonthlyReportPage from './pages/monthly-report';
 import NotFound from '@/pages/not-found';
 
 const queryClient = new QueryClient({
@@ -53,6 +54,7 @@ function AuthenticatedRoutes() {
         <Route path="/workouts/:id" component={WorkoutDetailPage} />
         <Route path="/exercises" component={ExercisesPage} />
         <Route path="/nutrition" component={NutritionPage} />
+        <Route path="/progress/monthly-report" component={MonthlyReportPage} />
         <Route path="/progress" component={ProgressPage} />
         <Route path="/progress-photos" component={ProgressPhotosPage} />
         <Route path="/recovery" component={RecoveryPage} />

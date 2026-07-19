@@ -1134,6 +1134,43 @@ paths:
               schema:
                 $ref: "#/components/schemas/ProgressStats"
 
+  /progress/monthly-report:
+    get:
+      operationId: getProgressMonthlyReport
+      tags: [progress]
+      summary: Get monthly progress report
+      description: Returns aggregated progress stats for a given month and year. Returns zeros for months with no data.
+      parameters:
+        - name: month
+          in: query
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 12
+          description: Month number (1–12)
+        - name: year
+          in: query
+          required: true
+          schema:
+            type: integer
+            minimum: 2000
+            maximum: 2100
+          description: Four-digit year
+      responses:
+        "200":
+          description: Monthly report data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MonthlyReport"
+        "400":
+          description: Invalid month or year
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /progress/summary:
     get:
       operationId: getProgressSummary
@@ -3134,6 +3171,38 @@ components:
           type: string
         message:
           type: string
+
+    # ─── Monthly Report ─────────────────────────────────────────────────────────
+    MonthlyReport:
+      type: object
+      required:
+        - month
+        - year
+        - totalWorkouts
+        - totalWorkoutMinutes
+        - totalPersonalRecords
+        - bodyMeasurementsAdded
+        - progressPhotosAdded
+        - goalsCompleted
+      properties:
+        month:
+          type: integer
+          minimum: 1
+          maximum: 12
+        year:
+          type: integer
+        totalWorkouts:
+          type: integer
+        totalWorkoutMinutes:
+          type: integer
+        totalPersonalRecords:
+          type: integer
+        bodyMeasurementsAdded:
+          type: integer
+        progressPhotosAdded:
+          type: integer
+        goalsCompleted:
+          type: integer
 
     # ─── Progress Analysis ──────────────────────────────────────────────────────
     ProgressSummary:
