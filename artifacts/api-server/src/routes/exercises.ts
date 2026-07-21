@@ -107,7 +107,9 @@ router.get("/exercises/:id/alternatives", requireAuth, async (req, res) => {
   const [source] = await db.select().from(exercisesTable).where(eq(exercisesTable.id, id)).limit(1);
   if (!source) { res.status(404).json({ error: "Exercise not found" }); return; }
 
-  // Find exercises that share primary muscles and same category, excluding self
+  // Find exercises that share primary muscles and same category, excluding self.
+  // Muscle values are bound as parameters via `= ANY(...)` — never interpolated.
+  const muscleOverlap = source.primaryMuscles.map(m => sql`${m} = ANY(${exercisesTable.primaryMuscles})`);
   const alternatives = await db
     .select()
     .from(exercisesTable)
@@ -116,7 +118,7 @@ router.get("/exercises/:id/alternatives", requireAuth, async (req, res) => {
         sql`${exercisesTable.id} != ${id}`,
         or(
           ilike(exercisesTable.category, source.category),
-          sql`${exercisesTable.primaryMuscles} && ${sql.raw(`ARRAY[${source.primaryMuscles.map(m => `'${m}'`).join(",")}]::text[]`)}`
+          ...muscleOverlap
         )!
       )!
     )
