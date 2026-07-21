@@ -125,7 +125,7 @@ type DayTemplate = {
   isolationCount: number;
 };
 
-function getSplitTemplates(days: number, goal: string): DayTemplate[] {
+export function getSplitTemplates(days: number, goal: string): DayTemplate[] {
   const fullBodyA: DayTemplate = { title: "Full Body A", focusArea: "Full Body", primaryMuscles: ["Chest", "Back", "Quadriceps", "Core"], compoundCount: 3, isolationCount: 2 };
   const fullBodyB: DayTemplate = { title: "Full Body B", focusArea: "Full Body", primaryMuscles: ["Shoulders", "Arms", "Hamstrings", "Core"], compoundCount: 3, isolationCount: 2 };
   const fullBodyC: DayTemplate = { title: "Full Body C", focusArea: "Full Body", primaryMuscles: ["Back", "Glutes", "Core", "Calves"], compoundCount: 3, isolationCount: 2 };
@@ -158,7 +158,7 @@ function getSplitTemplates(days: number, goal: string): DayTemplate[] {
   ];
 }
 
-function getSplitName(days: number, goal: string): string {
+export function getSplitName(days: number, goal: string): string {
   if (days <= 2) return "Full Body";
   if (days === 3) return goal === "muscle_gain" || goal === "strength" ? "Push/Pull/Legs" : "Full Body (3x/week)";
   if (days === 4) return "Upper/Lower Split";
@@ -175,11 +175,11 @@ const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Frid
 
 // ─── Equipment Filtering ──────────────────────────────────────────────────────
 
-function normalizeEquip(name: string): string {
+export function normalizeEquip(name: string): string {
   return name.toLowerCase().trim().replace(/s$/, "").replace(/[\s_-]+/g, "_");
 }
 
-function filterByEquipment(exercises: Exercise[], userEquipment: string[]): Exercise[] {
+export function filterByEquipment(exercises: Exercise[], userEquipment: string[]): Exercise[] {
   if (!userEquipment || userEquipment.length === 0) {
     // bodyweight only
     return exercises.filter((e) => e.equipment.length === 0 || e.equipment.some((eq) => normalizeEquip(eq).includes("bodyweight")));
@@ -221,7 +221,7 @@ const INJURY_KEYWORDS: Record<string, string[]> = {
   ankle: ["ankle"],
 };
 
-function filterByInjuries(
+export function filterByInjuries(
   exercises: Exercise[],
   injuries: string[],
   injuryNotes: string | null,
@@ -252,14 +252,14 @@ function filterByInjuries(
 
 // ─── Level Filtering ──────────────────────────────────────────────────────────
 
-function filterByLevel(exercises: Exercise[], level: string): Exercise[] {
+export function filterByLevel(exercises: Exercise[], level: string): Exercise[] {
   const cfg = LEVEL_CONFIG[level] ?? LEVEL_CONFIG.intermediate;
   return exercises.filter((e) => cfg.difficulties.includes(e.difficulty));
 }
 
 // ─── Exercise Selection ───────────────────────────────────────────────────────
 
-function priorityScore(ex: Exercise, goal: string, targetMuscles: string[]): number {
+export function priorityScore(ex: Exercise, goal: string, targetMuscles: string[]): number {
   const goalCfg = GOAL_CONFIG[goal] ?? GOAL_CONFIG.general_fitness;
   let score = 0;
 
@@ -286,7 +286,7 @@ function priorityScore(ex: Exercise, goal: string, targetMuscles: string[]): num
   return score;
 }
 
-function selectExercises(
+export function selectExercises(
   pool: Exercise[],
   goal: string,
   targetMuscles: string[],
@@ -334,7 +334,7 @@ function selectExercises(
 
 // ─── Volume Assignment ────────────────────────────────────────────────────────
 
-function assignVolume(
+export function assignVolume(
   exercise: Exercise,
   goal: string,
   level: string,
@@ -416,7 +416,7 @@ type OverloadAnalysis = {
   intensityModifier: number; // 0.8 = reduce 20%, 1.0 = same, 1.1 = increase 10%
 };
 
-function analyzeProgressiveOverload(completions: WorkoutCompletion[]): OverloadAnalysis {
+export function analyzeProgressiveOverload(completions: WorkoutCompletion[]): OverloadAnalysis {
   if (completions.length === 0) {
     return { type: "baseline", note: "Starting fresh — volume set to baseline for your fitness level.", intensityModifier: 1.0 };
   }
