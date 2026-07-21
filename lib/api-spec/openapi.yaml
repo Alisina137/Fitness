@@ -36,6 +36,8 @@ tags:
     description: Progress photo management
   - name: workout-schedule
     description: One-off workout scheduling operations
+  - name: workout-reminders
+    description: Workout reminder settings
 paths:
   /healthz:
     get:
@@ -1741,6 +1743,43 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ScheduledWorkout"
+
+  /workout-reminders:
+    get:
+      operationId: getWorkoutReminderSettings
+      tags: [workout-reminders]
+      summary: Get the user's global reminder settings
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: User reminder settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserReminderSettings"
+
+    put:
+      operationId: updateWorkoutReminderSettings
+      tags: [workout-reminders]
+      summary: Update the user's global reminder settings
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateReminderSettingsInput"
+      responses:
+        "200":
+          description: Updated reminder settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserReminderSettings"
+        "400":
+          description: Validation error
 
   /workout-schedule/recurring:
     post:
@@ -3627,6 +3666,13 @@ components:
           nullable: true
           format: date
           description: "YYYY-MM-DD, optional end date for recurrence"
+        reminderEnabled:
+          type: boolean
+          default: false
+        reminderMinutesBefore:
+          type: integer
+          nullable: true
+          description: "Minutes before workout to remind; null means use global default"
         createdAt:
           type: string
           format: date-time
@@ -3651,6 +3697,25 @@ components:
         notes:
           type: string
           nullable: true
+
+    UserReminderSettings:
+      type: object
+      required: [reminderEnabled, reminderMinutesBefore]
+      properties:
+        reminderEnabled:
+          type: boolean
+        reminderMinutesBefore:
+          type: integer
+          description: "Minutes before workout (15, 30, 60, 120, 1440)"
+
+    UpdateReminderSettingsInput:
+      type: object
+      properties:
+        reminderEnabled:
+          type: boolean
+        reminderMinutesBefore:
+          type: integer
+          minimum: 0
 
     CreateRecurringWorkoutScheduleInput:
       type: object

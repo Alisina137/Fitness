@@ -27,6 +27,8 @@ function serialize(
     isRecurring: row.isRecurring,
     recurrenceType: row.recurrenceType ?? null,
     recurrenceEndDate: row.recurrenceEndDate ?? null,
+    reminderEnabled: row.reminderEnabled,
+    reminderMinutesBefore: row.reminderMinutesBefore ?? null,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };

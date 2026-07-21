@@ -1509,6 +1509,9 @@ export interface ScheduledWorkout {
   recurrenceType?: ScheduledWorkoutRecurrenceType;
   /** YYYY-MM-DD, optional end date for recurrence */
   recurrenceEndDate?: string | null;
+  reminderEnabled?: boolean;
+  /** Minutes before workout to remind; null means use global default */
+  reminderMinutesBefore?: number | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -1520,6 +1523,18 @@ export interface CreateWorkoutScheduleInput {
   /** HH:mm, optional */
   scheduledTime?: string | null;
   notes?: string | null;
+}
+
+export interface UserReminderSettings {
+  reminderEnabled: boolean;
+  /** Minutes before workout (15, 30, 60, 120, 1440) */
+  reminderMinutesBefore: number;
+}
+
+export interface UpdateReminderSettingsInput {
+  reminderEnabled?: boolean;
+  /** @minimum 0 */
+  reminderMinutesBefore?: number;
 }
 
 export type CreateRecurringWorkoutScheduleInputRecurrenceType = typeof CreateRecurringWorkoutScheduleInputRecurrenceType[keyof typeof CreateRecurringWorkoutScheduleInputRecurrenceType];

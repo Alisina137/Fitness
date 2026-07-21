@@ -65,9 +65,22 @@ export const userProfilesTable = pgTable("user_profiles", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// ─── User Reminder Settings ───────────────────────────────────────────────────
+// Global default reminder preferences per user. Individual ScheduledWorkout
+// entries inherit these values when created.
+
+export const userReminderSettingsTable = pgTable("user_reminder_settings", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }).unique(),
+  reminderEnabled: boolean("reminder_enabled").default(true).notNull(),
+  reminderMinutesBefore: integer("reminder_minutes_before").default(30).notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 export const insertUserSchema = createInsertSchema(usersTable).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertUserProfileSchema = createInsertSchema(userProfilesTable).omit({ id: true, updatedAt: true });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof usersTable.$inferSelect;
 export type UserProfile = typeof userProfilesTable.$inferSelect;
+export type UserReminderSettings = typeof userReminderSettingsTable.$inferSelect;

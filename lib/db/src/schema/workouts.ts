@@ -187,6 +187,9 @@ export const scheduledWorkoutsTable = pgTable("scheduled_workouts", {
   isRecurring: boolean("is_recurring").default(false).notNull(),
   recurrenceType: text("recurrence_type"),   // daily | weekly | weekdays | monthly
   recurrenceEndDate: text("recurrence_end_date"), // "YYYY-MM-DD", optional
+  // Reminder fields
+  reminderEnabled: boolean("reminder_enabled").default(false).notNull(),
+  reminderMinutesBefore: integer("reminder_minutes_before"), // null = use global default
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

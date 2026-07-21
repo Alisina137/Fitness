@@ -56,6 +56,7 @@ import {
   type EditableScheduledEntry,
 } from "@/components/edit-schedule-dialog";
 import { RescheduleConfirmDialog } from "@/components/reschedule-confirm-dialog";
+import { ReminderSettingsCard } from "@/components/reminder-settings-card";
 
 type ViewMode = "month" | "week";
 

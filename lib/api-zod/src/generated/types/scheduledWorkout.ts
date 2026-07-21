@@ -23,6 +23,9 @@ export interface ScheduledWorkout {
   recurrenceType?: ScheduledWorkoutRecurrenceType;
   /** YYYY-MM-DD, optional end date for recurrence */
   recurrenceEndDate?: Date | null;
+  reminderEnabled?: boolean;
+  /** Minutes before workout to remind; null means use global default */
+  reminderMinutesBefore?: number | null;
   createdAt: Date;
   updatedAt: Date;
 }

@@ -2180,6 +2180,7 @@ export const CreateWorkoutScheduleBody = zod.object({
 })
 
 export const createWorkoutScheduleResponseIsRecurringDefault = false;
+export const createWorkoutScheduleResponseReminderEnabledDefault = false;
 
 export const CreateWorkoutScheduleResponse = zod.object({
   "id": zod.number(),
@@ -2193,6 +2194,8 @@ export const CreateWorkoutScheduleResponse = zod.object({
   "isRecurring": zod.boolean().default(createWorkoutScheduleResponseIsRecurringDefault),
   "recurrenceType": zod.enum(['daily', 'weekly', 'weekdays', 'monthly']).nullish(),
   "recurrenceEndDate": zod.coerce.date().nullish().describe('YYYY-MM-DD, optional end date for recurrence'),
+  "reminderEnabled": zod.boolean().default(createWorkoutScheduleResponseReminderEnabledDefault),
+  "reminderMinutesBefore": zod.number().nullish().describe('Minutes before workout to remind; null means use global default'),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })
@@ -2207,6 +2210,7 @@ export const ListWorkoutScheduleQueryParams = zod.object({
 })
 
 export const listWorkoutScheduleResponseIsRecurringDefault = false;
+export const listWorkoutScheduleResponseReminderEnabledDefault = false;
 
 export const ListWorkoutScheduleResponseItem = zod.object({
   "id": zod.number(),
@@ -2220,10 +2224,39 @@ export const ListWorkoutScheduleResponseItem = zod.object({
   "isRecurring": zod.boolean().default(listWorkoutScheduleResponseIsRecurringDefault),
   "recurrenceType": zod.enum(['daily', 'weekly', 'weekdays', 'monthly']).nullish(),
   "recurrenceEndDate": zod.coerce.date().nullish().describe('YYYY-MM-DD, optional end date for recurrence'),
+  "reminderEnabled": zod.boolean().default(listWorkoutScheduleResponseReminderEnabledDefault),
+  "reminderMinutesBefore": zod.number().nullish().describe('Minutes before workout to remind; null means use global default'),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })
 export const ListWorkoutScheduleResponse = zod.array(ListWorkoutScheduleResponseItem)
+
+
+/**
+ * @summary Get the user's global reminder settings
+ */
+export const GetWorkoutReminderSettingsResponse = zod.object({
+  "reminderEnabled": zod.boolean(),
+  "reminderMinutesBefore": zod.number().describe('Minutes before workout (15, 30, 60, 120, 1440)')
+})
+
+
+/**
+ * @summary Update the user's global reminder settings
+ */
+export const updateWorkoutReminderSettingsBodyReminderMinutesBeforeMin = 0;
+
+
+
+export const UpdateWorkoutReminderSettingsBody = zod.object({
+  "reminderEnabled": zod.boolean().optional(),
+  "reminderMinutesBefore": zod.number().min(updateWorkoutReminderSettingsBodyReminderMinutesBeforeMin).optional()
+})
+
+export const UpdateWorkoutReminderSettingsResponse = zod.object({
+  "reminderEnabled": zod.boolean(),
+  "reminderMinutesBefore": zod.number().describe('Minutes before workout (15, 30, 60, 120, 1440)')
+})
 
 
 /**
@@ -2239,6 +2272,7 @@ export const CreateRecurringWorkoutScheduleBody = zod.object({
 })
 
 export const createRecurringWorkoutScheduleResponseEntriesItemIsRecurringDefault = false;
+export const createRecurringWorkoutScheduleResponseEntriesItemReminderEnabledDefault = false;
 
 export const CreateRecurringWorkoutScheduleResponse = zod.object({
   "count": zod.number(),
@@ -2254,6 +2288,8 @@ export const CreateRecurringWorkoutScheduleResponse = zod.object({
   "isRecurring": zod.boolean().default(createRecurringWorkoutScheduleResponseEntriesItemIsRecurringDefault),
   "recurrenceType": zod.enum(['daily', 'weekly', 'weekdays', 'monthly']).nullish(),
   "recurrenceEndDate": zod.coerce.date().nullish().describe('YYYY-MM-DD, optional end date for recurrence'),
+  "reminderEnabled": zod.boolean().default(createRecurringWorkoutScheduleResponseEntriesItemReminderEnabledDefault),
+  "reminderMinutesBefore": zod.number().nullish().describe('Minutes before workout to remind; null means use global default'),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 }))
@@ -2272,6 +2308,7 @@ export const RescheduleWorkoutScheduleBody = zod.object({
 })
 
 export const rescheduleWorkoutScheduleResponseIsRecurringDefault = false;
+export const rescheduleWorkoutScheduleResponseReminderEnabledDefault = false;
 
 export const RescheduleWorkoutScheduleResponse = zod.object({
   "id": zod.number(),
@@ -2285,6 +2322,8 @@ export const RescheduleWorkoutScheduleResponse = zod.object({
   "isRecurring": zod.boolean().default(rescheduleWorkoutScheduleResponseIsRecurringDefault),
   "recurrenceType": zod.enum(['daily', 'weekly', 'weekdays', 'monthly']).nullish(),
   "recurrenceEndDate": zod.coerce.date().nullish().describe('YYYY-MM-DD, optional end date for recurrence'),
+  "reminderEnabled": zod.boolean().default(rescheduleWorkoutScheduleResponseReminderEnabledDefault),
+  "reminderMinutesBefore": zod.number().nullish().describe('Minutes before workout to remind; null means use global default'),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })
@@ -2298,6 +2337,7 @@ export const GetWorkoutScheduleParams = zod.object({
 })
 
 export const getWorkoutScheduleResponseIsRecurringDefault = false;
+export const getWorkoutScheduleResponseReminderEnabledDefault = false;
 
 export const GetWorkoutScheduleResponse = zod.object({
   "id": zod.number(),
@@ -2311,6 +2351,8 @@ export const GetWorkoutScheduleResponse = zod.object({
   "isRecurring": zod.boolean().default(getWorkoutScheduleResponseIsRecurringDefault),
   "recurrenceType": zod.enum(['daily', 'weekly', 'weekdays', 'monthly']).nullish(),
   "recurrenceEndDate": zod.coerce.date().nullish().describe('YYYY-MM-DD, optional end date for recurrence'),
+  "reminderEnabled": zod.boolean().default(getWorkoutScheduleResponseReminderEnabledDefault),
+  "reminderMinutesBefore": zod.number().nullish().describe('Minutes before workout to remind; null means use global default'),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })
@@ -2328,6 +2370,7 @@ export const UpdateWorkoutScheduleStatusBody = zod.object({
 })
 
 export const updateWorkoutScheduleStatusResponseIsRecurringDefault = false;
+export const updateWorkoutScheduleStatusResponseReminderEnabledDefault = false;
 
 export const UpdateWorkoutScheduleStatusResponse = zod.object({
   "id": zod.number(),
@@ -2341,6 +2384,8 @@ export const UpdateWorkoutScheduleStatusResponse = zod.object({
   "isRecurring": zod.boolean().default(updateWorkoutScheduleStatusResponseIsRecurringDefault),
   "recurrenceType": zod.enum(['daily', 'weekly', 'weekdays', 'monthly']).nullish(),
   "recurrenceEndDate": zod.coerce.date().nullish().describe('YYYY-MM-DD, optional end date for recurrence'),
+  "reminderEnabled": zod.boolean().default(updateWorkoutScheduleStatusResponseReminderEnabledDefault),
+  "reminderMinutesBefore": zod.number().nullish().describe('Minutes before workout to remind; null means use global default'),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })
@@ -2361,6 +2406,7 @@ export const UpdateWorkoutScheduleBody = zod.object({
 })
 
 export const updateWorkoutScheduleResponseIsRecurringDefault = false;
+export const updateWorkoutScheduleResponseReminderEnabledDefault = false;
 
 export const UpdateWorkoutScheduleResponse = zod.object({
   "id": zod.number(),
@@ -2374,6 +2420,8 @@ export const UpdateWorkoutScheduleResponse = zod.object({
   "isRecurring": zod.boolean().default(updateWorkoutScheduleResponseIsRecurringDefault),
   "recurrenceType": zod.enum(['daily', 'weekly', 'weekdays', 'monthly']).nullish(),
   "recurrenceEndDate": zod.coerce.date().nullish().describe('YYYY-MM-DD, optional end date for recurrence'),
+  "reminderEnabled": zod.boolean().default(updateWorkoutScheduleResponseReminderEnabledDefault),
+  "reminderMinutesBefore": zod.number().nullish().describe('Minutes before workout to remind; null means use global default'),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })

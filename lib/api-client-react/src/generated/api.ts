@@ -93,11 +93,13 @@ import type {
   TodayWorkout,
   UpcomingMilestone,
   UpdateReminderInput,
+  UpdateReminderSettingsInput,
   UpdateWorkoutScheduleInput,
   UpdateWorkoutScheduleStatusInput,
   User,
   UserProfile,
   UserProfileUpdate,
+  UserReminderSettings,
   WeeklySummary,
   WorkoutAnalytics,
   WorkoutCompletion,
@@ -6305,6 +6307,154 @@ export function useListWorkoutSchedule<TData = Awaited<ReturnType<typeof listWor
 
 
 
+
+export const getGetWorkoutReminderSettingsUrl = () => {
+
+
+
+
+  return `/api/workout-reminders`
+}
+
+/**
+ * @summary Get the user's global reminder settings
+ */
+export const getWorkoutReminderSettings = async ( options?: RequestInit): Promise<UserReminderSettings> => {
+
+  return customFetch<UserReminderSettings>(getGetWorkoutReminderSettingsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetWorkoutReminderSettingsQueryKey = () => {
+    return [
+    `/api/workout-reminders`
+    ] as const;
+    }
+
+
+export const getGetWorkoutReminderSettingsQueryOptions = <TData = Awaited<ReturnType<typeof getWorkoutReminderSettings>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getWorkoutReminderSettings>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetWorkoutReminderSettingsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getWorkoutReminderSettings>>> = ({ signal }) => getWorkoutReminderSettings({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getWorkoutReminderSettings>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetWorkoutReminderSettingsQueryResult = NonNullable<Awaited<ReturnType<typeof getWorkoutReminderSettings>>>
+export type GetWorkoutReminderSettingsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get the user's global reminder settings
+ */
+
+export function useGetWorkoutReminderSettings<TData = Awaited<ReturnType<typeof getWorkoutReminderSettings>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getWorkoutReminderSettings>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetWorkoutReminderSettingsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getUpdateWorkoutReminderSettingsUrl = () => {
+
+
+
+
+  return `/api/workout-reminders`
+}
+
+/**
+ * @summary Update the user's global reminder settings
+ */
+export const updateWorkoutReminderSettings = async (updateReminderSettingsInput: UpdateReminderSettingsInput, options?: RequestInit): Promise<UserReminderSettings> => {
+
+  return customFetch<UserReminderSettings>(getUpdateWorkoutReminderSettingsUrl(),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(updateReminderSettingsInput)
+  }
+);}
+
+
+
+
+
+export const getUpdateWorkoutReminderSettingsMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateWorkoutReminderSettings>>, TError,{data: BodyType<UpdateReminderSettingsInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateWorkoutReminderSettings>>, TError,{data: BodyType<UpdateReminderSettingsInput>}, TContext> => {
+
+const mutationKey = ['updateWorkoutReminderSettings'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateWorkoutReminderSettings>>, {data: BodyType<UpdateReminderSettingsInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  updateWorkoutReminderSettings(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateWorkoutReminderSettingsMutationResult = NonNullable<Awaited<ReturnType<typeof updateWorkoutReminderSettings>>>
+    export type UpdateWorkoutReminderSettingsMutationBody = BodyType<UpdateReminderSettingsInput>
+    export type UpdateWorkoutReminderSettingsMutationError = ErrorType<void>
+
+    /**
+ * @summary Update the user's global reminder settings
+ */
+export const useUpdateWorkoutReminderSettings = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateWorkoutReminderSettings>>, TError,{data: BodyType<UpdateReminderSettingsInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateWorkoutReminderSettings>>,
+        TError,
+        {data: BodyType<UpdateReminderSettingsInput>},
+        TContext
+      > => {
+      return useMutation(getUpdateWorkoutReminderSettingsMutationOptions(options));
+    }
 
 export const getCreateRecurringWorkoutScheduleUrl = () => {
 

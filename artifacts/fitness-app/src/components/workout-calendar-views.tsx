@@ -10,7 +10,7 @@ import {
   isToday,
   format,
 } from "date-fns";
-import { Repeat } from "lucide-react";
+import { Repeat, Bell } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // ── Shared types ────────────────────────────────────────────────────────────
@@ -49,6 +49,7 @@ export type ScheduledEntry = {
   scheduledTime?: string | null;
   status: string;
   isRecurring?: boolean;
+  reminderEnabled?: boolean;
 };
 
 // ── Drag & Drop shared props ──────────────────────────────────────────────────

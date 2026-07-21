@@ -16,6 +16,7 @@ import recordsRouter from "./records";
 import goalsRouter from "./goals";
 import progressPhotosRouter from "./progress-photos";
 import workoutScheduleRouter from "./workout-schedule";
+import workoutRemindersRouter from "./workout-reminders";
 
 const router: IRouter = Router();
 
@@ -36,5 +37,6 @@ router.use(recordsRouter);
 router.use(goalsRouter);
 router.use(progressPhotosRouter);
 router.use(workoutScheduleRouter);
+router.use(workoutRemindersRouter);
 
 export default router;
