@@ -129,6 +129,8 @@ export * from './upcomingMilestoneGoal';
 export * from './updateReminderInput';
 export * from './updateReminderInputFrequency';
 export * from './updateWorkoutScheduleInput';
+export * from './updateWorkoutScheduleStatusInput';
+export * from './updateWorkoutScheduleStatusInputStatus';
 export * from './user';
 export * from './userProfile';
 export * from './userProfileActivityLevel';

@@ -176,6 +176,48 @@ router.get("/workout-schedule/:id", requireAuth, async (req, res) => {
   return res.json(serialize(row));
 });
 
+// ─── PATCH /api/workout-schedule/:id (status only) ───────────────────────────
+
+router.patch("/workout-schedule/:id", requireAuth, async (req, res) => {
+  const user = getUser(req);
+  const id = parseInt(req.params.id, 10);
+  if (isNaN(id)) return res.status(400).json({ error: "Invalid ID" });
+
+  const VALID_STATUSES = ["scheduled", "completed", "missed", "cancelled"] as const;
+  const bodySchema = z.object({
+    status: z.enum(VALID_STATUSES, { error: "Status must be one of: scheduled, completed, missed, cancelled" }),
+  });
+
+  const parsed = bodySchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({
+      error: "Validation failed",
+      issues: parsed.error.issues.map((i) => ({ field: i.path.join("."), message: i.message })),
+    });
+  }
+
+  const [existing] = await db
+    .select({ id: scheduledWorkoutsTable.id })
+    .from(scheduledWorkoutsTable)
+    .where(and(eq(scheduledWorkoutsTable.id, id), eq(scheduledWorkoutsTable.userId, user.id)))
+    .limit(1);
+  if (!existing) return res.status(404).json({ error: "Scheduled workout not found" });
+
+  const [updated] = await db
+    .update(scheduledWorkoutsTable)
+    .set({ status: parsed.data.status, updatedAt: new Date() })
+    .where(eq(scheduledWorkoutsTable.id, id))
+    .returning();
+
+  const [workout] = await db
+    .select({ name: workoutPlansTable.name })
+    .from(workoutPlansTable)
+    .where(eq(workoutPlansTable.id, updated.workoutId))
+    .limit(1);
+
+  return res.json(serialize({ ...updated, workoutName: workout?.name ?? "" }));
+});
+
 // ─── PUT /api/workout-schedule/:id ───────────────────────────────────────────
 
 router.put("/workout-schedule/:id", requireAuth, async (req, res) => {

@@ -1508,6 +1508,20 @@ export interface CreateWorkoutScheduleInput {
   notes?: string | null;
 }
 
+export type UpdateWorkoutScheduleStatusInputStatus = typeof UpdateWorkoutScheduleStatusInputStatus[keyof typeof UpdateWorkoutScheduleStatusInputStatus];
+
+
+export const UpdateWorkoutScheduleStatusInputStatus = {
+  scheduled: 'scheduled',
+  completed: 'completed',
+  missed: 'missed',
+  cancelled: 'cancelled',
+} as const;
+
+export interface UpdateWorkoutScheduleStatusInput {
+  status: UpdateWorkoutScheduleStatusInputStatus;
+}
+
 export interface UpdateWorkoutScheduleInput {
   workoutId: number;
   /** YYYY-MM-DD */

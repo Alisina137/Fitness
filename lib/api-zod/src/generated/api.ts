@@ -2238,6 +2238,31 @@ export const GetWorkoutScheduleResponse = zod.object({
 
 
 /**
+ * @summary Update the status of a scheduled workout
+ */
+export const UpdateWorkoutScheduleStatusParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UpdateWorkoutScheduleStatusBody = zod.object({
+  "status": zod.enum(['scheduled', 'completed', 'missed', 'cancelled'])
+})
+
+export const UpdateWorkoutScheduleStatusResponse = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "workoutId": zod.number(),
+  "workoutName": zod.string(),
+  "scheduledDate": zod.coerce.date().describe('YYYY-MM-DD'),
+  "scheduledTime": zod.string().nullish().describe('HH:mm, optional'),
+  "status": zod.enum(['scheduled', 'completed', 'missed', 'cancelled']),
+  "notes": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
  * @summary Update a scheduled workout
  */
 export const UpdateWorkoutScheduleParams = zod.object({

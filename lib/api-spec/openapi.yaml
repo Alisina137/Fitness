@@ -1765,6 +1765,36 @@ paths:
         "404":
           description: Not found
 
+    patch:
+      operationId: updateWorkoutScheduleStatus
+      tags: [workout-schedule]
+      summary: Update the status of a scheduled workout
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateWorkoutScheduleStatusInput"
+      responses:
+        "200":
+          description: Updated scheduled workout
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScheduledWorkout"
+        "400":
+          description: Validation error
+        "404":
+          description: Not found
+
     put:
       operationId: updateWorkoutSchedule
       tags: [workout-schedule]
@@ -3545,6 +3575,14 @@ components:
         notes:
           type: string
           nullable: true
+
+    UpdateWorkoutScheduleStatusInput:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [scheduled, completed, missed, cancelled]
 
     UpdateWorkoutScheduleInput:
       type: object

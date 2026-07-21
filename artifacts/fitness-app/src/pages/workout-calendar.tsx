@@ -4,6 +4,7 @@ import {
   useListWorkouts,
   useListWorkoutSchedule,
   useDeleteWorkoutSchedule,
+  useUpdateWorkoutScheduleStatus,
   getListWorkoutScheduleQueryKey,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -17,6 +18,9 @@ import {
   Plus,
   Pencil,
   Trash2,
+  CheckCircle2,
+  XCircle,
+  RotateCcw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -71,6 +75,7 @@ export default function WorkoutCalendarPage() {
   const { data: scheduledData, isLoading: loadingScheduled, isError: errorScheduled } =
     useListWorkoutSchedule();
   const deleteSchedule = useDeleteWorkoutSchedule();
+  const updateStatus = useUpdateWorkoutScheduleStatus();
 
   const allWorkouts = workouts ?? [];
   const scheduledEntries: ScheduledEntry[] = (scheduledData ?? []).map((s) => ({
@@ -126,6 +131,13 @@ export default function WorkoutCalendarPage() {
     if (weekStart.getFullYear() === weekEnd.getFullYear())
       return `${format(weekStart, "MMM d")} – ${format(weekEnd, "MMM d, yyyy")}`;
     return `${format(weekStart, "MMM d, yyyy")} – ${format(weekEnd, "MMM d, yyyy")}`;
+  }
+
+  // ── Status handler ───────────────────────────────────────────────────────────
+
+  async function handleStatusUpdate(id: number, status: "scheduled" | "completed" | "missed") {
+    await updateStatus.mutateAsync({ id, data: { status } });
+    queryClient.invalidateQueries({ queryKey: getListWorkoutScheduleQueryKey() });
   }
 
   // ── Delete handler ───────────────────────────────────────────────────────────
@@ -320,67 +332,151 @@ export default function WorkoutCalendarPage() {
                 </Link>
               ))}
 
-              {/* One-off scheduled entries (with edit / delete) */}
-              {scheduledForDay.map((entry) => (
-                <div
-                  key={`sched-${entry.id}`}
-                  className="flex items-center gap-4 bg-card border border-border rounded-2xl p-5 hover:border-primary/20 transition-colors"
-                >
-                  <Link
-                    href={`/workouts/${entry.workoutId}`}
-                    className="flex items-center gap-4 flex-1 min-w-0 group"
-                  >
-                    <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                      <Dumbbell className="h-6 w-6 text-primary" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-bold truncate group-hover:text-primary transition-colors">
-                        {entry.workoutName}
-                      </p>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-[10px] font-semibold bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">
-                          Scheduled
-                        </span>
-                        {entry.scheduledTime && (
-                          <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                            <Clock className="h-3 w-3" />
-                            {entry.scheduledTime}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </Link>
+              {/* One-off scheduled entries (with status / edit / delete) */}
+              {scheduledForDay.map((entry) => {
+                const isCompleted = entry.status === "completed";
+                const isMissed = entry.status === "missed";
+                const isPending = updateStatus.isPending;
 
-                  {/* Actions */}
-                  <div className="flex items-center gap-1 shrink-0">
-                    <button
-                      onClick={() =>
-                        setEditEntry({
-                          id: entry.id,
-                          workoutId: entry.workoutId,
-                          workoutName: entry.workoutName,
-                          scheduledDate: entry.scheduledDate,
-                          scheduledTime: entry.scheduledTime,
-                          notes: null,
-                        })
-                      }
-                      title="Edit scheduled workout"
-                      className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                const statusBadge = isCompleted ? (
+                  <span className="text-[10px] font-semibold bg-green-500/15 text-green-600 dark:text-green-400 px-1.5 py-0.5 rounded-full">
+                    Completed
+                  </span>
+                ) : isMissed ? (
+                  <span className="text-[10px] font-semibold bg-destructive/15 text-destructive px-1.5 py-0.5 rounded-full">
+                    Missed
+                  </span>
+                ) : (
+                  <span className="text-[10px] font-semibold bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">
+                    Scheduled
+                  </span>
+                );
+
+                return (
+                  <div
+                    key={`sched-${entry.id}`}
+                    className={cn(
+                      "flex items-center gap-4 bg-card border rounded-2xl p-5 transition-colors",
+                      isCompleted
+                        ? "border-green-500/30"
+                        : isMissed
+                          ? "border-destructive/30"
+                          : "border-border hover:border-primary/20",
+                    )}
+                  >
+                    <Link
+                      href={`/workouts/${entry.workoutId}`}
+                      className="flex items-center gap-4 flex-1 min-w-0 group"
                     >
-                      <Pencil className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={() =>
-                        setDeleteEntry({ id: entry.id, name: entry.workoutName })
-                      }
-                      title="Delete scheduled workout"
-                      className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                      <div
+                        className={cn(
+                          "h-12 w-12 rounded-xl flex items-center justify-center shrink-0",
+                          isCompleted
+                            ? "bg-green-500/15"
+                            : isMissed
+                              ? "bg-destructive/10"
+                              : "bg-primary/10",
+                        )}
+                      >
+                        <Dumbbell
+                          className={cn(
+                            "h-6 w-6",
+                            isCompleted
+                              ? "text-green-500"
+                              : isMissed
+                                ? "text-destructive"
+                                : "text-primary",
+                          )}
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p
+                          className={cn(
+                            "font-bold truncate transition-colors",
+                            isCompleted
+                              ? "text-muted-foreground line-through"
+                              : "group-hover:text-primary",
+                          )}
+                        >
+                          {entry.workoutName}
+                        </p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          {statusBadge}
+                          {entry.scheduledTime && (
+                            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <Clock className="h-3 w-3" />
+                              {entry.scheduledTime}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </Link>
+
+                    {/* Status + edit / delete actions */}
+                    <div className="flex items-center gap-1 shrink-0">
+                      {/* Status toggles */}
+                      {isCompleted || isMissed ? (
+                        <button
+                          onClick={() => handleStatusUpdate(entry.id, "scheduled")}
+                          disabled={isPending}
+                          title="Reset to Scheduled"
+                          className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors disabled:opacity-50"
+                        >
+                          <RotateCcw className="h-4 w-4" />
+                        </button>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => handleStatusUpdate(entry.id, "completed")}
+                            disabled={isPending}
+                            title="Mark as Completed"
+                            className="p-2 rounded-lg text-muted-foreground hover:text-green-600 hover:bg-green-500/10 transition-colors disabled:opacity-50"
+                          >
+                            <CheckCircle2 className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => handleStatusUpdate(entry.id, "missed")}
+                            disabled={isPending}
+                            title="Mark as Missed"
+                            className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-50"
+                          >
+                            <XCircle className="h-4 w-4" />
+                          </button>
+                        </>
+                      )}
+
+                      {/* Edit */}
+                      <button
+                        onClick={() =>
+                          setEditEntry({
+                            id: entry.id,
+                            workoutId: entry.workoutId,
+                            workoutName: entry.workoutName,
+                            scheduledDate: entry.scheduledDate,
+                            scheduledTime: entry.scheduledTime,
+                            notes: null,
+                          })
+                        }
+                        title="Edit scheduled workout"
+                        className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </button>
+
+                      {/* Delete */}
+                      <button
+                        onClick={() =>
+                          setDeleteEntry({ id: entry.id, name: entry.workoutName })
+                        }
+                        title="Delete scheduled workout"
+                        className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </section>
