@@ -2233,6 +2233,40 @@ export const ListWorkoutScheduleResponse = zod.array(ListWorkoutScheduleResponse
 
 
 /**
+ * @summary Save an existing workout as a reusable template
+ */
+export const CreateWorkoutTemplateBody = zod.object({
+  "name": zod.string().describe('Template name (must be unique per user)'),
+  "workoutId": zod.number().describe('The existing workout plan to save as a template')
+})
+
+export const CreateWorkoutTemplateResponse = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "name": zod.string(),
+  "workoutId": zod.number(),
+  "workoutName": zod.string(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary List the current user's workout templates
+ */
+export const ListUserWorkoutTemplatesResponseItem = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "name": zod.string(),
+  "workoutId": zod.number(),
+  "workoutName": zod.string(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+export const ListUserWorkoutTemplatesResponse = zod.array(ListUserWorkoutTemplatesResponseItem)
+
+
+/**
  * @summary Get the user's global reminder settings
  */
 export const GetWorkoutReminderSettingsResponse = zod.object({
