@@ -1765,6 +1765,64 @@ paths:
         "404":
           description: Not found
 
+    put:
+      operationId: updateWorkoutSchedule
+      tags: [workout-schedule]
+      summary: Update a scheduled workout
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateWorkoutScheduleInput"
+      responses:
+        "200":
+          description: Updated scheduled workout
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScheduledWorkout"
+        "400":
+          description: Validation error
+        "404":
+          description: Not found
+
+    delete:
+      operationId: deleteWorkoutSchedule
+      tags: [workout-schedule]
+      summary: Delete a scheduled workout
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [deleted, id]
+                properties:
+                  deleted:
+                    type: boolean
+                  id:
+                    type: integer
+        "404":
+          description: Not found
+
 components:
   schemas:
     HealthStatus:
@@ -3471,6 +3529,24 @@ components:
           format: date-time
 
     CreateWorkoutScheduleInput:
+      type: object
+      required: [workoutId, scheduledDate]
+      properties:
+        workoutId:
+          type: integer
+        scheduledDate:
+          type: string
+          format: date
+          description: "YYYY-MM-DD"
+        scheduledTime:
+          type: string
+          nullable: true
+          description: "HH:mm, optional"
+        notes:
+          type: string
+          nullable: true
+
+    UpdateWorkoutScheduleInput:
       type: object
       required: [workoutId, scheduledDate]
       properties:

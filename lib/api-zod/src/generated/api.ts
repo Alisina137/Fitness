@@ -2237,3 +2237,44 @@ export const GetWorkoutScheduleResponse = zod.object({
 })
 
 
+/**
+ * @summary Update a scheduled workout
+ */
+export const UpdateWorkoutScheduleParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UpdateWorkoutScheduleBody = zod.object({
+  "workoutId": zod.number(),
+  "scheduledDate": zod.coerce.date().describe('YYYY-MM-DD'),
+  "scheduledTime": zod.string().nullish().describe('HH:mm, optional'),
+  "notes": zod.string().nullish()
+})
+
+export const UpdateWorkoutScheduleResponse = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "workoutId": zod.number(),
+  "workoutName": zod.string(),
+  "scheduledDate": zod.coerce.date().describe('YYYY-MM-DD'),
+  "scheduledTime": zod.string().nullish().describe('HH:mm, optional'),
+  "status": zod.enum(['scheduled', 'completed', 'missed', 'cancelled']),
+  "notes": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Delete a scheduled workout
+ */
+export const DeleteWorkoutScheduleParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const DeleteWorkoutScheduleResponse = zod.object({
+  "deleted": zod.boolean(),
+  "id": zod.number()
+})
+
+

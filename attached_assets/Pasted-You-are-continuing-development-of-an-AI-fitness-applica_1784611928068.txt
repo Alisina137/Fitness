@@ -1,0 +1,113 @@
+You are continuing development of an AI fitness application.
+
+IMPORTANT IMPLEMENTATION RULES
+
+- Implement ONLY the features requested in this prompt.
+- Do NOT add extra features.
+- Do NOT modify existing systems unless required.
+- If something appears to be missing, DO NOT implement it.
+- Add it to the Suggestions section of the completion report.
+- Future prompts will implement the remaining functionality.
+
+CURRENT PROJECT STATE
+
+Already implemented:
+
+- User Profiles
+- Workout Engine
+- AI Workout Generation
+- Workout Analytics
+- Recovery System
+- Goal System
+- Progress System
+- Workout Calendar Foundation
+- Workout Scheduling
+
+Do not rebuild existing systems.
+
+TASK
+
+Build the Edit & Delete Scheduled Workouts feature.
+
+IMPLEMENT
+
+1. Create API endpoints.
+
+PUT /api/workout-schedule/:id
+
+DELETE /api/workout-schedule/:id
+
+2. Edit scheduled workout.
+
+Allow users to update:
+
+- Workout
+- Scheduled date
+- Scheduled time
+- Notes
+
+Save changes without creating a new schedule.
+
+3. Delete scheduled workout.
+
+Allow users to remove a scheduled workout.
+
+Before deleting:
+
+- Show a confirmation dialog.
+
+4. Calendar integration.
+
+After editing:
+
+- Immediately update the calendar.
+
+After deleting:
+
+- Remove the workout from the calendar without refreshing the page.
+
+5. Create Edit Schedule dialog.
+
+Fields:
+
+- Workout
+- Date
+- Time
+- Notes
+
+Buttons:
+
+- Save Changes
+- Cancel
+
+6. Validation.
+
+Prevent:
+
+- Invalid schedule ID
+- Missing workout
+- Missing date
+- Invalid date
+
+Display clear validation messages.
+
+TECH REQUIREMENTS
+
+- Reuse the existing ScheduledWorkout model.
+- Do not modify workout history.
+- Do not implement drag & drop.
+- Do not implement recurring workouts.
+- Follow the existing design system.
+
+COMPLETION REPORT
+
+Provide:
+
+- Files created
+- Files modified
+- API endpoints
+- Components created
+
+Suggestions:
+
+List features that should exist later but were intentionally not implemented because they are outside this prompt.

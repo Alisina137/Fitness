@@ -1508,6 +1508,15 @@ export interface CreateWorkoutScheduleInput {
   notes?: string | null;
 }
 
+export interface UpdateWorkoutScheduleInput {
+  workoutId: number;
+  /** YYYY-MM-DD */
+  scheduledDate: string;
+  /** HH:mm, optional */
+  scheduledTime?: string | null;
+  notes?: string | null;
+}
+
 export type ListWorkoutsParams = {
 status?: ListWorkoutsStatus;
 };
@@ -1737,5 +1746,10 @@ date?: string;
  * Filter by status
  */
 status?: string;
+};
+
+export type DeleteWorkoutSchedule200 = {
+  deleted: boolean;
+  id: number;
 };
 
