@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from "react";
 import { Target, Plus, Edit2, Trash2, CheckCircle, PauseCircle, Star, Filter, Trophy, Dumbbell, TrendingUp, Zap, Heart, BarChart3, ListChecks, Pencil, X, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { apiFetch } from "@/lib/api";
 import { format, formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { MilestoneCard, MilestoneCardSkeleton, type Milestone } from "@/components/milestone-card";
@@ -56,22 +57,6 @@ const PRIORITY_CONFIG: Record<GoalPriority, { label: string; dot: string }> = {
   medium: { label: "Medium", dot: "bg-yellow-400" },
   low:    { label: "Low",    dot: "bg-green-400" },
 };
-
-// ─── API helpers ──────────────────────────────────────────────────────────────
-
-const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") || "";
-
-async function apiFetch<T>(path: string, opts?: RequestInit): Promise<T> {
-  const token = (() => {
-    try { return JSON.parse(localStorage.getItem("auth-storage") || "{}").state?.token; } catch { return null; }
-  })();
-  const res = await fetch(`${BASE}/api${path}`, {
-    headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-    ...opts,
-  });
-  if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || "Request failed"); }
-  return res.json();
-}
 
 function useGoals() {
   const [goals, setGoals] = React.useState<Goal[]>([]);

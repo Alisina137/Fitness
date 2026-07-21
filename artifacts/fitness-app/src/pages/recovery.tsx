@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { apiFetch } from "@/lib/api";
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
@@ -65,35 +66,6 @@ type TodayData = {
 };
 
 type HistoryItem = CheckIn;
-
-// ─── API helpers ────────────────────────────────────────────────────────────
-
-const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") || "";
-
-function getAuthToken(): string | null {
-  try {
-    return JSON.parse(localStorage.getItem("auth-storage") || "{}").state?.token ?? null;
-  } catch {
-    return null;
-  }
-}
-
-async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
-  const token = getAuthToken();
-  const res = await fetch(`${BASE}/api${path}`, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...options?.headers,
-    },
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: "Request failed" }));
-    throw new Error((err as { error?: string }).error ?? `Error ${res.status}`);
-  }
-  return res.json() as Promise<T>;
-}
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 

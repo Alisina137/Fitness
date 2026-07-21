@@ -22,6 +22,7 @@ import { format } from "date-fns";
 import { GoalProgressCard, GoalProgressCardSkeleton, type GoalProgress } from "@/components/goal-progress-card";
 import { MilestoneCard, type Milestone } from "@/components/milestone-card";
 import { PhotoReminderDashboardCard } from "@/components/photo-reminder-dashboard-card";
+import { apiFetch } from "@/lib/api";
 
 // ─── Upcoming Milestone Section ───────────────────────────────────────────────
 
@@ -71,21 +72,13 @@ function UpcomingMilestoneSection() {
 
 // ─── Active Goals Section ─────────────────────────────────────────────────────
 
-const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") || "";
-
 function ActiveGoalsSection() {
   const [goals, setGoals] = useState<GoalProgress[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = (() => {
-      try { return JSON.parse(localStorage.getItem("auth-storage") || "{}").state?.token; } catch { return null; }
-    })();
-    fetch(`${BASE}/api/goals/progress`, {
-      headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-    })
-      .then((r) => r.ok ? r.json() : [])
-      .then((data: GoalProgress[]) => setGoals(data.filter((g) => g.status === "active").slice(0, 3)))
+    apiFetch<GoalProgress[]>("/goals/progress")
+      .then((data) => setGoals(data.filter((g) => g.status === "active").slice(0, 3)))
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);

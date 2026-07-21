@@ -3,6 +3,7 @@ import { db } from "@workspace/db";
 import { workoutCompletionsTable, workoutPlansTable, nutritionEntriesTable, userProfilesTable } from "@workspace/db";
 import { eq, and, gte, lte, desc } from "drizzle-orm";
 import { requireAuth, getUser } from "../lib/auth";
+import { dayRangeUtc, todayDateString } from "../lib/http";
 
 const router = Router();
 
@@ -41,8 +42,7 @@ router.get("/dashboard/summary", requireAuth, async (req, res) => {
   }
 
   // Today's nutrition
-  const dayStart = new Date(now.toISOString().split("T")[0] + "T00:00:00.000Z");
-  const dayEnd = new Date(now.toISOString().split("T")[0] + "T23:59:59.999Z");
+  const { start: dayStart, end: dayEnd } = dayRangeUtc(todayDateString());
   const todayEntries = await db.select().from(nutritionEntriesTable).where(
     and(eq(nutritionEntriesTable.userId, user.id), gte(nutritionEntriesTable.loggedAt, dayStart), lte(nutritionEntriesTable.loggedAt, dayEnd))
   );

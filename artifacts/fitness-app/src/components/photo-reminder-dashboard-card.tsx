@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Camera, X } from "lucide-react";
 import { Link } from "wouter";
+import { getAuthToken } from "@/lib/api";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -17,14 +18,6 @@ const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") || "";
 // Format: ISO date string of nextReminderDate, or a "never-uploaded:<YYYY-MM-DD>"
 // sentinel for users who have never taken a photo.
 const STORAGE_KEY = "photo-reminder-dismissed-token";
-
-function getToken(): string | null {
-  try {
-    return JSON.parse(localStorage.getItem("auth-storage") || "{}").state?.token ?? null;
-  } catch {
-    return null;
-  }
-}
 
 /**
  * Derive a stable dismissal token from the API response.
@@ -66,7 +59,7 @@ export function PhotoReminderDashboardCard() {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    const authToken = getToken();
+    const authToken = getAuthToken();
     fetch(`${BASE}/api/progress-photos/reminder`, {
       headers: { ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}) },
     })
