@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { Link } from "wouter";
 import {
   useListWorkouts,
   useListWorkoutSchedule,
   useDeleteWorkoutSchedule,
   useUpdateWorkoutScheduleStatus,
+  useRescheduleWorkoutSchedule,
   getListWorkoutScheduleQueryKey,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -53,6 +54,7 @@ import {
   EditScheduleDialog,
   type EditableScheduledEntry,
 } from "@/components/edit-schedule-dialog";
+import { RescheduleConfirmDialog } from "@/components/reschedule-confirm-dialog";
 
 type ViewMode = "month" | "week";
 
@@ -69,6 +71,14 @@ export default function WorkoutCalendarPage() {
   const [editEntry, setEditEntry] = useState<EditableScheduledEntry | null>(null);
   const [deleteEntry, setDeleteEntry] = useState<{ id: number; name: string } | null>(null);
 
+  // Drag & drop state
+  const [draggingEntry, setDraggingEntry] = useState<ScheduledEntry | null>(null);
+  const [dragOverDate, setDragOverDate] = useState<string | null>(null);
+  const [rescheduleTarget, setRescheduleTarget] = useState<{
+    entry: ScheduledEntry;
+    newDate: string;
+  } | null>(null);
+
   // Data
   const { data: workouts, isLoading: loadingWorkouts, isError: errorWorkouts } =
     useListWorkouts({ status: "active" });
@@ -76,6 +86,7 @@ export default function WorkoutCalendarPage() {
     useListWorkoutSchedule();
   const deleteSchedule = useDeleteWorkoutSchedule();
   const updateStatus = useUpdateWorkoutScheduleStatus();
+  const reschedule = useRescheduleWorkoutSchedule();
 
   const allWorkouts = workouts ?? [];
   const scheduledEntries: ScheduledEntry[] = (scheduledData ?? []).map((s) => ({
@@ -152,9 +163,85 @@ export default function WorkoutCalendarPage() {
     }
   }
 
+  // ── Drag & Drop handlers ─────────────────────────────────────────────────────
+
+  const handleEntryDragStart = useCallback((entry: ScheduledEntry) => {
+    setDraggingEntry(entry);
+    setDragOverDate(null);
+  }, []);
+
+  const handleEntryDragEnd = useCallback(() => {
+    setDraggingEntry(null);
+    setDragOverDate(null);
+  }, []);
+
+  const handleDayCellDragOver = useCallback(
+    (date: Date, e: React.DragEvent) => {
+      if (!draggingEntry) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+      const dateStr = format(date, "yyyy-MM-dd");
+      // Don't highlight the origin date
+      if (dateStr !== draggingEntry.scheduledDate) {
+        setDragOverDate(dateStr);
+      }
+    },
+    [draggingEntry],
+  );
+
+  const handleDayCellDrop = useCallback(
+    (date: Date) => {
+      if (!draggingEntry) return;
+      const newDateStr = format(date, "yyyy-MM-dd");
+      // Ignore drop on same date
+      if (newDateStr === draggingEntry.scheduledDate) {
+        setDraggingEntry(null);
+        setDragOverDate(null);
+        return;
+      }
+      // Show confirmation dialog
+      setRescheduleTarget({ entry: draggingEntry, newDate: newDateStr });
+      setDraggingEntry(null);
+      setDragOverDate(null);
+    },
+    [draggingEntry],
+  );
+
+  const handleDayCellDragLeave = useCallback((date: Date) => {
+    const dateStr = format(date, "yyyy-MM-dd");
+    setDragOverDate((prev) => (prev === dateStr ? null : prev));
+  }, []);
+
+  const handleRescheduleConfirm = async () => {
+    if (!rescheduleTarget) return;
+    try {
+      await reschedule.mutateAsync({
+        id: rescheduleTarget.entry.id,
+        data: { scheduledDate: rescheduleTarget.newDate },
+      });
+      queryClient.invalidateQueries({ queryKey: getListWorkoutScheduleQueryKey() });
+    } finally {
+      setRescheduleTarget(null);
+    }
+  };
+
+  const handleRescheduleCancel = () => {
+    setRescheduleTarget(null);
+  };
+
   // ── Render ───────────────────────────────────────────────────────────────────
 
   const totalForDay = recurringForDay.length + scheduledForDay.length;
+
+  const dragDropProps = {
+    draggingEntryId: draggingEntry?.id ?? null,
+    dragOverDate,
+    onEntryDragStart: handleEntryDragStart,
+    onEntryDragEnd: handleEntryDragEnd,
+    onDayCellDragOver: handleDayCellDragOver,
+    onDayCellDrop: handleDayCellDrop,
+    onDayCellDragLeave: handleDayCellDragLeave,
+  };
 
   return (
     <div className="p-4 md:p-8 max-w-4xl mx-auto space-y-6 animate-in fade-in duration-500">
@@ -203,6 +290,12 @@ export default function WorkoutCalendarPage() {
             {getHeaderLabel()}
           </span>
 
+          {draggingEntry && (
+            <span className="text-xs text-primary font-medium animate-pulse">
+              Drop onto a day to reschedule
+            </span>
+          )}
+
           <div className="flex items-center gap-1 bg-secondary rounded-lg p-1">
             {(["month", "week"] as ViewMode[]).map((v) => (
               <button
@@ -250,6 +343,7 @@ export default function WorkoutCalendarPage() {
             onSelectDate={handleSelectDate}
             workouts={allWorkouts}
             scheduledEntries={scheduledEntries}
+            {...dragDropProps}
           />
         ) : (
           <CalendarWeekView
@@ -258,6 +352,7 @@ export default function WorkoutCalendarPage() {
             onSelectDate={handleSelectDate}
             workouts={allWorkouts}
             scheduledEntries={scheduledEntries}
+            {...dragDropProps}
           />
         )}
       </div>
@@ -524,6 +619,16 @@ export default function WorkoutCalendarPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Reschedule confirmation dialog */}
+      <RescheduleConfirmDialog
+        open={!!rescheduleTarget}
+        workoutName={rescheduleTarget?.entry.workoutName ?? ""}
+        newDate={rescheduleTarget?.newDate ?? ""}
+        isPending={reschedule.isPending}
+        onConfirm={handleRescheduleConfirm}
+        onCancel={handleRescheduleCancel}
+      />
     </div>
   );
 }

@@ -2217,6 +2217,31 @@ export const ListWorkoutScheduleResponse = zod.array(ListWorkoutScheduleResponse
 
 
 /**
+ * @summary Move a scheduled workout to a new date
+ */
+export const RescheduleWorkoutScheduleParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const RescheduleWorkoutScheduleBody = zod.object({
+  "scheduledDate": zod.coerce.date().describe('New date (YYYY-MM-DD)')
+})
+
+export const RescheduleWorkoutScheduleResponse = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "workoutId": zod.number(),
+  "workoutName": zod.string(),
+  "scheduledDate": zod.coerce.date().describe('YYYY-MM-DD'),
+  "scheduledTime": zod.string().nullish().describe('HH:mm, optional'),
+  "status": zod.enum(['scheduled', 'completed', 'missed', 'cancelled']),
+  "notes": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
  * @summary Get a scheduled workout by ID
  */
 export const GetWorkoutScheduleParams = zod.object({

@@ -1742,6 +1742,37 @@ paths:
                 items:
                   $ref: "#/components/schemas/ScheduledWorkout"
 
+  /workout-schedule/{id}/reschedule:
+    patch:
+      operationId: rescheduleWorkoutSchedule
+      tags: [workout-schedule]
+      summary: Move a scheduled workout to a new date
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RescheduleWorkoutScheduleInput"
+      responses:
+        "200":
+          description: Rescheduled workout
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScheduledWorkout"
+        "400":
+          description: Validation error
+        "404":
+          description: Not found
+
   /workout-schedule/{id}:
     get:
       operationId: getWorkoutSchedule
@@ -3575,6 +3606,15 @@ components:
         notes:
           type: string
           nullable: true
+
+    RescheduleWorkoutScheduleInput:
+      type: object
+      required: [scheduledDate]
+      properties:
+        scheduledDate:
+          type: string
+          format: date
+          description: "New date (YYYY-MM-DD)"
 
     UpdateWorkoutScheduleStatusInput:
       type: object

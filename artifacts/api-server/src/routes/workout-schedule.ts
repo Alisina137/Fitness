@@ -176,6 +176,54 @@ router.get("/workout-schedule/:id", requireAuth, async (req, res) => {
   return res.json(serialize(row));
 });
 
+// ─── PATCH /api/workout-schedule/:id/reschedule ──────────────────────────────
+
+router.patch("/workout-schedule/:id/reschedule", requireAuth, async (req, res) => {
+  const user = getUser(req);
+  const id = parseInt(req.params.id, 10);
+  if (isNaN(id)) return res.status(400).json({ error: "Invalid ID" });
+
+  const bodySchema = z.object({
+    scheduledDate: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format. Use YYYY-MM-DD")
+      .refine((d) => !isNaN(Date.parse(d)), "Invalid date"),
+  });
+
+  const parsed = bodySchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({
+      error: "Validation failed",
+      issues: parsed.error.issues.map((i) => ({ field: i.path.join("."), message: i.message })),
+    });
+  }
+
+  // Verify ownership
+  const [existing] = await db
+    .select({
+      id: scheduledWorkoutsTable.id,
+      workoutId: scheduledWorkoutsTable.workoutId,
+    })
+    .from(scheduledWorkoutsTable)
+    .where(and(eq(scheduledWorkoutsTable.id, id), eq(scheduledWorkoutsTable.userId, user.id)))
+    .limit(1);
+  if (!existing) return res.status(404).json({ error: "Scheduled workout not found" });
+
+  const [updated] = await db
+    .update(scheduledWorkoutsTable)
+    .set({ scheduledDate: parsed.data.scheduledDate, updatedAt: new Date() })
+    .where(eq(scheduledWorkoutsTable.id, id))
+    .returning();
+
+  const [workout] = await db
+    .select({ name: workoutPlansTable.name })
+    .from(workoutPlansTable)
+    .where(eq(workoutPlansTable.id, updated.workoutId))
+    .limit(1);
+
+  return res.json(serialize({ ...updated, workoutName: workout?.name ?? "" }));
+});
+
 // ─── PATCH /api/workout-schedule/:id (status only) ───────────────────────────
 
 router.patch("/workout-schedule/:id", requireAuth, async (req, res) => {

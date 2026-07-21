@@ -83,6 +83,7 @@ import type {
   ProgressSummary,
   RecoveryRecommendation,
   RegisterInput,
+  RescheduleWorkoutScheduleInput,
   ScheduledWorkout,
   Subscription,
   SubscriptionPlan,
@@ -6302,6 +6303,78 @@ export function useListWorkoutSchedule<TData = Awaited<ReturnType<typeof listWor
 
 
 
+
+export const getRescheduleWorkoutScheduleUrl = (id: number,) => {
+
+
+
+
+  return `/api/workout-schedule/${id}/reschedule`
+}
+
+/**
+ * @summary Move a scheduled workout to a new date
+ */
+export const rescheduleWorkoutSchedule = async (id: number,
+    rescheduleWorkoutScheduleInput: RescheduleWorkoutScheduleInput, options?: RequestInit): Promise<ScheduledWorkout> => {
+
+  return customFetch<ScheduledWorkout>(getRescheduleWorkoutScheduleUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(rescheduleWorkoutScheduleInput)
+  }
+);}
+
+
+
+
+
+export const getRescheduleWorkoutScheduleMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof rescheduleWorkoutSchedule>>, TError,{id: number;data: BodyType<RescheduleWorkoutScheduleInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof rescheduleWorkoutSchedule>>, TError,{id: number;data: BodyType<RescheduleWorkoutScheduleInput>}, TContext> => {
+
+const mutationKey = ['rescheduleWorkoutSchedule'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof rescheduleWorkoutSchedule>>, {id: number;data: BodyType<RescheduleWorkoutScheduleInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  rescheduleWorkoutSchedule(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RescheduleWorkoutScheduleMutationResult = NonNullable<Awaited<ReturnType<typeof rescheduleWorkoutSchedule>>>
+    export type RescheduleWorkoutScheduleMutationBody = BodyType<RescheduleWorkoutScheduleInput>
+    export type RescheduleWorkoutScheduleMutationError = ErrorType<void>
+
+    /**
+ * @summary Move a scheduled workout to a new date
+ */
+export const useRescheduleWorkoutSchedule = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof rescheduleWorkoutSchedule>>, TError,{id: number;data: BodyType<RescheduleWorkoutScheduleInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof rescheduleWorkoutSchedule>>,
+        TError,
+        {id: number;data: BodyType<RescheduleWorkoutScheduleInput>},
+        TContext
+      > => {
+      return useMutation(getRescheduleWorkoutScheduleMutationOptions(options));
+    }
 
 export const getGetWorkoutScheduleUrl = (id: number,) => {
 

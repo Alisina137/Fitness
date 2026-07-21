@@ -114,6 +114,7 @@ export * from './progressSummaryWorkouts';
 export * from './recoveryRecommendation';
 export * from './recoveryRecommendationReadiness';
 export * from './registerInput';
+export * from './rescheduleWorkoutScheduleInput';
 export * from './scheduledWorkout';
 export * from './scheduledWorkoutStatus';
 export * from './subscription';

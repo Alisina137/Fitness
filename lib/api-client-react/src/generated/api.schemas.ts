@@ -1508,6 +1508,11 @@ export interface CreateWorkoutScheduleInput {
   notes?: string | null;
 }
 
+export interface RescheduleWorkoutScheduleInput {
+  /** New date (YYYY-MM-DD) */
+  scheduledDate: string;
+}
+
 export type UpdateWorkoutScheduleStatusInputStatus = typeof UpdateWorkoutScheduleStatusInputStatus[keyof typeof UpdateWorkoutScheduleStatusInputStatus];
 
 

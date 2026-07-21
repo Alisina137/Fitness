@@ -1,0 +1,114 @@
+You are continuing development of an AI fitness application.
+
+IMPORTANT IMPLEMENTATION RULES
+
+- Implement ONLY the features requested in this prompt.
+- Do NOT add extra features.
+- Do NOT modify existing systems unless required.
+- If something appears to be missing, DO NOT implement it.
+- Add it to the Suggestions section of the completion report.
+- Future prompts will implement the remaining functionality.
+
+CURRENT PROJECT STATE
+
+Already implemented:
+
+- User Profiles
+- Workout Engine
+- AI Workout Generation
+- Workout Analytics
+- Recovery System
+- Goal System
+- Progress System
+- Workout Calendar Foundation
+- Workout Scheduling
+- Edit & Delete Scheduled Workouts
+
+Do not rebuild existing systems.
+
+TASK
+
+Build Drag & Drop Workout Rescheduling.
+
+IMPLEMENT
+
+1. Enable drag & drop.
+
+Allow users to drag a scheduled workout from one calendar day to another.
+
+Support:
+
+- Monthly View
+- Weekly View
+
+2. Update schedule.
+
+When a workout is dropped onto a new date:
+
+- Update the scheduled date.
+- Save the change automatically.
+- Refresh the calendar without reloading the page.
+
+3. Confirmation.
+
+Before saving the new date, show:
+
+"Move this workout to July 18?"
+
+Buttons:
+
+- Confirm
+- Cancel
+
+4. Visual feedback.
+
+While dragging:
+
+- Highlight valid drop targets.
+- Show a dragging preview.
+- Highlight the destination date.
+
+5. Create API.
+
+PATCH /api/workout-schedule/:id/reschedule
+
+Request:
+
+- scheduledDate
+
+Return:
+
+- Updated scheduled workout
+
+6. Validation.
+
+Prevent:
+
+- Dropping outside the calendar
+- Invalid dates
+- Invalid schedule ID
+
+If validation fails:
+
+- Return the workout to its original position.
+
+TECH REQUIREMENTS
+
+- Reuse the existing ScheduledWorkout model.
+- Do not implement recurring workouts.
+- Do not modify workout history.
+- Keep drag & drop components reusable.
+- Follow the existing design system.
+
+COMPLETION REPORT
+
+Provide:
+
+- Files created
+- Files modified
+- API endpoints
+- Components created
+
+Suggestions:
+
+List features that should exist later but were intentionally not implemented because they are outside this prompt.
