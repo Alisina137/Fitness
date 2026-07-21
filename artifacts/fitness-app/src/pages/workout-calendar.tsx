@@ -99,6 +99,8 @@ export default function WorkoutCalendarPage() {
     scheduledTime: s.scheduledTime ?? null,
     status: s.status,
     isRecurring: s.isRecurring,
+    recurrenceType: s.recurrenceType ?? null,
+    recurrenceEndDate: s.recurrenceEndDate ?? null,
   }));
 
   const isLoading = loadingWorkouts || loadingScheduled;
@@ -559,6 +561,9 @@ export default function WorkoutCalendarPage() {
                             scheduledDate: entry.scheduledDate,
                             scheduledTime: entry.scheduledTime,
                             notes: null,
+                            isRecurring: entry.isRecurring,
+                            recurrenceType: entry.recurrenceType,
+                            recurrenceEndDate: entry.recurrenceEndDate,
                           })
                         }
                         title="Edit scheduled workout"

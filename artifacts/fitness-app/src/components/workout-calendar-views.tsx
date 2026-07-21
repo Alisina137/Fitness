@@ -49,6 +49,8 @@ export type ScheduledEntry = {
   scheduledTime?: string | null;
   status: string;
   isRecurring?: boolean;
+  recurrenceType?: string | null;
+  recurrenceEndDate?: string | null;
   reminderEnabled?: boolean;
 };
 

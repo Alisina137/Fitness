@@ -14,6 +14,14 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { Repeat } from "lucide-react";
+
+const RECURRENCE_LABELS: Record<string, string> = {
+  daily: "Daily",
+  weekly: "Weekly",
+  weekdays: "Weekdays (Mon–Fri)",
+  monthly: "Monthly",
+};
 
 export interface EditableScheduledEntry {
   id: number;
@@ -22,6 +30,9 @@ export interface EditableScheduledEntry {
   scheduledDate: string; // "YYYY-MM-DD"
   scheduledTime?: string | null;
   notes?: string | null;
+  isRecurring?: boolean;
+  recurrenceType?: string | null;
+  recurrenceEndDate?: string | null;
 }
 
 interface EditScheduleDialogProps {
@@ -55,6 +66,11 @@ export function EditScheduleDialog({
       setErrors({});
     }
   }, [open, entry]);
+
+  const isRecurring = !!entry?.isRecurring;
+  const recurrenceLabel = entry?.recurrenceType
+    ? RECURRENCE_LABELS[entry.recurrenceType] ?? entry.recurrenceType
+    : null;
 
   function validate(): boolean {
     const errs: Record<string, string> = {};
@@ -111,6 +127,22 @@ export function EditScheduleDialog({
             <p className="text-sm text-destructive bg-destructive/10 rounded-lg px-3 py-2">
               {errors.form}
             </p>
+          )}
+
+          {/* Recurring badge */}
+          {isRecurring && (
+            <div className="flex items-center gap-2 rounded-xl border border-primary/30 bg-primary/10 px-3 py-2.5">
+              <Repeat className="h-4 w-4 shrink-0 text-primary" />
+              <div className="text-sm">
+                <span className="font-medium text-primary">Recurring workout</span>
+                {recurrenceLabel && (
+                  <span className="text-muted-foreground"> · {recurrenceLabel}</span>
+                )}
+                {entry?.recurrenceEndDate && (
+                  <span className="text-muted-foreground"> · ends {entry.recurrenceEndDate}</span>
+                )}
+              </div>
+            </div>
           )}
 
           {/* Workout selector */}
