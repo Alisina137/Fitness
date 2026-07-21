@@ -9,23 +9,6 @@ args = ["pnpm", "store", "prune"]
 env = { "CI" = "true" }
 
 [workflows]
-runButton = "artifacts/fitness-app: web"
-
-[[workflows.workflow]]
-name = "artifacts/api-server: API Server"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "PORT=8080 pnpm --filter @workspace/api-server run dev"
-
-[[workflows.workflow]]
-name = "artifacts/fitness-app: web"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "PORT=5173 BASE_PATH=/ pnpm --filter @workspace/fitness-app run dev"
 
 [agent]
 stack = "PNPM_WORKSPACE"
