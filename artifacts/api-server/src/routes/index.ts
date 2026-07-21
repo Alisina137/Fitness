@@ -17,6 +17,7 @@ import goalsRouter from "./goals";
 import progressPhotosRouter from "./progress-photos";
 import workoutScheduleRouter from "./workout-schedule";
 import workoutRemindersRouter from "./workout-reminders";
+import workoutTemplatesRouter from "./workout-templates";
 
 const router: IRouter = Router();
 
@@ -38,5 +39,6 @@ router.use(goalsRouter);
 router.use(progressPhotosRouter);
 router.use(workoutScheduleRouter);
 router.use(workoutRemindersRouter);
+router.use(workoutTemplatesRouter);
 
 export default router;

@@ -4,7 +4,8 @@ import {
   useGetWorkout,
   getGetWorkoutQueryKey,
   useCompleteWorkout,
-  useUpdateWorkout
+  useUpdateWorkout,
+  useCreateWorkoutTemplate
 } from "@workspace/api-client-react";
 import { 
   ArrowLeft, 
@@ -13,10 +14,20 @@ import {
   Play, 
   CheckCircle2, 
   Info,
-  Dumbbell
+  Dumbbell,
+  LayoutTemplate
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
@@ -31,7 +42,34 @@ export default function WorkoutDetailPage() {
   });
   
   const completeWorkout = useCompleteWorkout();
-  
+  const createTemplate = useCreateWorkoutTemplate();
+
+  // Save-as-template dialog state
+  const [isTemplateOpen, setIsTemplateOpen] = useState(false);
+  const [templateName, setTemplateName] = useState("");
+
+  const saveAsTemplate = () => {
+    const name = templateName.trim();
+    if (!name) {
+      toast({ variant: "destructive", title: "Template name is required" });
+      return;
+    }
+    createTemplate.mutate(
+      { data: { name, workoutId: id } },
+      {
+        onSuccess: () => {
+          setIsTemplateOpen(false);
+          setTemplateName("");
+          toast({ title: "Template saved", description: "You can reuse this workout anytime." });
+        },
+        onError: (err: unknown) => {
+          const message = err instanceof Error ? err.message : "Failed to save template";
+          toast({ variant: "destructive", title: "Could not save template", description: message });
+        },
+      },
+    );
+  };
+
   // Local state for active workout tracking
   const [isActive, setIsActive] = useState(false);
   const [completedExercises, setCompletedExercises] = useState<Set<number>>(new Set());
@@ -164,11 +202,52 @@ export default function WorkoutDetailPage() {
             <div className="text-muted-foreground text-sm">
               <span className="font-bold text-foreground">{workout.exercises?.length || 0}</span> movements loaded.
             </div>
-            <Button size="lg" onClick={startWorkout} className="w-full sm:w-auto text-black font-bold text-lg h-14 px-8 shadow-lg shadow-primary/20">
-              <Play className="mr-2 h-5 w-5 fill-current" /> Initialize Protocol
-            </Button>
+            <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-3">
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={() => setIsTemplateOpen(true)}
+                className="w-full sm:w-auto font-bold h-14 px-6"
+              >
+                <LayoutTemplate className="mr-2 h-5 w-5" /> Save as Template
+              </Button>
+              <Button size="lg" onClick={startWorkout} className="w-full sm:w-auto text-black font-bold text-lg h-14 px-8 shadow-lg shadow-primary/20">
+                <Play className="mr-2 h-5 w-5 fill-current" /> Initialize Protocol
+              </Button>
+            </div>
           </div>
         )}
+
+        <Dialog open={isTemplateOpen} onOpenChange={setIsTemplateOpen}>
+          <DialogContent className="sm:max-w-[425px] bg-card border-border">
+            <DialogHeader>
+              <DialogTitle>Save as Template</DialogTitle>
+              <DialogDescription>
+                Save "{workout.name}" as a reusable template.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2 pt-2">
+              <label htmlFor="template-name" className="text-sm font-medium">Template Name</label>
+              <Input
+                id="template-name"
+                placeholder="e.g., My Push Day"
+                value={templateName}
+                onChange={(e) => setTemplateName(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") saveAsTemplate(); }}
+                autoFocus
+              />
+            </div>
+            <DialogFooter className="pt-2">
+              <Button
+                onClick={saveAsTemplate}
+                disabled={createTemplate.isPending || !templateName.trim()}
+                className="text-black font-bold"
+              >
+                {createTemplate.isPending ? "Saving…" : "Save Template"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Exercises List */}
         <div className="space-y-4 pt-4">

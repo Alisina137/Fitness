@@ -1525,6 +1525,23 @@ export interface CreateWorkoutScheduleInput {
   notes?: string | null;
 }
 
+export interface WorkoutTemplate {
+  id: number;
+  userId: number;
+  name: string;
+  workoutId: number;
+  workoutName: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface WorkoutTemplateInput {
+  /** Template name (must be unique per user) */
+  name: string;
+  /** The existing workout plan to save as a template */
+  workoutId: number;
+}
+
 export interface UserReminderSettings {
   reminderEnabled: boolean;
   /** Minutes before workout (15, 30, 60, 120, 1440) */

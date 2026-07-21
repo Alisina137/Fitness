@@ -191,3 +191,5 @@ export * from './workoutPlanUpdate';
 export * from './workoutPlanUpdateDifficulty';
 export * from './workoutPlanUpdateWeeklySchedule';
 export * from './workoutPlanWeeklySchedule';
+export * from './workoutTemplate';
+export * from './workoutTemplateInput';

@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "wouter";
-import { Activity, LayoutDashboard, Utensils, TrendingUp, MessageSquare, UserCircle, LogOut, Sparkles, Heart, Target, Camera, BarChart2, CalendarDays, CalendarRange } from "lucide-react";
+import { Activity, LayoutDashboard, Utensils, TrendingUp, MessageSquare, UserCircle, LogOut, Sparkles, Heart, Target, Camera, BarChart2, CalendarDays, CalendarRange, LayoutTemplate } from "lucide-react";
 import { useAuthStore } from "../store/auth";
 import { cn } from "@/lib/utils";
 
@@ -8,6 +8,7 @@ const MAIN_NAV = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/workouts", label: "Workouts", icon: Activity },
   { href: "/workouts/calendar", label: "Calendar", icon: CalendarRange },
+  { href: "/templates", label: "Templates", icon: LayoutTemplate },
   { href: "/exercises", label: "Exercises", icon: Activity },
   { href: "/nutrition", label: "Nutrition", icon: Utensils },
   { href: "/progress", label: "Progress", icon: TrendingUp },

@@ -113,7 +113,9 @@ import type {
   WorkoutDayWithExercises,
   WorkoutPlan,
   WorkoutPlanInput,
-  WorkoutPlanUpdate
+  WorkoutPlanUpdate,
+  WorkoutTemplate,
+  WorkoutTemplateInput
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -6296,6 +6298,154 @@ export function useListWorkoutSchedule<TData = Awaited<ReturnType<typeof listWor
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getListWorkoutScheduleQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateWorkoutTemplateUrl = () => {
+
+
+
+
+  return `/api/workout-templates`
+}
+
+/**
+ * @summary Save an existing workout as a reusable template
+ */
+export const createWorkoutTemplate = async (workoutTemplateInput: WorkoutTemplateInput, options?: RequestInit): Promise<WorkoutTemplate> => {
+
+  return customFetch<WorkoutTemplate>(getCreateWorkoutTemplateUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(workoutTemplateInput)
+  }
+);}
+
+
+
+
+
+export const getCreateWorkoutTemplateMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createWorkoutTemplate>>, TError,{data: BodyType<WorkoutTemplateInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createWorkoutTemplate>>, TError,{data: BodyType<WorkoutTemplateInput>}, TContext> => {
+
+const mutationKey = ['createWorkoutTemplate'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createWorkoutTemplate>>, {data: BodyType<WorkoutTemplateInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createWorkoutTemplate(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateWorkoutTemplateMutationResult = NonNullable<Awaited<ReturnType<typeof createWorkoutTemplate>>>
+    export type CreateWorkoutTemplateMutationBody = BodyType<WorkoutTemplateInput>
+    export type CreateWorkoutTemplateMutationError = ErrorType<void>
+
+    /**
+ * @summary Save an existing workout as a reusable template
+ */
+export const useCreateWorkoutTemplate = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createWorkoutTemplate>>, TError,{data: BodyType<WorkoutTemplateInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createWorkoutTemplate>>,
+        TError,
+        {data: BodyType<WorkoutTemplateInput>},
+        TContext
+      > => {
+      return useMutation(getCreateWorkoutTemplateMutationOptions(options));
+    }
+
+export const getListUserWorkoutTemplatesUrl = () => {
+
+
+
+
+  return `/api/workout-templates`
+}
+
+/**
+ * @summary List the current user's workout templates
+ */
+export const listUserWorkoutTemplates = async ( options?: RequestInit): Promise<WorkoutTemplate[]> => {
+
+  return customFetch<WorkoutTemplate[]>(getListUserWorkoutTemplatesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListUserWorkoutTemplatesQueryKey = () => {
+    return [
+    `/api/workout-templates`
+    ] as const;
+    }
+
+
+export const getListUserWorkoutTemplatesQueryOptions = <TData = Awaited<ReturnType<typeof listUserWorkoutTemplates>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listUserWorkoutTemplates>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListUserWorkoutTemplatesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listUserWorkoutTemplates>>> = ({ signal }) => listUserWorkoutTemplates({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listUserWorkoutTemplates>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListUserWorkoutTemplatesQueryResult = NonNullable<Awaited<ReturnType<typeof listUserWorkoutTemplates>>>
+export type ListUserWorkoutTemplatesQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List the current user's workout templates
+ */
+
+export function useListUserWorkoutTemplates<TData = Awaited<ReturnType<typeof listUserWorkoutTemplates>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listUserWorkoutTemplates>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListUserWorkoutTemplatesQueryOptions(options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
