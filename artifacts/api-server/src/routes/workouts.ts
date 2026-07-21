@@ -453,24 +453,28 @@ router.post("/workouts/:id/complete", requireAuth, async (req, res) => {
 
   // Update muscle recovery data based on exercises completed in this session
   if (exercisesCompleted && Array.isArray(exercisesCompleted) && exercisesCompleted.length > 0) {
-    refreshMusclesAfterWorkout(user.id, exercisesCompleted as import("@workspace/db").CompletedExerciseLog[]).catch(() => {
-      // Non-blocking: muscle recovery update failure should not fail the completion response
+    refreshMusclesAfterWorkout(user.id, exercisesCompleted as import("@workspace/db").CompletedExerciseLog[]).catch((err) => {
+      // Non-blocking: failure must not fail the completion response, but is logged rather than swallowed
+      req.log?.error({ err, userId: user.id, completionId: completion.id }, "Failed to refresh muscle recovery after workout");
     });
   }
 
   // Compute and store workout analytics (volume, sets, reps) non-blocking
-  processWorkoutAnalytics(user.id, completion.id).catch(() => {
+  processWorkoutAnalytics(user.id, completion.id).catch((err) => {
     // Non-blocking: analytics failure should not fail the completion response
+    req.log?.error({ err, userId: user.id, completionId: completion.id }, "Failed to process workout analytics");
   });
 
   // Detect and save all personal records (max_weight, max_reps, max_volume, streak) non-blocking
-  detectAndSavePRs(user.id, completion.id).catch(() => {
+  detectAndSavePRs(user.id, completion.id).catch((err) => {
     // Non-blocking: PR detection failure should not fail the completion response
+    req.log?.error({ err, userId: user.id, completionId: completion.id }, "Failed to detect personal records");
   });
 
   // Recalculate goal progress (workout_consistency goals) non-blocking
-  updateAllUserGoals(user.id).catch(() => {
+  updateAllUserGoals(user.id).catch((err) => {
     // Non-blocking: goal progress update failure should not fail the completion response
+    req.log?.error({ err, userId: user.id, completionId: completion.id }, "Failed to update goal progress after workout");
   });
 
   res.json(serializeCompletion(completion, workout.name));
