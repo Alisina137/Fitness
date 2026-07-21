@@ -1484,6 +1484,16 @@ export const ScheduledWorkoutStatus = {
   cancelled: 'cancelled',
 } as const;
 
+export type ScheduledWorkoutRecurrenceType = typeof ScheduledWorkoutRecurrenceType[keyof typeof ScheduledWorkoutRecurrenceType] | null;
+
+
+export const ScheduledWorkoutRecurrenceType = {
+  daily: 'daily',
+  weekly: 'weekly',
+  weekdays: 'weekdays',
+  monthly: 'monthly',
+} as const;
+
 export interface ScheduledWorkout {
   id: number;
   userId: number;
@@ -1495,6 +1505,10 @@ export interface ScheduledWorkout {
   scheduledTime?: string | null;
   status: ScheduledWorkoutStatus;
   notes?: string | null;
+  isRecurring: boolean;
+  recurrenceType?: ScheduledWorkoutRecurrenceType;
+  /** YYYY-MM-DD, optional end date for recurrence */
+  recurrenceEndDate?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -1506,6 +1520,28 @@ export interface CreateWorkoutScheduleInput {
   /** HH:mm, optional */
   scheduledTime?: string | null;
   notes?: string | null;
+}
+
+export type CreateRecurringWorkoutScheduleInputRecurrenceType = typeof CreateRecurringWorkoutScheduleInputRecurrenceType[keyof typeof CreateRecurringWorkoutScheduleInputRecurrenceType];
+
+
+export const CreateRecurringWorkoutScheduleInputRecurrenceType = {
+  daily: 'daily',
+  weekly: 'weekly',
+  weekdays: 'weekdays',
+  monthly: 'monthly',
+} as const;
+
+export interface CreateRecurringWorkoutScheduleInput {
+  workoutId: number;
+  /** Start date (YYYY-MM-DD) */
+  scheduledDate: string;
+  /** HH:mm, optional */
+  scheduledTime?: string | null;
+  notes?: string | null;
+  recurrenceType: CreateRecurringWorkoutScheduleInputRecurrenceType;
+  /** End date (YYYY-MM-DD), optional — defaults to 90 days */
+  recurrenceEndDate?: string | null;
 }
 
 export interface RescheduleWorkoutScheduleInput {
@@ -1765,6 +1801,11 @@ date?: string;
  * Filter by status
  */
 status?: string;
+};
+
+export type CreateRecurringWorkoutSchedule201 = {
+  count: number;
+  entries: ScheduledWorkout[];
 };
 
 export type DeleteWorkoutSchedule200 = {

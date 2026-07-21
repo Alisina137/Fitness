@@ -183,6 +183,10 @@ export const scheduledWorkoutsTable = pgTable("scheduled_workouts", {
   scheduledTime: text("scheduled_time"),            // "HH:mm", optional
   status: text("status").default("scheduled").notNull(), // scheduled | completed | missed | cancelled
   notes: text("notes"),
+  // Recurrence fields
+  isRecurring: boolean("is_recurring").default(false).notNull(),
+  recurrenceType: text("recurrence_type"),   // daily | weekly | weekdays | monthly
+  recurrenceEndDate: text("recurrence_end_date"), // "YYYY-MM-DD", optional
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

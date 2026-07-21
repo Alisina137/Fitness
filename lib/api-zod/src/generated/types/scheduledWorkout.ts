@@ -5,6 +5,7 @@
  * FitCore AI Fitness App API
  * OpenAPI spec version: 0.1.0
  */
+import type { ScheduledWorkoutRecurrenceType } from './scheduledWorkoutRecurrenceType';
 import type { ScheduledWorkoutStatus } from './scheduledWorkoutStatus';
 
 export interface ScheduledWorkout {
@@ -18,6 +19,10 @@ export interface ScheduledWorkout {
   scheduledTime?: string | null;
   status: ScheduledWorkoutStatus;
   notes?: string | null;
+  isRecurring: boolean;
+  recurrenceType?: ScheduledWorkoutRecurrenceType;
+  /** YYYY-MM-DD, optional end date for recurrence */
+  recurrenceEndDate?: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }

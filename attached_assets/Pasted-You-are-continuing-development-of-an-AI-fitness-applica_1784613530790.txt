@@ -1,0 +1,102 @@
+You are continuing development of an AI fitness application.
+
+IMPORTANT IMPLEMENTATION RULES
+
+- Implement ONLY the features requested in this prompt.
+- Do NOT add extra features.
+- Do NOT modify existing systems unless required.
+- If something appears to be missing, DO NOT implement it.
+- Add it to the Suggestions section of the completion report.
+- Future prompts will implement the remaining functionality.
+
+CURRENT PROJECT STATE
+
+Already implemented:
+
+- User Profiles
+- Workout Engine
+- AI Workout Generation
+- Workout Analytics
+- Recovery System
+- Goal System
+- Progress System
+- Workout Calendar Foundation
+- Workout Scheduling
+- Edit & Delete Scheduled Workouts
+- Drag & Drop Workout Rescheduling
+
+Do not rebuild existing systems.
+
+TASK
+
+Build the Recurring Workouts feature.
+
+IMPLEMENT
+
+1. Extend the ScheduledWorkout model.
+
+Add optional fields:
+
+- isRecurring
+- recurrenceType
+- recurrenceEndDate (optional)
+
+Allowed recurrenceType values:
+
+- Daily
+- Weekly
+- Weekdays
+- Monthly
+
+2. Update the Schedule Workout dialog.
+
+Add:
+
+- Repeat toggle
+- Repeat frequency dropdown
+- End date (optional)
+
+Only show recurrence options when Repeat is enabled.
+
+3. Create API.
+
+POST /api/workout-schedule/recurring
+
+Create future workout schedules based on the selected recurrence rule.
+
+4. Calendar integration.
+
+Display recurring workouts like normal scheduled workouts.
+
+Visually indicate recurring workouts with a small repeat icon.
+
+5. Validation.
+
+Prevent:
+
+- End date before start date
+- Invalid recurrence type
+- Missing start date
+
+TECH REQUIREMENTS
+
+- Reuse the existing ScheduledWorkout model.
+- Create individual scheduled workout records.
+- Do not edit all recurring workouts together yet.
+- Do not support custom recurrence rules yet.
+- Do not implement reminder integration.
+- Follow the existing design system.
+
+COMPLETION REPORT
+
+Provide:
+
+- Files created
+- Files modified
+- Database changes
+- API endpoints
+- Components created
+
+Suggestions:
+
+List features that should exist later but were intentionally not implemented because they are outside this prompt.

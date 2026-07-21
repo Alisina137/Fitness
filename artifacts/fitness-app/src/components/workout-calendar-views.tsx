@@ -10,6 +10,7 @@ import {
   isToday,
   format,
 } from "date-fns";
+import { Repeat } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // ── Shared types ────────────────────────────────────────────────────────────
@@ -47,6 +48,7 @@ export type ScheduledEntry = {
   scheduledDate: string; // "YYYY-MM-DD"
   scheduledTime?: string | null;
   status: string;
+  isRecurring?: boolean;
 };
 
 // ── Drag & Drop shared props ──────────────────────────────────────────────────
@@ -232,13 +234,17 @@ export function CalendarMonthView({
                           : undefined
                       }
                       onDragEnd={onEntryDragEnd}
-                      title={`Drag to reschedule: ${entry.workoutName}`}
+                      title={`${entry.isRecurring ? "Recurring · " : ""}Drag to reschedule: ${entry.workoutName}`}
                       className={cn(
-                        "h-2 w-2 rounded-full bg-primary transition-all",
+                        "relative h-2 w-2 rounded-full bg-primary transition-all",
                         onEntryDragStart && "cursor-grab active:cursor-grabbing hover:scale-125",
                         draggingEntryId === entry.id && "opacity-40 scale-90",
                       )}
-                    />
+                    >
+                      {entry.isRecurring && (
+                        <span className="absolute -top-1 -right-1 h-1.5 w-1.5 rounded-full bg-primary/60 ring-1 ring-card" />
+                      )}
+                    </div>
                   ))}
                   {allDayWorkouts.length > 3 && (
                     <div className="h-1.5 w-1.5 rounded-full bg-primary/40" />
@@ -381,14 +387,15 @@ export function CalendarWeekView({
                       : undefined
                   }
                   onDragEnd={onEntryDragEnd}
-                  title={`Drag to reschedule: ${entry.workoutName}`}
+                  title={`${entry.isRecurring ? "Recurring · " : ""}Drag to reschedule: ${entry.workoutName}`}
                   className={cn(
-                    "w-full px-1 py-0.5 bg-primary/15 rounded text-[10px] text-primary font-medium truncate text-center leading-tight transition-all",
+                    "w-full px-1 py-0.5 bg-primary/15 rounded text-[10px] text-primary font-medium truncate text-center leading-tight transition-all flex items-center gap-0.5 justify-center",
                     onEntryDragStart && "cursor-grab active:cursor-grabbing hover:bg-primary/25",
                     draggingEntryId === entry.id && "opacity-40 scale-95",
                   )}
                 >
-                  {entry.workoutName}
+                  {entry.isRecurring && <Repeat className="h-2 w-2 shrink-0" />}
+                  <span className="truncate">{entry.workoutName}</span>
                 </div>
               ))}
 

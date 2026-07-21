@@ -22,6 +22,7 @@ import {
   CheckCircle2,
   XCircle,
   RotateCcw,
+  Repeat,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -96,6 +97,7 @@ export default function WorkoutCalendarPage() {
     scheduledDate: s.scheduledDate,
     scheduledTime: s.scheduledTime ?? null,
     status: s.status,
+    isRecurring: s.isRecurring,
   }));
 
   const isLoading = loadingWorkouts || loadingScheduled;
@@ -495,8 +497,14 @@ export default function WorkoutCalendarPage() {
                         >
                           {entry.workoutName}
                         </p>
-                        <div className="flex items-center gap-2 mt-0.5">
+                        <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                           {statusBadge}
+                          {entry.isRecurring && (
+                            <span className="flex items-center gap-0.5 text-[10px] font-semibold bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">
+                              <Repeat className="h-2.5 w-2.5" />
+                              Recurring
+                            </span>
+                          )}
                           {entry.scheduledTime && (
                             <span className="flex items-center gap-1 text-xs text-muted-foreground">
                               <Clock className="h-3 w-3" />

@@ -24,10 +24,151 @@ function serialize(
     scheduledTime: row.scheduledTime ?? null,
     status: row.status,
     notes: row.notes ?? null,
+    isRecurring: row.isRecurring,
+    recurrenceType: row.recurrenceType ?? null,
+    recurrenceEndDate: row.recurrenceEndDate ?? null,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };
 }
+
+// ─── Recurrence helpers ───────────────────────────────────────────────────────
+
+const RECURRENCE_TYPES = ["daily", "weekly", "weekdays", "monthly"] as const;
+type RecurrenceType = (typeof RECURRENCE_TYPES)[number];
+
+/** Generate all dates for a recurrence rule between startDate and endDate (inclusive). Max 365 entries. */
+function generateRecurringDates(
+  startDateStr: string,
+  recurrenceType: RecurrenceType,
+  endDateStr?: string | null,
+): string[] {
+  const start = new Date(startDateStr + "T00:00:00");
+  const defaultEnd = new Date(start);
+  defaultEnd.setDate(defaultEnd.getDate() + 89); // 90-day default window
+  const end = endDateStr ? new Date(endDateStr + "T00:00:00") : defaultEnd;
+
+  const dates: string[] = [];
+  const cursor = new Date(start);
+  const MAX = 365;
+
+  while (cursor <= end && dates.length < MAX) {
+    const dayOfWeek = cursor.getDay(); // 0=Sun, 6=Sat
+    const iso = cursor.toISOString().slice(0, 10);
+
+    if (recurrenceType === "daily") {
+      dates.push(iso);
+      cursor.setDate(cursor.getDate() + 1);
+    } else if (recurrenceType === "weekly") {
+      dates.push(iso);
+      cursor.setDate(cursor.getDate() + 7);
+    } else if (recurrenceType === "weekdays") {
+      if (dayOfWeek >= 1 && dayOfWeek <= 5) dates.push(iso);
+      cursor.setDate(cursor.getDate() + 1);
+    } else if (recurrenceType === "monthly") {
+      dates.push(iso);
+      const next = new Date(cursor);
+      next.setMonth(next.getMonth() + 1);
+      // Clamp to last day if month is shorter
+      cursor.setTime(next.getTime());
+    }
+  }
+
+  return dates;
+}
+
+// ─── POST /api/workout-schedule/recurring ────────────────────────────────────
+
+router.post("/workout-schedule/recurring", requireAuth, async (req, res) => {
+  const user = getUser(req);
+
+  const bodySchema = z.object({
+    workoutId: z.number().int().positive("Workout is required"),
+    scheduledDate: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format. Use YYYY-MM-DD")
+      .refine((d) => !isNaN(Date.parse(d)), "Invalid date"),
+    scheduledTime: z
+      .string()
+      .regex(/^\d{2}:\d{2}$/, "Invalid time format. Use HH:mm")
+      .nullable()
+      .optional(),
+    notes: z.string().max(1000).nullable().optional(),
+    recurrenceType: z.enum(["daily", "weekly", "weekdays", "monthly"], {
+      error: "recurrenceType must be one of: daily, weekly, weekdays, monthly",
+    }),
+    recurrenceEndDate: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid end date format. Use YYYY-MM-DD")
+      .refine((d) => !isNaN(Date.parse(d)), "Invalid end date")
+      .nullable()
+      .optional(),
+  });
+
+  const parsed = bodySchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({
+      error: "Validation failed",
+      issues: parsed.error.issues.map((i) => ({
+        field: i.path.join("."),
+        message: i.message,
+      })),
+    });
+  }
+
+  const { workoutId, scheduledDate, scheduledTime, notes, recurrenceType, recurrenceEndDate } =
+    parsed.data;
+
+  // Validate end date is not before start date
+  if (recurrenceEndDate && recurrenceEndDate < scheduledDate) {
+    return res.status(400).json({
+      error: "Validation failed",
+      issues: [{ field: "recurrenceEndDate", message: "End date must not be before the start date" }],
+    });
+  }
+
+  // Verify workout exists and belongs to the user
+  const [workout] = await db
+    .select({ id: workoutPlansTable.id, name: workoutPlansTable.name })
+    .from(workoutPlansTable)
+    .where(
+      and(
+        eq(workoutPlansTable.id, workoutId),
+        eq(workoutPlansTable.userId, user.id),
+      ),
+    )
+    .limit(1);
+
+  if (!workout) {
+    return res.status(404).json({ error: "Workout not found" });
+  }
+
+  const dates = generateRecurringDates(scheduledDate, recurrenceType, recurrenceEndDate);
+
+  if (dates.length === 0) {
+    return res.status(400).json({ error: "No dates generated for the given recurrence rule" });
+  }
+
+  const rows = await db
+    .insert(scheduledWorkoutsTable)
+    .values(
+      dates.map((date) => ({
+        userId: user.id,
+        workoutId,
+        scheduledDate: date,
+        scheduledTime: scheduledTime ?? null,
+        status: "scheduled" as const,
+        notes: notes ?? null,
+        isRecurring: true,
+        recurrenceType,
+        recurrenceEndDate: recurrenceEndDate ?? null,
+      })),
+    )
+    .returning();
+
+  const entries = rows.map((r) => serialize({ ...r, workoutName: workout.name }));
+  return res.status(201).json({ count: entries.length, entries });
+});
 
 // ─── POST /api/workout-schedule ───────────────────────────────────────────────
 

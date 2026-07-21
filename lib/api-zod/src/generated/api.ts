@@ -2179,6 +2179,8 @@ export const CreateWorkoutScheduleBody = zod.object({
   "notes": zod.string().nullish()
 })
 
+export const createWorkoutScheduleResponseIsRecurringDefault = false;
+
 export const CreateWorkoutScheduleResponse = zod.object({
   "id": zod.number(),
   "userId": zod.number(),
@@ -2188,6 +2190,9 @@ export const CreateWorkoutScheduleResponse = zod.object({
   "scheduledTime": zod.string().nullish().describe('HH:mm, optional'),
   "status": zod.enum(['scheduled', 'completed', 'missed', 'cancelled']),
   "notes": zod.string().nullish(),
+  "isRecurring": zod.boolean().default(createWorkoutScheduleResponseIsRecurringDefault),
+  "recurrenceType": zod.enum(['daily', 'weekly', 'weekdays', 'monthly']).nullish(),
+  "recurrenceEndDate": zod.coerce.date().nullish().describe('YYYY-MM-DD, optional end date for recurrence'),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })
@@ -2201,6 +2206,8 @@ export const ListWorkoutScheduleQueryParams = zod.object({
   "status": zod.coerce.string().optional().describe('Filter by status')
 })
 
+export const listWorkoutScheduleResponseIsRecurringDefault = false;
+
 export const ListWorkoutScheduleResponseItem = zod.object({
   "id": zod.number(),
   "userId": zod.number(),
@@ -2210,10 +2217,47 @@ export const ListWorkoutScheduleResponseItem = zod.object({
   "scheduledTime": zod.string().nullish().describe('HH:mm, optional'),
   "status": zod.enum(['scheduled', 'completed', 'missed', 'cancelled']),
   "notes": zod.string().nullish(),
+  "isRecurring": zod.boolean().default(listWorkoutScheduleResponseIsRecurringDefault),
+  "recurrenceType": zod.enum(['daily', 'weekly', 'weekdays', 'monthly']).nullish(),
+  "recurrenceEndDate": zod.coerce.date().nullish().describe('YYYY-MM-DD, optional end date for recurrence'),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })
 export const ListWorkoutScheduleResponse = zod.array(ListWorkoutScheduleResponseItem)
+
+
+/**
+ * @summary Create recurring scheduled workouts
+ */
+export const CreateRecurringWorkoutScheduleBody = zod.object({
+  "workoutId": zod.number(),
+  "scheduledDate": zod.coerce.date().describe('Start date (YYYY-MM-DD)'),
+  "scheduledTime": zod.string().nullish().describe('HH:mm, optional'),
+  "notes": zod.string().nullish(),
+  "recurrenceType": zod.enum(['daily', 'weekly', 'weekdays', 'monthly']),
+  "recurrenceEndDate": zod.coerce.date().nullish().describe('End date (YYYY-MM-DD), optional — defaults to 90 days')
+})
+
+export const createRecurringWorkoutScheduleResponseEntriesItemIsRecurringDefault = false;
+
+export const CreateRecurringWorkoutScheduleResponse = zod.object({
+  "count": zod.number(),
+  "entries": zod.array(zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "workoutId": zod.number(),
+  "workoutName": zod.string(),
+  "scheduledDate": zod.coerce.date().describe('YYYY-MM-DD'),
+  "scheduledTime": zod.string().nullish().describe('HH:mm, optional'),
+  "status": zod.enum(['scheduled', 'completed', 'missed', 'cancelled']),
+  "notes": zod.string().nullish(),
+  "isRecurring": zod.boolean().default(createRecurringWorkoutScheduleResponseEntriesItemIsRecurringDefault),
+  "recurrenceType": zod.enum(['daily', 'weekly', 'weekdays', 'monthly']).nullish(),
+  "recurrenceEndDate": zod.coerce.date().nullish().describe('YYYY-MM-DD, optional end date for recurrence'),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+}))
+})
 
 
 /**
@@ -2227,6 +2271,8 @@ export const RescheduleWorkoutScheduleBody = zod.object({
   "scheduledDate": zod.coerce.date().describe('New date (YYYY-MM-DD)')
 })
 
+export const rescheduleWorkoutScheduleResponseIsRecurringDefault = false;
+
 export const RescheduleWorkoutScheduleResponse = zod.object({
   "id": zod.number(),
   "userId": zod.number(),
@@ -2236,6 +2282,9 @@ export const RescheduleWorkoutScheduleResponse = zod.object({
   "scheduledTime": zod.string().nullish().describe('HH:mm, optional'),
   "status": zod.enum(['scheduled', 'completed', 'missed', 'cancelled']),
   "notes": zod.string().nullish(),
+  "isRecurring": zod.boolean().default(rescheduleWorkoutScheduleResponseIsRecurringDefault),
+  "recurrenceType": zod.enum(['daily', 'weekly', 'weekdays', 'monthly']).nullish(),
+  "recurrenceEndDate": zod.coerce.date().nullish().describe('YYYY-MM-DD, optional end date for recurrence'),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })
@@ -2248,6 +2297,8 @@ export const GetWorkoutScheduleParams = zod.object({
   "id": zod.coerce.number()
 })
 
+export const getWorkoutScheduleResponseIsRecurringDefault = false;
+
 export const GetWorkoutScheduleResponse = zod.object({
   "id": zod.number(),
   "userId": zod.number(),
@@ -2257,6 +2308,9 @@ export const GetWorkoutScheduleResponse = zod.object({
   "scheduledTime": zod.string().nullish().describe('HH:mm, optional'),
   "status": zod.enum(['scheduled', 'completed', 'missed', 'cancelled']),
   "notes": zod.string().nullish(),
+  "isRecurring": zod.boolean().default(getWorkoutScheduleResponseIsRecurringDefault),
+  "recurrenceType": zod.enum(['daily', 'weekly', 'weekdays', 'monthly']).nullish(),
+  "recurrenceEndDate": zod.coerce.date().nullish().describe('YYYY-MM-DD, optional end date for recurrence'),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })
@@ -2273,6 +2327,8 @@ export const UpdateWorkoutScheduleStatusBody = zod.object({
   "status": zod.enum(['scheduled', 'completed', 'missed', 'cancelled'])
 })
 
+export const updateWorkoutScheduleStatusResponseIsRecurringDefault = false;
+
 export const UpdateWorkoutScheduleStatusResponse = zod.object({
   "id": zod.number(),
   "userId": zod.number(),
@@ -2282,6 +2338,9 @@ export const UpdateWorkoutScheduleStatusResponse = zod.object({
   "scheduledTime": zod.string().nullish().describe('HH:mm, optional'),
   "status": zod.enum(['scheduled', 'completed', 'missed', 'cancelled']),
   "notes": zod.string().nullish(),
+  "isRecurring": zod.boolean().default(updateWorkoutScheduleStatusResponseIsRecurringDefault),
+  "recurrenceType": zod.enum(['daily', 'weekly', 'weekdays', 'monthly']).nullish(),
+  "recurrenceEndDate": zod.coerce.date().nullish().describe('YYYY-MM-DD, optional end date for recurrence'),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })
@@ -2301,6 +2360,8 @@ export const UpdateWorkoutScheduleBody = zod.object({
   "notes": zod.string().nullish()
 })
 
+export const updateWorkoutScheduleResponseIsRecurringDefault = false;
+
 export const UpdateWorkoutScheduleResponse = zod.object({
   "id": zod.number(),
   "userId": zod.number(),
@@ -2310,6 +2371,9 @@ export const UpdateWorkoutScheduleResponse = zod.object({
   "scheduledTime": zod.string().nullish().describe('HH:mm, optional'),
   "status": zod.enum(['scheduled', 'completed', 'missed', 'cancelled']),
   "notes": zod.string().nullish(),
+  "isRecurring": zod.boolean().default(updateWorkoutScheduleResponseIsRecurringDefault),
+  "recurrenceType": zod.enum(['daily', 'weekly', 'weekdays', 'monthly']).nullish(),
+  "recurrenceEndDate": zod.coerce.date().nullish().describe('YYYY-MM-DD, optional end date for recurrence'),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })

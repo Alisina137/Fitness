@@ -32,6 +32,8 @@ import type {
   Conversation,
   ConversationInput,
   CreateProgressPhotoInput,
+  CreateRecurringWorkoutSchedule201,
+  CreateRecurringWorkoutScheduleInput,
   CreateWorkoutScheduleInput,
   DailyCheckIn,
   DailyCheckInInput,
@@ -6303,6 +6305,77 @@ export function useListWorkoutSchedule<TData = Awaited<ReturnType<typeof listWor
 
 
 
+
+export const getCreateRecurringWorkoutScheduleUrl = () => {
+
+
+
+
+  return `/api/workout-schedule/recurring`
+}
+
+/**
+ * @summary Create recurring scheduled workouts
+ */
+export const createRecurringWorkoutSchedule = async (createRecurringWorkoutScheduleInput: CreateRecurringWorkoutScheduleInput, options?: RequestInit): Promise<CreateRecurringWorkoutSchedule201> => {
+
+  return customFetch<CreateRecurringWorkoutSchedule201>(getCreateRecurringWorkoutScheduleUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(createRecurringWorkoutScheduleInput)
+  }
+);}
+
+
+
+
+
+export const getCreateRecurringWorkoutScheduleMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createRecurringWorkoutSchedule>>, TError,{data: BodyType<CreateRecurringWorkoutScheduleInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createRecurringWorkoutSchedule>>, TError,{data: BodyType<CreateRecurringWorkoutScheduleInput>}, TContext> => {
+
+const mutationKey = ['createRecurringWorkoutSchedule'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createRecurringWorkoutSchedule>>, {data: BodyType<CreateRecurringWorkoutScheduleInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createRecurringWorkoutSchedule(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateRecurringWorkoutScheduleMutationResult = NonNullable<Awaited<ReturnType<typeof createRecurringWorkoutSchedule>>>
+    export type CreateRecurringWorkoutScheduleMutationBody = BodyType<CreateRecurringWorkoutScheduleInput>
+    export type CreateRecurringWorkoutScheduleMutationError = ErrorType<void>
+
+    /**
+ * @summary Create recurring scheduled workouts
+ */
+export const useCreateRecurringWorkoutSchedule = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createRecurringWorkoutSchedule>>, TError,{data: BodyType<CreateRecurringWorkoutScheduleInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createRecurringWorkoutSchedule>>,
+        TError,
+        {data: BodyType<CreateRecurringWorkoutScheduleInput>},
+        TContext
+      > => {
+      return useMutation(getCreateRecurringWorkoutScheduleMutationOptions(options));
+    }
 
 export const getRescheduleWorkoutScheduleUrl = (id: number,) => {
 

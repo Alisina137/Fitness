@@ -1742,6 +1742,39 @@ paths:
                 items:
                   $ref: "#/components/schemas/ScheduledWorkout"
 
+  /workout-schedule/recurring:
+    post:
+      operationId: createRecurringWorkoutSchedule
+      tags: [workout-schedule]
+      summary: Create recurring scheduled workouts
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateRecurringWorkoutScheduleInput"
+      responses:
+        "201":
+          description: Recurring workouts created
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [count, entries]
+                properties:
+                  count:
+                    type: integer
+                  entries:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ScheduledWorkout"
+        "400":
+          description: Validation error
+        "404":
+          description: Workout not found
+
   /workout-schedule/{id}/reschedule:
     patch:
       operationId: rescheduleWorkoutSchedule
@@ -3558,7 +3591,7 @@ components:
 
     ScheduledWorkout:
       type: object
-      required: [id, userId, workoutId, workoutName, scheduledDate, status, createdAt, updatedAt]
+      required: [id, userId, workoutId, workoutName, scheduledDate, status, isRecurring, createdAt, updatedAt]
       properties:
         id:
           type: integer
@@ -3582,6 +3615,18 @@ components:
         notes:
           type: string
           nullable: true
+        isRecurring:
+          type: boolean
+          default: false
+        recurrenceType:
+          type: string
+          nullable: true
+          enum: [daily, weekly, weekdays, monthly]
+        recurrenceEndDate:
+          type: string
+          nullable: true
+          format: date
+          description: "YYYY-MM-DD, optional end date for recurrence"
         createdAt:
           type: string
           format: date-time
@@ -3606,6 +3651,32 @@ components:
         notes:
           type: string
           nullable: true
+
+    CreateRecurringWorkoutScheduleInput:
+      type: object
+      required: [workoutId, scheduledDate, recurrenceType]
+      properties:
+        workoutId:
+          type: integer
+        scheduledDate:
+          type: string
+          format: date
+          description: "Start date (YYYY-MM-DD)"
+        scheduledTime:
+          type: string
+          nullable: true
+          description: "HH:mm, optional"
+        notes:
+          type: string
+          nullable: true
+        recurrenceType:
+          type: string
+          enum: [daily, weekly, weekdays, monthly]
+        recurrenceEndDate:
+          type: string
+          nullable: true
+          format: date
+          description: "End date (YYYY-MM-DD), optional — defaults to 90 days"
 
     RescheduleWorkoutScheduleInput:
       type: object
