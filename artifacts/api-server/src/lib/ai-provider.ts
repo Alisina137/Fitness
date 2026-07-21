@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { logger } from "./logger";
 
 let _client: OpenAI | null = null;
 
@@ -58,9 +59,10 @@ export async function generateWorkoutReasoning(
     } catch (error) {
       attempts++;
       if (attempts >= 3) {
-        console.error("[AI Provider] OpenAI call failed after 3 attempts:", error);
+        logger.error({ err: error, attempts }, "OpenAI workout-reasoning call failed after 3 attempts");
         return null;
       }
+      logger.warn({ err: error, attempts }, "OpenAI workout-reasoning call failed; retrying");
       await new Promise((r) => setTimeout(r, 1000 * attempts));
     }
   }

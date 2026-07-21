@@ -333,7 +333,9 @@ router.post("/progress", requireAuth, async (req, res) => {
   }).returning();
 
   // Recalculate goal progress (weight_loss/weight_gain/body_fat goals) non-blocking
-  updateAllUserGoals(user.id).catch(() => {});
+  updateAllUserGoals(user.id).catch((err) => {
+    req.log?.error({ err, userId: user.id }, "Failed to update goal progress after progress entry");
+  });
 
   res.status(201).json(serializeEntry(entry));
 });

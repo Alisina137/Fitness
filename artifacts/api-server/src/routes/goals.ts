@@ -93,7 +93,9 @@ router.post("/goals", requireAuth, async (req, res) => {
   updateGoalProgress(goal.id)
     .then(() => generateGoalMilestones(goal.id))
     .then(() => checkMilestones(goal.id))
-    .catch(() => {});
+    .catch((err) => {
+      req.log?.error({ err, goalId: goal.id }, "Failed to seed goal progress/milestones after create");
+    });
 
   res.status(201).json(serializeGoal(goal));
 });
@@ -203,7 +205,11 @@ router.put("/goals/:id", requireAuth, async (req, res) => {
   }
 
   // Recalculate progress after any edit, then check milestones non-blocking
-  updateGoalProgress(id).then(() => checkMilestones(id)).catch(() => {});
+  updateGoalProgress(id)
+    .then(() => checkMilestones(id))
+    .catch((err) => {
+      req.log?.error({ err, goalId: id }, "Failed to recalculate goal progress after update");
+    });
 
   res.json(serializeGoal(updated));
 });
