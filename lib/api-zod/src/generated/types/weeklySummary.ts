@@ -5,6 +5,7 @@
  * FitCore AI Fitness App API
  * OpenAPI spec version: 0.1.0
  */
+import type { WeeklySummaryComparison } from './weeklySummaryComparison';
 
 export interface WeeklySummary {
   weekStartDate: Date;
@@ -16,4 +17,5 @@ export interface WeeklySummary {
   goalsCompleted: number;
   recoveryCheckIns: number;
   avgRecoveryScore?: number | null;
+  comparison: WeeklySummaryComparison;
 }

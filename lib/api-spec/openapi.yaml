@@ -34,6 +34,8 @@ tags:
     description: Goal milestone operations
   - name: progress-photos
     description: Progress photo management
+  - name: workout-schedule
+    description: One-off workout scheduling operations
 paths:
   /healthz:
     get:
@@ -1685,6 +1687,83 @@ paths:
                     type: integer
         "404":
           description: Photo not found
+
+  # ─── Workout Schedule ────────────────────────────────────────────────────────
+  /workout-schedule:
+    post:
+      operationId: createWorkoutSchedule
+      tags: [workout-schedule]
+      summary: Schedule a workout
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateWorkoutScheduleInput"
+      responses:
+        "201":
+          description: Scheduled workout created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScheduledWorkout"
+        "400":
+          description: Validation error
+        "404":
+          description: Workout not found
+
+    get:
+      operationId: listWorkoutSchedule
+      tags: [workout-schedule]
+      summary: List scheduled workouts
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: date
+          schema:
+            type: string
+            format: date
+          description: Filter by scheduled date (YYYY-MM-DD)
+        - in: query
+          name: status
+          schema:
+            type: string
+          description: Filter by status
+      responses:
+        "200":
+          description: List of scheduled workouts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ScheduledWorkout"
+
+  /workout-schedule/{id}:
+    get:
+      operationId: getWorkoutSchedule
+      tags: [workout-schedule]
+      summary: Get a scheduled workout by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Scheduled workout
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScheduledWorkout"
+        "404":
+          description: Not found
 
 components:
   schemas:
@@ -3357,3 +3436,54 @@ components:
                 achievedAt:
                   type: string
                   format: date-time
+
+    ScheduledWorkout:
+      type: object
+      required: [id, userId, workoutId, workoutName, scheduledDate, status, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        workoutId:
+          type: integer
+        workoutName:
+          type: string
+        scheduledDate:
+          type: string
+          format: date
+          description: "YYYY-MM-DD"
+        scheduledTime:
+          type: string
+          nullable: true
+          description: "HH:mm, optional"
+        status:
+          type: string
+          enum: [scheduled, completed, missed, cancelled]
+        notes:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateWorkoutScheduleInput:
+      type: object
+      required: [workoutId, scheduledDate]
+      properties:
+        workoutId:
+          type: integer
+        scheduledDate:
+          type: string
+          format: date
+          description: "YYYY-MM-DD"
+        scheduledTime:
+          type: string
+          nullable: true
+          description: "HH:mm, optional"
+        notes:
+          type: string
+          nullable: true

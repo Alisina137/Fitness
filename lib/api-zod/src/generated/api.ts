@@ -1605,7 +1605,16 @@ export const GetProgressWeeklySummaryResponse = zod.object({
   "totalPersonalRecords": zod.number(),
   "goalsCompleted": zod.number(),
   "recoveryCheckIns": zod.number(),
-  "avgRecoveryScore": zod.number().nullish()
+  "avgRecoveryScore": zod.number().nullish(),
+  "comparison": zod.object({
+  "prevWeekStartDate": zod.coerce.date(),
+  "deltaTotalWorkouts": zod.number(),
+  "deltaTotalWorkoutMinutes": zod.number(),
+  "deltaCaloriesBurned": zod.number().nullish(),
+  "deltaTotalPersonalRecords": zod.number(),
+  "deltaGoalsCompleted": zod.number(),
+  "deltaRecoveryCheckIns": zod.number()
+})
 })
 
 
@@ -2157,6 +2166,74 @@ export const DeleteProgressPhotosIdParams = zod.object({
 export const DeleteProgressPhotosIdResponse = zod.object({
   "deleted": zod.boolean(),
   "id": zod.number()
+})
+
+
+/**
+ * @summary Schedule a workout
+ */
+export const CreateWorkoutScheduleBody = zod.object({
+  "workoutId": zod.number(),
+  "scheduledDate": zod.coerce.date().describe('YYYY-MM-DD'),
+  "scheduledTime": zod.string().nullish().describe('HH:mm, optional'),
+  "notes": zod.string().nullish()
+})
+
+export const CreateWorkoutScheduleResponse = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "workoutId": zod.number(),
+  "workoutName": zod.string(),
+  "scheduledDate": zod.coerce.date().describe('YYYY-MM-DD'),
+  "scheduledTime": zod.string().nullish().describe('HH:mm, optional'),
+  "status": zod.enum(['scheduled', 'completed', 'missed', 'cancelled']),
+  "notes": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary List scheduled workouts
+ */
+export const ListWorkoutScheduleQueryParams = zod.object({
+  "date": zod.date().optional().describe('Filter by scheduled date (YYYY-MM-DD)'),
+  "status": zod.coerce.string().optional().describe('Filter by status')
+})
+
+export const ListWorkoutScheduleResponseItem = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "workoutId": zod.number(),
+  "workoutName": zod.string(),
+  "scheduledDate": zod.coerce.date().describe('YYYY-MM-DD'),
+  "scheduledTime": zod.string().nullish().describe('HH:mm, optional'),
+  "status": zod.enum(['scheduled', 'completed', 'missed', 'cancelled']),
+  "notes": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+export const ListWorkoutScheduleResponse = zod.array(ListWorkoutScheduleResponseItem)
+
+
+/**
+ * @summary Get a scheduled workout by ID
+ */
+export const GetWorkoutScheduleParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const GetWorkoutScheduleResponse = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "workoutId": zod.number(),
+  "workoutName": zod.string(),
+  "scheduledDate": zod.coerce.date().describe('YYYY-MM-DD'),
+  "scheduledTime": zod.string().nullish().describe('HH:mm, optional'),
+  "status": zod.enum(['scheduled', 'completed', 'missed', 'cancelled']),
+  "notes": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
 })
 
 

@@ -1,0 +1,122 @@
+You are continuing development of an AI fitness application.
+
+IMPORTANT IMPLEMENTATION RULES
+
+- Implement ONLY the features requested in this prompt.
+- Do NOT add extra features.
+- Do NOT modify existing systems unless required.
+- If something appears to be missing, DO NOT implement it.
+- Add it to the Suggestions section of the completion report.
+- Future prompts will implement the remaining functionality.
+
+CURRENT PROJECT STATE
+
+Already implemented:
+
+- User Profiles
+- Workout Engine
+- AI Workout Generation
+- Workout Analytics
+- Recovery System
+- Goal System
+- Progress System
+- Workout Calendar Foundation
+
+Do not rebuild existing systems.
+
+TASK
+
+Build the Workout Scheduling feature.
+
+IMPLEMENT
+
+1. Create ScheduledWorkout model.
+
+Fields:
+
+- id
+- userId
+- workoutId
+- scheduledDate
+- scheduledTime (optional)
+- status
+- notes (optional)
+- createdAt
+- updatedAt
+
+Status values:
+
+- Scheduled
+- Completed
+- Missed
+- Cancelled
+
+2. Create API endpoints.
+
+POST /api/workout-schedule
+
+GET /api/workout-schedule
+
+GET /api/workout-schedule/:id
+
+3. Schedule a workout.
+
+Allow users to:
+
+- Select an existing workout
+- Select a date
+- Optionally select a time
+- Optionally add notes
+- Save the schedule
+
+4. Calendar integration.
+
+After saving:
+
+- The scheduled workout should immediately appear on the Workout Calendar.
+- The selected day should display the scheduled workout.
+
+5. Create Schedule Workout dialog.
+
+Fields:
+
+- Workout
+- Date
+- Time (optional)
+- Notes (optional)
+- Save
+- Cancel
+
+6. Validation.
+
+Prevent:
+
+- Missing workout
+- Missing date
+- Invalid date
+- Invalid workout ID
+
+Display clear validation messages.
+
+TECH REQUIREMENTS
+
+- Reuse the existing Workout Engine.
+- Do not duplicate workout data.
+- Do not allow editing scheduled workouts yet.
+- Do not allow deleting scheduled workouts yet.
+- Do not implement recurring workouts.
+- Follow the existing design system.
+
+COMPLETION REPORT
+
+Provide:
+
+- Files created
+- Files modified
+- Database changes
+- API endpoints
+- Components created
+
+Suggestions:
+
+List features that should exist later but were intentionally not implemented because they are outside this prompt.

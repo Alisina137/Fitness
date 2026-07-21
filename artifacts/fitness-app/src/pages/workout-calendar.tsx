@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "wouter";
-import { useListWorkouts } from "@workspace/api-client-react";
+import { useListWorkouts, useListWorkoutSchedule, getListWorkoutScheduleQueryKey } from "@workspace/api-client-react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -8,6 +8,7 @@ import {
   Clock,
   Dumbbell,
   AlertCircle,
+  Plus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -26,7 +27,9 @@ import {
   CalendarMonthView,
   CalendarWeekView,
   getWorkoutsForDate,
+  type ScheduledEntry,
 } from "@/components/workout-calendar-views";
+import { ScheduleWorkoutDialog } from "@/components/schedule-workout-dialog";
 
 type ViewMode = "month" | "week";
 
@@ -35,11 +38,42 @@ export default function WorkoutCalendarPage() {
   const [view, setView] = useState<ViewMode>("month");
   const [currentDate, setCurrentDate] = useState(today);
   const [selectedDate, setSelectedDate] = useState(today);
+  const [scheduleDialogOpen, setScheduleDialogOpen] = useState(false);
 
-  const { data: workouts, isLoading, isError } = useListWorkouts({ status: "active" });
+  // Recurring workouts (from weeklySchedule.days)
+  const { data: workouts, isLoading: loadingWorkouts, isError: errorWorkouts } = useListWorkouts({ status: "active" });
+  // One-off scheduled workouts
+  const { data: scheduledData, isLoading: loadingScheduled, isError: errorScheduled } = useListWorkoutSchedule();
+
   const allWorkouts = workouts ?? [];
+  const scheduledEntries: ScheduledEntry[] = (scheduledData ?? []).map((s) => ({
+    id: s.id,
+    workoutId: s.workoutId,
+    workoutName: s.workoutName,
+    scheduledDate: s.scheduledDate,
+    scheduledTime: s.scheduledTime ?? null,
+    status: s.status,
+  }));
 
-  const selectedDayWorkouts = getWorkoutsForDate(selectedDate, allWorkouts);
+  const isLoading = loadingWorkouts || loadingScheduled;
+  const isError = errorWorkouts || errorScheduled;
+
+  // Workouts for the selected day: merge recurring + one-off
+  const recurringForDay = getWorkoutsForDate(selectedDate, allWorkouts);
+  const selectedDateStr = format(selectedDate, "yyyy-MM-dd");
+  const scheduledForDay = scheduledEntries
+    .filter((e) => e.scheduledDate === selectedDateStr && e.status !== "cancelled")
+    .map((e) => ({
+      workoutId: e.workoutId,
+      workoutName: e.workoutName,
+      category: null,
+      durationMinutes: null,
+      isScheduledEntry: true,
+      scheduledTime: e.scheduledTime,
+      entryId: e.id,
+    }));
+
+  const selectedDayWorkouts = [...recurringForDay, ...scheduledForDay];
 
   // ── Navigation ──────────────────────────────────────────────────────────────
 
@@ -61,8 +95,6 @@ export default function WorkoutCalendarPage() {
 
   function handleSelectDate(date: Date) {
     setSelectedDate(date);
-    // When selecting a date in month view that's outside the current displayed
-    // month, shift the calendar to show that month.
     if (view === "month") {
       const sameMonth =
         date.getFullYear() === currentDate.getFullYear() &&
@@ -91,18 +123,26 @@ export default function WorkoutCalendarPage() {
   return (
     <div className="p-4 md:p-8 max-w-4xl mx-auto space-y-6 animate-in fade-in duration-500">
       {/* Page header */}
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Workout Calendar</h1>
-        <p className="text-muted-foreground mt-1">
-          View your scheduled workouts by month or week.
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Workout Calendar</h1>
+          <p className="text-muted-foreground mt-1">
+            View and schedule your workouts by month or week.
+          </p>
+        </div>
+        <Button
+          onClick={() => setScheduleDialogOpen(true)}
+          className="gap-2 shrink-0"
+        >
+          <Plus className="h-4 w-4" />
+          Schedule
+        </Button>
       </div>
 
       {/* Calendar card */}
       <div className="bg-card border border-border rounded-2xl p-5 space-y-4">
-        {/* Toolbar: nav + view toggle */}
+        {/* Toolbar */}
         <div className="flex items-center justify-between gap-3 flex-wrap">
-          {/* Left: prev / today / next */}
           <div className="flex items-center gap-1">
             <button
               onClick={goToPrev}
@@ -126,12 +166,10 @@ export default function WorkoutCalendarPage() {
             </button>
           </div>
 
-          {/* Centre: period label */}
           <span className="font-semibold text-sm md:text-base flex-1 text-center md:text-left">
             {getHeaderLabel()}
           </span>
 
-          {/* Right: month / week toggle */}
           <div className="flex items-center gap-1 bg-secondary rounded-lg p-1">
             <button
               onClick={() => setView("month")}
@@ -158,7 +196,7 @@ export default function WorkoutCalendarPage() {
           </div>
         </div>
 
-        {/* Calendar grid — loading skeleton */}
+        {/* Calendar grid */}
         {isLoading ? (
           <div className="space-y-2">
             <div className="grid grid-cols-7 gap-1">
@@ -186,6 +224,7 @@ export default function WorkoutCalendarPage() {
             selectedDate={selectedDate}
             onSelectDate={handleSelectDate}
             workouts={allWorkouts}
+            scheduledEntries={scheduledEntries}
           />
         ) : (
           <CalendarWeekView
@@ -193,6 +232,7 @@ export default function WorkoutCalendarPage() {
             selectedDate={selectedDate}
             onSelectDate={handleSelectDate}
             workouts={allWorkouts}
+            scheduledEntries={scheduledEntries}
           />
         )}
       </div>
@@ -200,19 +240,27 @@ export default function WorkoutCalendarPage() {
       {/* Selected day panel */}
       {!isLoading && !isError && (
         <section className="space-y-4">
-          <div className="flex items-center gap-3">
-            <h2 className="font-bold text-lg">
-              {format(selectedDate, "EEEE, MMMM d")}
-            </h2>
-            {isToday(selectedDate) && (
-              <span className="text-xs bg-primary text-black font-bold px-2 py-0.5 rounded-full">
-                Today
-              </span>
-            )}
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <h2 className="font-bold text-lg">
+                {format(selectedDate, "EEEE, MMMM d")}
+              </h2>
+              {isToday(selectedDate) && (
+                <span className="text-xs bg-primary text-black font-bold px-2 py-0.5 rounded-full">
+                  Today
+                </span>
+              )}
+            </div>
+            <button
+              onClick={() => setScheduleDialogOpen(true)}
+              className="flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary/80 transition-colors"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Add workout
+            </button>
           </div>
 
           {selectedDayWorkouts.length === 0 ? (
-            /* Empty state */
             <div className="bg-card border border-border rounded-2xl p-8 flex flex-col items-center gap-4 text-center">
               <div className="h-12 w-12 rounded-full bg-border flex items-center justify-center">
                 <Calendar className="h-6 w-6 text-muted-foreground" />
@@ -220,21 +268,19 @@ export default function WorkoutCalendarPage() {
               <div>
                 <p className="font-medium">No workouts scheduled.</p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  This day is free — enjoy the rest or head to Schedule to assign a workout.
+                  This day is free — tap "Add workout" to schedule one.
                 </p>
               </div>
-              <Link href="/workouts/schedule">
-                <Button variant="outline" size="sm">
-                  Go to Schedule
-                </Button>
-              </Link>
+              <Button variant="outline" size="sm" onClick={() => setScheduleDialogOpen(true)}>
+                <Plus className="h-4 w-4 mr-1.5" />
+                Schedule a workout
+              </Button>
             </div>
           ) : (
-            /* Workout list */
             <div className="space-y-3">
-              {selectedDayWorkouts.map((w) => (
+              {selectedDayWorkouts.map((w, i) => (
                 <Link
-                  key={w.workoutId}
+                  key={`${"isScheduledEntry" in w && w.isScheduledEntry ? "sched" : "rec"}-${w.workoutId}-${i}`}
                   href={`/workouts/${w.workoutId}`}
                   className="flex items-center gap-4 bg-card border border-border rounded-2xl p-5 hover:border-primary/20 transition-colors group"
                 >
@@ -245,24 +291,44 @@ export default function WorkoutCalendarPage() {
                     <p className="font-bold truncate group-hover:text-primary transition-colors">
                       {w.workoutName}
                     </p>
-                    {w.category && (
-                      <p className="text-xs text-muted-foreground mt-0.5 capitalize">
-                        {w.category}
-                      </p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      {w.category && (
+                        <p className="text-xs text-muted-foreground capitalize">{w.category}</p>
+                      )}
+                      {"isScheduledEntry" in w && w.isScheduledEntry && (
+                        <span className="text-[10px] font-semibold bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">
+                          Scheduled
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0">
+                    {"scheduledTime" in w && w.scheduledTime && (
+                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                        <Clock className="h-4 w-4" />
+                        {w.scheduledTime}
+                      </div>
+                    )}
+                    {w.durationMinutes != null && (
+                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                        <Clock className="h-4 w-4" />
+                        {w.durationMinutes} min
+                      </div>
                     )}
                   </div>
-                  {w.durationMinutes != null && (
-                    <div className="flex items-center gap-1.5 text-sm text-muted-foreground shrink-0">
-                      <Clock className="h-4 w-4" />
-                      {w.durationMinutes} min
-                    </div>
-                  )}
                 </Link>
               ))}
             </div>
           )}
         </section>
       )}
+
+      {/* Schedule dialog */}
+      <ScheduleWorkoutDialog
+        open={scheduleDialogOpen}
+        onOpenChange={setScheduleDialogOpen}
+        defaultDate={selectedDate}
+      />
     </div>
   );
 }

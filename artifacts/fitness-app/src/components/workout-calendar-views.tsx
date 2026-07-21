@@ -34,6 +34,19 @@ export type CalendarWorkout = {
   workoutName: string;
   category: string | null;
   durationMinutes: number | null;
+  /** true = one-off scheduled entry (not recurring) */
+  isScheduledEntry?: boolean;
+  scheduledTime?: string | null;
+};
+
+/** A one-off scheduled workout entry from the workout-schedule API */
+export type ScheduledEntry = {
+  id: number;
+  workoutId: number;
+  workoutName: string;
+  scheduledDate: string; // "YYYY-MM-DD"
+  scheduledTime?: string | null;
+  status: string;
 };
 
 // ── Utility ─────────────────────────────────────────────────────────────────
@@ -79,6 +92,7 @@ export interface CalendarMonthViewProps {
   selectedDate: Date;
   onSelectDate: (date: Date) => void;
   workouts: WorkoutLike[];
+  scheduledEntries?: ScheduledEntry[];
 }
 
 /**
@@ -90,6 +104,7 @@ export function CalendarMonthView({
   selectedDate,
   onSelectDate,
   workouts,
+  scheduledEntries = [],
 }: CalendarMonthViewProps) {
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
@@ -124,7 +139,11 @@ export function CalendarMonthView({
           const inMonth = isSameMonth(day, currentDate);
           const isSelected = isSameDay(day, selectedDate);
           const today = isToday(day);
-          const dayWorkouts = getWorkoutsForDate(day, workouts);
+          const dayStr = format(day, "yyyy-MM-dd");
+          const dayWorkouts = [
+            ...getWorkoutsForDate(day, workouts),
+            ...scheduledEntries.filter((e) => e.scheduledDate === dayStr && e.status !== "cancelled"),
+          ];
 
           return (
             <button
@@ -181,6 +200,7 @@ export interface CalendarWeekViewProps {
   selectedDate: Date;
   onSelectDate: (date: Date) => void;
   workouts: WorkoutLike[];
+  scheduledEntries?: ScheduledEntry[];
 }
 
 /**
@@ -192,6 +212,7 @@ export function CalendarWeekView({
   selectedDate,
   onSelectDate,
   workouts,
+  scheduledEntries = [],
 }: CalendarWeekViewProps) {
   const weekStart = startOfWeek(currentDate);
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
@@ -201,7 +222,11 @@ export function CalendarWeekView({
       {weekDays.map((day, i) => {
         const isSelected = isSameDay(day, selectedDate);
         const today = isToday(day);
-        const dayWorkouts = getWorkoutsForDate(day, workouts);
+        const dayStr = format(day, "yyyy-MM-dd");
+        const dayWorkouts = [
+          ...getWorkoutsForDate(day, workouts),
+          ...scheduledEntries.filter((e) => e.scheduledDate === dayStr && e.status !== "cancelled"),
+        ];
 
         return (
           <button

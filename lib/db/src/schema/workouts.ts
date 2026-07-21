@@ -172,6 +172,28 @@ export const exercisePerformanceTable = pgTable("exercise_performance", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// ─── Scheduled Workouts ───────────────────────────────────────────────────────
+// One-off workout schedule entries (distinct from recurring weeklySchedule).
+
+export const scheduledWorkoutsTable = pgTable("scheduled_workouts", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
+  workoutId: integer("workout_id").notNull().references(() => workoutPlansTable.id, { onDelete: "cascade" }),
+  scheduledDate: text("scheduled_date").notNull(), // "YYYY-MM-DD"
+  scheduledTime: text("scheduled_time"),            // "HH:mm", optional
+  status: text("status").default("scheduled").notNull(), // scheduled | completed | missed | cancelled
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertScheduledWorkoutSchema = createInsertSchema(scheduledWorkoutsTable).omit({
+  id: true, createdAt: true, updatedAt: true,
+});
+
+export type ScheduledWorkoutRow = typeof scheduledWorkoutsTable.$inferSelect;
+export type InsertScheduledWorkout = z.infer<typeof insertScheduledWorkoutSchema>;
+
 // ─── Inferred Types ───────────────────────────────────────────────────────────
 
 export const insertWorkoutPlanSchema = createInsertSchema(workoutPlansTable).omit({ id: true, createdAt: true, updatedAt: true, completionCount: true });

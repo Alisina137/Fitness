@@ -32,6 +32,7 @@ import type {
   Conversation,
   ConversationInput,
   CreateProgressPhotoInput,
+  CreateWorkoutScheduleInput,
   DailyCheckIn,
   DailyCheckInInput,
   DashboardSummary,
@@ -61,6 +62,7 @@ import type {
   ListGoalsParams,
   ListNutritionEntriesParams,
   ListProgressEntriesParams,
+  ListWorkoutScheduleParams,
   ListWorkoutTemplatesParams,
   ListWorkoutsParams,
   LoginInput,
@@ -80,6 +82,7 @@ import type {
   ProgressSummary,
   RecoveryRecommendation,
   RegisterInput,
+  ScheduledWorkout,
   Subscription,
   SubscriptionPlan,
   TodayRecovery,
@@ -6141,4 +6144,236 @@ export const useDeleteProgressPhotosId = <TError = ErrorType<void>,
       > => {
       return useMutation(getDeleteProgressPhotosIdMutationOptions(options));
     }
+
+export const getCreateWorkoutScheduleUrl = () => {
+
+
+
+
+  return `/api/workout-schedule`
+}
+
+/**
+ * @summary Schedule a workout
+ */
+export const createWorkoutSchedule = async (createWorkoutScheduleInput: CreateWorkoutScheduleInput, options?: RequestInit): Promise<ScheduledWorkout> => {
+
+  return customFetch<ScheduledWorkout>(getCreateWorkoutScheduleUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(createWorkoutScheduleInput)
+  }
+);}
+
+
+
+
+
+export const getCreateWorkoutScheduleMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createWorkoutSchedule>>, TError,{data: BodyType<CreateWorkoutScheduleInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createWorkoutSchedule>>, TError,{data: BodyType<CreateWorkoutScheduleInput>}, TContext> => {
+
+const mutationKey = ['createWorkoutSchedule'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createWorkoutSchedule>>, {data: BodyType<CreateWorkoutScheduleInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createWorkoutSchedule(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateWorkoutScheduleMutationResult = NonNullable<Awaited<ReturnType<typeof createWorkoutSchedule>>>
+    export type CreateWorkoutScheduleMutationBody = BodyType<CreateWorkoutScheduleInput>
+    export type CreateWorkoutScheduleMutationError = ErrorType<void>
+
+    /**
+ * @summary Schedule a workout
+ */
+export const useCreateWorkoutSchedule = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createWorkoutSchedule>>, TError,{data: BodyType<CreateWorkoutScheduleInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createWorkoutSchedule>>,
+        TError,
+        {data: BodyType<CreateWorkoutScheduleInput>},
+        TContext
+      > => {
+      return useMutation(getCreateWorkoutScheduleMutationOptions(options));
+    }
+
+export const getListWorkoutScheduleUrl = (params?: ListWorkoutScheduleParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/workout-schedule?${stringifiedParams}` : `/api/workout-schedule`
+}
+
+/**
+ * @summary List scheduled workouts
+ */
+export const listWorkoutSchedule = async (params?: ListWorkoutScheduleParams, options?: RequestInit): Promise<ScheduledWorkout[]> => {
+
+  return customFetch<ScheduledWorkout[]>(getListWorkoutScheduleUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListWorkoutScheduleQueryKey = (params?: ListWorkoutScheduleParams,) => {
+    return [
+    `/api/workout-schedule`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListWorkoutScheduleQueryOptions = <TData = Awaited<ReturnType<typeof listWorkoutSchedule>>, TError = ErrorType<unknown>>(params?: ListWorkoutScheduleParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listWorkoutSchedule>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListWorkoutScheduleQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listWorkoutSchedule>>> = ({ signal }) => listWorkoutSchedule(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listWorkoutSchedule>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListWorkoutScheduleQueryResult = NonNullable<Awaited<ReturnType<typeof listWorkoutSchedule>>>
+export type ListWorkoutScheduleQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List scheduled workouts
+ */
+
+export function useListWorkoutSchedule<TData = Awaited<ReturnType<typeof listWorkoutSchedule>>, TError = ErrorType<unknown>>(
+ params?: ListWorkoutScheduleParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listWorkoutSchedule>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListWorkoutScheduleQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetWorkoutScheduleUrl = (id: number,) => {
+
+
+
+
+  return `/api/workout-schedule/${id}`
+}
+
+/**
+ * @summary Get a scheduled workout by ID
+ */
+export const getWorkoutSchedule = async (id: number, options?: RequestInit): Promise<ScheduledWorkout> => {
+
+  return customFetch<ScheduledWorkout>(getGetWorkoutScheduleUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetWorkoutScheduleQueryKey = (id: number,) => {
+    return [
+    `/api/workout-schedule/${id}`
+    ] as const;
+    }
+
+
+export const getGetWorkoutScheduleQueryOptions = <TData = Awaited<ReturnType<typeof getWorkoutSchedule>>, TError = ErrorType<void>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getWorkoutSchedule>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetWorkoutScheduleQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getWorkoutSchedule>>> = ({ signal }) => getWorkoutSchedule(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getWorkoutSchedule>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetWorkoutScheduleQueryResult = NonNullable<Awaited<ReturnType<typeof getWorkoutSchedule>>>
+export type GetWorkoutScheduleQueryError = ErrorType<void>
+
+
+/**
+ * @summary Get a scheduled workout by ID
+ */
+
+export function useGetWorkoutSchedule<TData = Awaited<ReturnType<typeof getWorkoutSchedule>>, TError = ErrorType<void>>(
+ id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getWorkoutSchedule>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetWorkoutScheduleQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 

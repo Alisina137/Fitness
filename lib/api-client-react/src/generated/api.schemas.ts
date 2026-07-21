@@ -1395,6 +1395,16 @@ export interface ErrorResponse {
   message?: string;
 }
 
+export type WeeklySummaryComparison = {
+  prevWeekStartDate: string;
+  deltaTotalWorkouts: number;
+  deltaTotalWorkoutMinutes: number;
+  deltaCaloriesBurned?: number | null;
+  deltaTotalPersonalRecords: number;
+  deltaGoalsCompleted: number;
+  deltaRecoveryCheckIns: number;
+};
+
 export interface WeeklySummary {
   weekStartDate: string;
   weekEndDate: string;
@@ -1405,6 +1415,7 @@ export interface WeeklySummary {
   goalsCompleted: number;
   recoveryCheckIns: number;
   avgRecoveryScore?: number | null;
+  comparison: WeeklySummaryComparison;
 }
 
 export interface MonthlyReport {
@@ -1461,6 +1472,40 @@ export interface ProgressSummary {
   progressPhotos: ProgressSummaryProgressPhotos;
   workouts: ProgressSummaryWorkouts;
   personalRecords: ProgressSummaryPersonalRecords;
+}
+
+export type ScheduledWorkoutStatus = typeof ScheduledWorkoutStatus[keyof typeof ScheduledWorkoutStatus];
+
+
+export const ScheduledWorkoutStatus = {
+  scheduled: 'scheduled',
+  completed: 'completed',
+  missed: 'missed',
+  cancelled: 'cancelled',
+} as const;
+
+export interface ScheduledWorkout {
+  id: number;
+  userId: number;
+  workoutId: number;
+  workoutName: string;
+  /** YYYY-MM-DD */
+  scheduledDate: string;
+  /** HH:mm, optional */
+  scheduledTime?: string | null;
+  status: ScheduledWorkoutStatus;
+  notes?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateWorkoutScheduleInput {
+  workoutId: number;
+  /** YYYY-MM-DD */
+  scheduledDate: string;
+  /** HH:mm, optional */
+  scheduledTime?: string | null;
+  notes?: string | null;
 }
 
 export type ListWorkoutsParams = {
@@ -1681,5 +1726,16 @@ afterPhotoId: number;
 export type DeleteProgressPhotosId200 = {
   deleted: boolean;
   id: number;
+};
+
+export type ListWorkoutScheduleParams = {
+/**
+ * Filter by scheduled date (YYYY-MM-DD)
+ */
+date?: string;
+/**
+ * Filter by status
+ */
+status?: string;
 };
 
