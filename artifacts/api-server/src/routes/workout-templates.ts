@@ -11,9 +11,29 @@ import {
   createUserWorkoutTemplate,
   deleteWorkoutTemplate,
   duplicateWorkoutTemplate,
+  toggleTemplateFavorite,
 } from "../lib/workout-template-service.js";
 
 const router = Router();
+
+// ─── PATCH /api/workout-templates/:id/favorite ────────────────────────────────
+// Toggle the isFavorite flag on a template.
+
+router.patch("/workout-templates/:id/favorite", requireAuth, async (req, res) => {
+  const user = getUser(req);
+  const templateId = parseInt(req.params.id ?? "", 10);
+
+  if (!templateId || isNaN(templateId)) {
+    return res.status(400).json({ error: "Invalid template ID" });
+  }
+
+  const updated = await toggleTemplateFavorite(user.id, templateId);
+  if (!updated) {
+    return res.status(404).json({ error: "Template not found" });
+  }
+
+  return res.json(updated);
+});
 
 // ─── POST /api/workout-templates/:id/duplicate ────────────────────────────────
 // Create a copy of an existing template with a unique auto-generated name.

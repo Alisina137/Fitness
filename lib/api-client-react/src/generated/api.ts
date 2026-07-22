@@ -6311,6 +6311,55 @@ export function useListWorkoutSchedule<TData = Awaited<ReturnType<typeof listWor
 
 
 
+export const getToggleWorkoutTemplateFavoriteUrl = (id: number) => {
+  return `/api/workout-templates/${id}/favorite`
+}
+
+/**
+ * @summary Toggle the favorite status of a workout template
+ */
+export const toggleWorkoutTemplateFavorite = async (id: number, options?: RequestInit): Promise<WorkoutTemplate> => {
+  return customFetch<WorkoutTemplate>(getToggleWorkoutTemplateFavoriteUrl(id), {
+    ...options,
+    method: 'PATCH',
+  });
+}
+
+export const getToggleWorkoutTemplateFavoriteMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof toggleWorkoutTemplateFavorite>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof toggleWorkoutTemplateFavorite>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['toggleWorkoutTemplateFavorite'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof toggleWorkoutTemplateFavorite>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+          return toggleWorkoutTemplateFavorite(id, requestOptions)
+        }
+
+  return { mutationFn, ...mutationOptions }}
+
+    export type ToggleWorkoutTemplateFavoriteMutationResult = NonNullable<Awaited<ReturnType<typeof toggleWorkoutTemplateFavorite>>>
+    export type ToggleWorkoutTemplateFavoriteMutationError = ErrorType<void>
+
+    /**
+ * @summary Toggle the favorite status of a workout template
+ */
+export const useToggleWorkoutTemplateFavorite = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof toggleWorkoutTemplateFavorite>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof toggleWorkoutTemplateFavorite>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getToggleWorkoutTemplateFavoriteMutationOptions(options));
+    }
+
 export const getDuplicateWorkoutTemplateUrl = (id: number) => {
   return `/api/workout-templates/${id}/duplicate`
 }

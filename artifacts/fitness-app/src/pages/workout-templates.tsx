@@ -5,8 +5,9 @@ import {
   useListWorkouts,
   useDeleteWorkoutTemplate,
   useDuplicateWorkoutTemplate,
+  useToggleWorkoutTemplateFavorite,
 } from "@workspace/api-client-react";
-import { LayoutTemplate, Plus, Dumbbell, CalendarDays, Pencil, Trash2, Copy } from "lucide-react";
+import { LayoutTemplate, Plus, Dumbbell, CalendarDays, Pencil, Trash2, Copy, Star } from "lucide-react";
 import { EditTemplateDialog } from "@/components/edit-template-dialog";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -194,13 +195,122 @@ function DeleteTemplateDialog({
   );
 }
 
+type Template = {
+  id: number;
+  name: string;
+  workoutName: string;
+  isFavorite: boolean;
+  createdAt: string;
+};
+
+function TemplateCard({
+  template,
+  onEdit,
+  onDelete,
+  onDuplicate,
+  onToggleFavorite,
+  duplicatePending,
+  favoritePending,
+}: {
+  template: Template;
+  onEdit: () => void;
+  onDelete: () => void;
+  onDuplicate: () => void;
+  onToggleFavorite: () => void;
+  duplicatePending: boolean;
+  favoritePending: boolean;
+}) {
+  return (
+    <div className="group bg-card border border-border rounded-3xl overflow-hidden hover:border-primary/50 transition-colors flex flex-col">
+      <div className="p-6 flex-1 space-y-4">
+        <div className="flex items-start justify-between gap-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary text-xs font-semibold rounded-full">
+            <LayoutTemplate className="h-3.5 w-3.5" /> Template
+          </div>
+          <div className="flex items-center gap-1">
+            {/* Star always visible */}
+            <button
+              onClick={onToggleFavorite}
+              disabled={favoritePending}
+              className="p-1.5 rounded-lg transition-colors disabled:opacity-50"
+              title={template.isFavorite ? "Remove from favorites" : "Add to favorites"}
+            >
+              <Star
+                className={`h-4 w-4 transition-colors ${
+                  template.isFavorite
+                    ? "fill-yellow-400 text-yellow-400"
+                    : "text-muted-foreground hover:text-yellow-400"
+                }`}
+              />
+            </button>
+            {/* Edit / Duplicate / Delete — appear on hover */}
+            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button
+                onClick={onEdit}
+                className="p-1.5 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+                title="Edit template name"
+              >
+                <Pencil className="h-4 w-4" />
+              </button>
+              <button
+                onClick={onDuplicate}
+                disabled={duplicatePending}
+                className="p-1.5 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+                title="Duplicate template"
+              >
+                <Copy className="h-4 w-4" />
+              </button>
+              <button
+                onClick={onDelete}
+                className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                title="Delete template"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+        <h3 className="text-xl font-bold leading-tight group-hover:text-primary transition-colors">
+          {template.name}
+        </h3>
+        <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+          <Dumbbell className="h-4 w-4" /> {template.workoutName}
+        </div>
+      </div>
+      <div className="p-4 bg-secondary/50 border-t border-border flex items-center justify-between">
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <CalendarDays className="h-3.5 w-3.5" />
+          Created {format(new Date(template.createdAt), "MMM d, yyyy")}
+        </div>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={onDuplicate}
+            disabled={duplicatePending}
+            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-lg hover:bg-secondary disabled:opacity-50"
+          >
+            <Copy className="h-3 w-3" /> Duplicate
+          </button>
+          <button
+            onClick={onEdit}
+            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-lg hover:bg-secondary"
+          >
+            <Pencil className="h-3 w-3" /> Edit
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function WorkoutTemplatesPage() {
   const { data: templates, isLoading, refetch } = useListUserWorkoutTemplates();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<{ id: number; name: string } | null>(null);
   const [deletingTemplateId, setDeletingTemplateId] = useState<number | null>(null);
   const { toast } = useToast();
+
   const duplicateTemplate = useDuplicateWorkoutTemplate();
+  const toggleFavorite = useToggleWorkoutTemplateFavorite();
 
   const handleDuplicate = (templateId: number) => {
     duplicateTemplate.mutate(
@@ -218,10 +328,43 @@ export default function WorkoutTemplatesPage() {
     );
   };
 
-  const hasTemplates = (templates?.length ?? 0) > 0;
+  const handleToggleFavorite = (templateId: number, currentlyFavorite: boolean) => {
+    toggleFavorite.mutate(
+      { id: templateId },
+      {
+        onSuccess: () => {
+          refetch();
+          toast({
+            title: currentlyFavorite ? "Removed from favorites" : "Added to favorites",
+          });
+        },
+        onError: (err: unknown) => {
+          const message = err instanceof Error ? err.message : "Failed to update favorite";
+          toast({ variant: "destructive", title: "Could not update favorite", description: message });
+        },
+      },
+    );
+  };
+
+  const allTemplates = (templates ?? []) as Template[];
+  const favorites = allTemplates.filter((t) => t.isFavorite);
+  const others = allTemplates.filter((t) => !t.isFavorite);
+  const hasTemplates = allTemplates.length > 0;
+  const hasFavorites = favorites.length > 0;
+
+  const cardProps = (template: Template) => ({
+    template,
+    onEdit: () => setEditingTemplate({ id: template.id, name: template.name }),
+    onDelete: () => setDeletingTemplateId(template.id),
+    onDuplicate: () => handleDuplicate(template.id),
+    onToggleFavorite: () => handleToggleFavorite(template.id, template.isFavorite),
+    duplicatePending: duplicateTemplate.isPending,
+    favoritePending: toggleFavorite.isPending,
+  });
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-10 animate-in fade-in duration-500">
+      {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Templates</h1>
@@ -252,72 +395,35 @@ export default function WorkoutTemplatesPage() {
           </Button>
         </div>
       ) : (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {templates?.map((template) => (
-            <div
-              key={template.id}
-              className="group bg-card border border-border rounded-3xl overflow-hidden hover:border-primary/50 transition-colors flex flex-col"
-            >
-              <div className="p-6 flex-1 space-y-4">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary text-xs font-semibold rounded-full">
-                    <LayoutTemplate className="h-3.5 w-3.5" /> Template
-                  </div>
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button
-                      onClick={() => setEditingTemplate({ id: template.id, name: template.name })}
-                      className="p-1.5 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
-                      title="Edit template name"
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDuplicate(template.id)}
-                      disabled={duplicateTemplate.isPending}
-                      className="p-1.5 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
-                      title="Duplicate template"
-                    >
-                      <Copy className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={() => setDeletingTemplateId(template.id)}
-                      className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
-                      title="Delete template"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-                <h3 className="text-xl font-bold leading-tight group-hover:text-primary transition-colors">
-                  {template.name}
-                </h3>
-                <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                  <Dumbbell className="h-4 w-4" /> {template.workoutName}
-                </div>
+        <div className="space-y-10">
+          {/* Favorites section — only shown when at least one favorite exists */}
+          {hasFavorites && (
+            <section className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                <h2 className="text-lg font-semibold">Favorites</h2>
               </div>
-              <div className="p-4 bg-secondary/50 border-t border-border flex items-center justify-between">
-                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <CalendarDays className="h-3.5 w-3.5" />
-                  Created {format(new Date(template.createdAt), "MMM d, yyyy")}
-                </div>
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={() => handleDuplicate(template.id)}
-                    disabled={duplicateTemplate.isPending}
-                    className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-lg hover:bg-secondary disabled:opacity-50"
-                  >
-                    <Copy className="h-3 w-3" /> Duplicate
-                  </button>
-                  <button
-                    onClick={() => setEditingTemplate({ id: template.id, name: template.name })}
-                    className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-lg hover:bg-secondary"
-                  >
-                    <Pencil className="h-3 w-3" /> Edit
-                  </button>
-                </div>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {favorites.map((template) => (
+                  <TemplateCard key={template.id} {...cardProps(template)} />
+                ))}
               </div>
-            </div>
-          ))}
+            </section>
+          )}
+
+          {/* All / remaining templates */}
+          {others.length > 0 && (
+            <section className="space-y-4">
+              {hasFavorites && (
+                <h2 className="text-lg font-semibold text-muted-foreground">All Templates</h2>
+              )}
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {others.map((template) => (
+                  <TemplateCard key={template.id} {...cardProps(template)} />
+                ))}
+              </div>
+            </section>
+          )}
         </div>
       )}
 

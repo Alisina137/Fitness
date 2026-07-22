@@ -1,0 +1,132 @@
+You are continuing development of an AI fitness application.
+
+IMPORTANT IMPLEMENTATION RULES
+
+- Implement ONLY the features in this prompt.
+- Do NOT add extra features.
+- Do NOT modify existing systems unless required.
+- If something appears to be missing, DO NOT implement it.
+- Add it to the Suggestions section.
+- Future prompts will implement the remaining functionality.
+
+--------------------------------------------------
+
+FEATURE
+
+Workout Templates
+
+Completed
+
+✓ Template Foundation
+✓ Save as Template
+✓ Templates Library
+✓ Edit Template
+✓ Delete Template
+✓ Duplicate Template
+
+Current Task
+
+Favorite Templates
+
+Upcoming
+
+- Categories
+- Search
+- Sorting
+- Quick Apply
+
+--------------------------------------------------
+
+TASK
+
+Implement Favorite Templates.
+
+1. Extend the WorkoutTemplate model.
+
+Add:
+
+- isFavorite (boolean)
+
+Default:
+
+false
+
+2. Create API.
+
+PATCH /api/workout-templates/:id/favorite
+
+Toggle the favorite status.
+
+3. Update the Templates Library.
+
+Each template card should display a Favorite icon.
+
+Users can:
+
+- Add to Favorites
+- Remove from Favorites
+
+4. Favorite Indicator.
+
+Favorited templates should display a highlighted star icon.
+
+5. Add a "Favorites" section.
+
+Display favorite templates at the top of the page.
+
+If there are no favorites, hide this section.
+
+6. Validation.
+
+Handle:
+
+- Invalid template ID
+- Favorite update failure
+
+Display user-friendly error messages.
+
+--------------------------------------------------
+
+TECH REQUIREMENTS
+
+- Reuse the existing WorkoutTemplate model.
+- Do not create a separate Favorites table.
+- Refresh the UI automatically after changes.
+- Follow the existing design system.
+
+--------------------------------------------------
+
+DO NOT IMPLEMENT
+
+- Categories
+- Search
+- Sorting
+- Quick Apply
+- Sharing
+- Import/Export
+
+--------------------------------------------------
+
+DEFINITION OF DONE
+
+✓ Templates can be marked as favorite.
+✓ Favorites can be removed.
+✓ Favorites appear at the top.
+✓ Changes update instantly.
+✓ Existing functionality remains unchanged.
+
+--------------------------------------------------
+
+COMPLETION REPORT
+
+Provide:
+
+- Files created
+- Files modified
+- Database changes
+- API endpoints
+- Components updated
+
+Suggestions:
+
+List features intentionally left for future prompts.

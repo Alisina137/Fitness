@@ -26,6 +26,7 @@ export function serializeWorkoutTemplate(row: WorkoutTemplateWithWorkout) {
     name: row.name,
     workoutId: row.workoutId,
     workoutName: row.workoutName,
+    isFavorite: row.isFavorite,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };
@@ -59,6 +60,7 @@ export async function listUserWorkoutTemplates(userId: number) {
       userId: workoutTemplatesTable.userId,
       name: workoutTemplatesTable.name,
       workoutId: workoutTemplatesTable.workoutId,
+      isFavorite: workoutTemplatesTable.isFavorite,
       createdAt: workoutTemplatesTable.createdAt,
       updatedAt: workoutTemplatesTable.updatedAt,
       workoutName: workoutPlansTable.name,
@@ -79,6 +81,7 @@ export async function findTemplateById(userId: number, templateId: number) {
       userId: workoutTemplatesTable.userId,
       name: workoutTemplatesTable.name,
       workoutId: workoutTemplatesTable.workoutId,
+      isFavorite: workoutTemplatesTable.isFavorite,
       createdAt: workoutTemplatesTable.createdAt,
       updatedAt: workoutTemplatesTable.updatedAt,
       workoutName: workoutPlansTable.name,
@@ -169,6 +172,30 @@ export async function duplicateWorkoutTemplate(
     .returning();
 
   return serializeWorkoutTemplate({ ...newRow, workoutName: source.workoutName });
+}
+
+// Toggle the isFavorite flag on a template. Returns the updated serialized
+// template, or null when the template does not exist / belong to the user.
+export async function toggleTemplateFavorite(
+  userId: number,
+  templateId: number,
+): Promise<ReturnType<typeof serializeWorkoutTemplate> | null> {
+  const current = await findTemplateById(userId, templateId);
+  if (!current) return null;
+
+  const [updated] = await db
+    .update(workoutTemplatesTable)
+    .set({ isFavorite: !current.isFavorite, updatedAt: new Date() })
+    .where(
+      and(
+        eq(workoutTemplatesTable.id, templateId),
+        eq(workoutTemplatesTable.userId, userId),
+      ),
+    )
+    .returning();
+
+  if (!updated) return null;
+  return serializeWorkoutTemplate({ ...updated, workoutName: current.workoutName });
 }
 
 // Delete a template owned by the user. Returns true when a row was removed.

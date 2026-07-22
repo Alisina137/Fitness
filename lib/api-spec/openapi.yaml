@@ -1747,6 +1747,31 @@ paths:
                   $ref: "#/components/schemas/ScheduledWorkout"
 
   # ─── Workout Templates ───────────────────────────────────────────────────────
+  /workout-templates/{id}/favorite:
+    patch:
+      operationId: toggleWorkoutTemplateFavorite
+      tags: [workout-templates]
+      summary: Toggle the favorite status of a workout template
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Updated template
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkoutTemplate"
+        "400":
+          description: Invalid template ID
+        "404":
+          description: Template not found
+
   /workout-templates/{id}/duplicate:
     post:
       operationId: duplicateWorkoutTemplate
