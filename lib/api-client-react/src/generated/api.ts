@@ -6311,6 +6311,55 @@ export function useListWorkoutSchedule<TData = Awaited<ReturnType<typeof listWor
 
 
 
+export const getDeleteWorkoutTemplateUrl = (id: number) => {
+  return `/api/workout-templates/${id}`
+}
+
+/**
+ * @summary Delete a workout template
+ */
+export const deleteWorkoutTemplate = async (id: number, options?: RequestInit): Promise<void> => {
+  return customFetch<void>(getDeleteWorkoutTemplateUrl(id), {
+    ...options,
+    method: 'DELETE',
+  });
+}
+
+export const getDeleteWorkoutTemplateMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteWorkoutTemplate>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteWorkoutTemplate>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['deleteWorkoutTemplate'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteWorkoutTemplate>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+          return deleteWorkoutTemplate(id, requestOptions)
+        }
+
+  return { mutationFn, ...mutationOptions }}
+
+    export type DeleteWorkoutTemplateMutationResult = NonNullable<Awaited<ReturnType<typeof deleteWorkoutTemplate>>>
+    export type DeleteWorkoutTemplateMutationError = ErrorType<void>
+
+    /**
+ * @summary Delete a workout template
+ */
+export const useDeleteWorkoutTemplate = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteWorkoutTemplate>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteWorkoutTemplate>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getDeleteWorkoutTemplateMutationOptions(options));
+    }
+
 export const getUpdateWorkoutTemplateUrl = (id: number,) => {
 
 

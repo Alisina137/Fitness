@@ -3,8 +3,9 @@ import {
   useListUserWorkoutTemplates,
   useCreateWorkoutTemplate,
   useListWorkouts,
+  useDeleteWorkoutTemplate,
 } from "@workspace/api-client-react";
-import { LayoutTemplate, Plus, Dumbbell, CalendarDays, Pencil } from "lucide-react";
+import { LayoutTemplate, Plus, Dumbbell, CalendarDays, Pencil, Trash2 } from "lucide-react";
 import { EditTemplateDialog } from "@/components/edit-template-dialog";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -131,10 +133,71 @@ function SaveTemplateDialog({
   );
 }
 
+function DeleteTemplateDialog({
+  templateId,
+  open,
+  onOpenChange,
+  onDeleted,
+}: {
+  templateId: number | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onDeleted: () => void;
+}) {
+  const { toast } = useToast();
+  const deleteTemplate = useDeleteWorkoutTemplate();
+
+  const handleDelete = () => {
+    if (!templateId) return;
+    deleteTemplate.mutate(
+      { id: templateId },
+      {
+        onSuccess: () => {
+          onOpenChange(false);
+          onDeleted();
+          toast({ title: "Template deleted" });
+        },
+        onError: (err: unknown) => {
+          const message = err instanceof Error ? err.message : "Failed to delete template";
+          toast({ variant: "destructive", title: "Could not delete template", description: message });
+        },
+      },
+    );
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[400px] bg-card border-border">
+        <DialogHeader>
+          <DialogTitle>Delete Template?</DialogTitle>
+          <DialogDescription>This action cannot be undone.</DialogDescription>
+        </DialogHeader>
+        <DialogFooter className="gap-2 pt-2">
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={deleteTemplate.isPending}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="destructive"
+            onClick={handleDelete}
+            disabled={deleteTemplate.isPending}
+          >
+            {deleteTemplate.isPending ? "Deleting…" : "Delete"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export default function WorkoutTemplatesPage() {
   const { data: templates, isLoading, refetch } = useListUserWorkoutTemplates();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<{ id: number; name: string } | null>(null);
+  const [deletingTemplateId, setDeletingTemplateId] = useState<number | null>(null);
 
   const hasTemplates = (templates?.length ?? 0) > 0;
 
@@ -181,13 +244,22 @@ export default function WorkoutTemplatesPage() {
                   <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary text-xs font-semibold rounded-full">
                     <LayoutTemplate className="h-3.5 w-3.5" /> Template
                   </div>
-                  <button
-                    onClick={() => setEditingTemplate({ id: template.id, name: template.name })}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground"
-                    title="Edit template name"
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </button>
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={() => setEditingTemplate({ id: template.id, name: template.name })}
+                      className="p-1.5 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+                      title="Edit template name"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => setDeletingTemplateId(template.id)}
+                      className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                      title="Delete template"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
                 <h3 className="text-xl font-bold leading-tight group-hover:text-primary transition-colors">
                   {template.name}
@@ -223,6 +295,13 @@ export default function WorkoutTemplatesPage() {
           currentName={editingTemplate.name}
         />
       )}
+
+      <DeleteTemplateDialog
+        templateId={deletingTemplateId}
+        open={deletingTemplateId !== null}
+        onOpenChange={(open) => { if (!open) setDeletingTemplateId(null); }}
+        onDeleted={() => refetch()}
+      />
     </div>
   );
 }

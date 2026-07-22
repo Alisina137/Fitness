@@ -9,9 +9,34 @@ import {
   updateWorkoutTemplate,
   listUserWorkoutTemplates,
   createUserWorkoutTemplate,
+  deleteWorkoutTemplate,
 } from "../lib/workout-template-service.js";
 
 const router = Router();
+
+// ─── DELETE /api/workout-templates/:id ────────────────────────────────────────
+// Delete a template. Does not delete the linked workout.
+
+router.delete("/workout-templates/:id", requireAuth, async (req, res) => {
+  const user = getUser(req);
+  const templateId = parseInt(req.params.id ?? "", 10);
+
+  if (!templateId || isNaN(templateId)) {
+    return res.status(400).json({ error: "Invalid template ID" });
+  }
+
+  const template = await findTemplateById(user.id, templateId);
+  if (!template) {
+    return res.status(404).json({ error: "Template not found" });
+  }
+
+  const deleted = await deleteWorkoutTemplate(user.id, templateId);
+  if (!deleted) {
+    return res.status(500).json({ error: "Failed to delete template" });
+  }
+
+  return res.status(204).send();
+});
 
 // ─── PATCH /api/workout-templates/:id ─────────────────────────────────────────
 // Rename a template. Does not change the linked workout.

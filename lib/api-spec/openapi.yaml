@@ -1748,6 +1748,26 @@ paths:
 
   # ─── Workout Templates ───────────────────────────────────────────────────────
   /workout-templates/{id}:
+    delete:
+      operationId: deleteWorkoutTemplate
+      tags: [workout-templates]
+      summary: Delete a workout template
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Template deleted
+        "400":
+          description: Invalid template ID
+        "404":
+          description: Template not found
+
     patch:
       operationId: updateWorkoutTemplate
       tags: [workout-templates]

@@ -132,6 +132,23 @@ export async function updateWorkoutTemplate(
   return updated ?? null;
 }
 
+// Delete a template owned by the user. Returns true when a row was removed.
+export async function deleteWorkoutTemplate(
+  userId: number,
+  templateId: number,
+): Promise<boolean> {
+  const result = await db
+    .delete(workoutTemplatesTable)
+    .where(
+      and(
+        eq(workoutTemplatesTable.id, templateId),
+        eq(workoutTemplatesTable.userId, userId),
+      ),
+    )
+    .returning({ id: workoutTemplatesTable.id });
+  return result.length > 0;
+}
+
 export async function createUserWorkoutTemplate(
   userId: number,
   name: string,
