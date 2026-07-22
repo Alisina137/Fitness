@@ -28,7 +28,7 @@ export default function WorkoutDetailPage() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   
-  const { data: workout, isLoading, refetch } = useGetWorkout(id, {
+  const { data: workout, isLoading, isError } = useGetWorkout(id, {
     query: { enabled: !!id, queryKey: getGetWorkoutQueryKey(id) }
   });
   
@@ -97,7 +97,22 @@ export default function WorkoutDetailPage() {
     );
   }
 
-  if (!workout) return <div>Workout not found</div>;
+  if (isError || !workout) {
+    return (
+      <div className="p-8 max-w-4xl mx-auto text-center py-24">
+        <Dumbbell className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+        <h2 className="text-2xl font-bold mb-2">Workout not found</h2>
+        <p className="text-muted-foreground mb-6">
+          This workout doesn't exist or you don't have access to it.
+        </p>
+        <Link href="/workouts">
+          <Button variant="outline">
+            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Workouts
+          </Button>
+        </Link>
+      </div>
+    );
+  }
 
   const allCompleted = workout.exercises && completedExercises.size === workout.exercises.length;
 
