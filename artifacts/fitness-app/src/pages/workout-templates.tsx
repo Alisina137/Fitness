@@ -7,7 +7,7 @@ import {
   useDuplicateWorkoutTemplate,
   useToggleWorkoutTemplateFavorite,
 } from "@workspace/api-client-react";
-import { LayoutTemplate, Plus, Dumbbell, CalendarDays, Pencil, Trash2, Copy, Star, Search, X } from "lucide-react";
+import { LayoutTemplate, Plus, Dumbbell, CalendarDays, Pencil, Trash2, Copy, Star, Search, X, SlidersHorizontal } from "lucide-react";
 import { EditTemplateDialog, TEMPLATE_CATEGORIES } from "@/components/edit-template-dialog";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -405,6 +405,69 @@ function CategoryFilter({
   );
 }
 
+// ─── Sort & Quick-filter helpers ─────────────────────────────────────────────
+
+type SortOrder = "newest" | "oldest" | "az" | "za";
+type QuickFilter = "all" | "favorites" | "recent";
+
+const SORT_OPTIONS: { value: SortOrder; label: string }[] = [
+  { value: "newest", label: "Newest First" },
+  { value: "oldest", label: "Oldest First" },
+  { value: "az",     label: "A → Z" },
+  { value: "za",     label: "Z → A" },
+];
+
+const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+
+function sortTemplates(list: Template[], order: SortOrder): Template[] {
+  return [...list].sort((a, b) => {
+    switch (order) {
+      case "oldest":
+        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      case "az":
+        return a.name.localeCompare(b.name);
+      case "za":
+        return b.name.localeCompare(a.name);
+      default: // newest
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    }
+  });
+}
+
+// ─── Quick Filter Chips ───────────────────────────────────────────────────────
+
+function QuickFilters({
+  selected,
+  onChange,
+}: {
+  selected: QuickFilter;
+  onChange: (f: QuickFilter) => void;
+}) {
+  const options: { value: QuickFilter; label: string }[] = [
+    { value: "all",       label: "All" },
+    { value: "favorites", label: "Favorites" },
+    { value: "recent",    label: "Recently Created" },
+  ];
+  return (
+    <div className="flex items-center gap-2 flex-wrap">
+      {options.map(({ value, label }) => (
+        <button
+          key={value}
+          onClick={() => onChange(value)}
+          className={cn(
+            "px-3 py-1.5 rounded-full text-sm font-medium border transition-colors",
+            selected === value
+              ? "bg-primary text-black border-primary"
+              : "bg-transparent text-muted-foreground border-border hover:border-primary/50 hover:text-foreground",
+          )}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function WorkoutTemplatesPage() {
@@ -414,7 +477,16 @@ export default function WorkoutTemplatesPage() {
   const [deletingTemplateId, setDeletingTemplateId] = useState<number | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
+  const [quickFilter, setQuickFilter] = useState<QuickFilter>("all");
   const { toast } = useToast();
+
+  const clearFilters = () => {
+    setSearchQuery("");
+    setSelectedCategory(null);
+    setSortOrder("newest");
+    setQuickFilter("all");
+  };
 
   const duplicateTemplate = useDuplicateWorkoutTemplate();
   const toggleFavorite = useToggleWorkoutTemplateFavorite();
@@ -456,23 +528,38 @@ export default function WorkoutTemplatesPage() {
   const allTemplates = (templates ?? []) as Template[];
   const hasTemplates = allTemplates.length > 0;
 
-  // Apply search + category filter
+  // Apply all filters, then sort
   const normalizedQuery = searchQuery.trim().toLowerCase();
-  const filteredTemplates = allTemplates.filter((t) => {
-    if (selectedCategory && t.category !== selectedCategory) return false;
-    if (normalizedQuery) {
-      return (
-        t.name.toLowerCase().includes(normalizedQuery) ||
-        t.workoutName.toLowerCase().includes(normalizedQuery) ||
-        t.category.toLowerCase().includes(normalizedQuery)
-      );
-    }
-    return true;
-  });
+  const now = Date.now();
 
-  const favorites = filteredTemplates.filter((t) => t.isFavorite);
-  const others = filteredTemplates.filter((t) => !t.isFavorite);
+  const filteredTemplates = sortTemplates(
+    allTemplates.filter((t) => {
+      if (selectedCategory && t.category !== selectedCategory) return false;
+      if (quickFilter === "favorites" && !t.isFavorite) return false;
+      if (quickFilter === "recent" && now - new Date(t.createdAt).getTime() > SEVEN_DAYS_MS) return false;
+      if (normalizedQuery) {
+        return (
+          t.name.toLowerCase().includes(normalizedQuery) ||
+          t.workoutName.toLowerCase().includes(normalizedQuery) ||
+          t.category.toLowerCase().includes(normalizedQuery)
+        );
+      }
+      return true;
+    }),
+    sortOrder,
+  );
+
+  // Favorites / others split only makes sense in the default "all" view
+  const showSplit = quickFilter === "all";
+  const favorites = showSplit ? filteredTemplates.filter((t) => t.isFavorite) : [];
+  const others = showSplit ? filteredTemplates.filter((t) => !t.isFavorite) : filteredTemplates;
   const hasFavorites = favorites.length > 0;
+
+  const isFiltersActive =
+    normalizedQuery !== "" ||
+    selectedCategory !== null ||
+    sortOrder !== "newest" ||
+    quickFilter !== "all";
 
   const cardProps = (template: Template) => ({
     template,
@@ -523,7 +610,7 @@ export default function WorkoutTemplatesPage() {
           </Button>
         </div>
       ) : (
-        <div className="space-y-8">
+        <div className="space-y-6">
           {/* Search bar */}
           <div className="relative">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
@@ -545,23 +632,46 @@ export default function WorkoutTemplatesPage() {
             )}
           </div>
 
+          {/* Quick filters + Sort + Clear Filters */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <QuickFilters selected={quickFilter} onChange={setQuickFilter} />
+            <div className="flex items-center gap-2 shrink-0">
+              <Select value={sortOrder} onValueChange={(v) => setSortOrder(v as SortOrder)}>
+                <SelectTrigger className="w-[160px] bg-card border-border rounded-xl h-9 text-sm">
+                  <SlidersHorizontal className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {SORT_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {isFiltersActive && (
+                <Button variant="outline" size="sm" onClick={clearFilters} className="h-9 text-sm rounded-xl">
+                  Clear Filters
+                </Button>
+              )}
+            </div>
+          </div>
+
           {/* Category filter chips */}
           <CategoryFilter selected={selectedCategory} onChange={setSelectedCategory} />
 
           {filteredTemplates.length === 0 ? (
-            /* Search / category empty state */
+            /* Filtered empty state */
             <div className="text-center py-20 bg-card border border-border border-dashed rounded-3xl">
               <LayoutTemplate className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
               <p className="text-muted-foreground font-medium mb-4">No templates found.</p>
-              {normalizedQuery && (
-                <Button variant="outline" size="sm" onClick={() => setSearchQuery("")}>
-                  Clear Search
+              {isFiltersActive && (
+                <Button variant="outline" size="sm" onClick={clearFilters}>
+                  Clear Filters
                 </Button>
               )}
             </div>
           ) : (
             <div className="space-y-10">
-              {/* Favorites section — only shown when at least one favorite exists */}
+              {/* Favorites section — only shown in default "all" view */}
               {hasFavorites && (
                 <section className="space-y-4">
                   <div className="flex items-center gap-2">
