@@ -5,6 +5,7 @@
  * FitCore AI Fitness App API
  * OpenAPI spec version: 0.1.0
  */
+import type { UpdateWorkoutTemplateInputCategory } from './updateWorkoutTemplateInputCategory';
 
 export interface UpdateWorkoutTemplateInput {
   /**
@@ -12,4 +13,5 @@ export interface UpdateWorkoutTemplateInput {
      * @maxLength 120
      */
   name?: string;
+  category?: UpdateWorkoutTemplateInputCategory;
 }

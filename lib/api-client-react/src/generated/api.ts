@@ -6311,7 +6311,11 @@ export function useListWorkoutSchedule<TData = Awaited<ReturnType<typeof listWor
 
 
 
-export const getToggleWorkoutTemplateFavoriteUrl = (id: number) => {
+export const getToggleWorkoutTemplateFavoriteUrl = (id: number,) => {
+
+
+
+
   return `/api/workout-templates/${id}/favorite`
 }
 
@@ -6319,11 +6323,19 @@ export const getToggleWorkoutTemplateFavoriteUrl = (id: number) => {
  * @summary Toggle the favorite status of a workout template
  */
 export const toggleWorkoutTemplateFavorite = async (id: number, options?: RequestInit): Promise<WorkoutTemplate> => {
-  return customFetch<WorkoutTemplate>(getToggleWorkoutTemplateFavoriteUrl(id), {
+
+  return customFetch<WorkoutTemplate>(getToggleWorkoutTemplateFavoriteUrl(id),
+  {
     ...options,
-    method: 'PATCH',
-  });
-}
+    method: 'PATCH'
+
+
+  }
+);}
+
+
+
+
 
 export const getToggleWorkoutTemplateFavoriteMutationOptions = <TError = ErrorType<void>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof toggleWorkoutTemplateFavorite>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
@@ -6336,14 +6348,24 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       : {...options, mutation: {...options.mutation, mutationKey}}
       : {mutation: { mutationKey, }, request: undefined};
 
+
+
+
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof toggleWorkoutTemplateFavorite>>, {id: number}> = (props) => {
           const {id} = props ?? {};
-          return toggleWorkoutTemplateFavorite(id, requestOptions)
+
+          return  toggleWorkoutTemplateFavorite(id,requestOptions)
         }
 
-  return { mutationFn, ...mutationOptions }}
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
 
     export type ToggleWorkoutTemplateFavoriteMutationResult = NonNullable<Awaited<ReturnType<typeof toggleWorkoutTemplateFavorite>>>
+
     export type ToggleWorkoutTemplateFavoriteMutationError = ErrorType<void>
 
     /**
@@ -6360,7 +6382,11 @@ export const useToggleWorkoutTemplateFavorite = <TError = ErrorType<void>,
       return useMutation(getToggleWorkoutTemplateFavoriteMutationOptions(options));
     }
 
-export const getDuplicateWorkoutTemplateUrl = (id: number) => {
+export const getDuplicateWorkoutTemplateUrl = (id: number,) => {
+
+
+
+
   return `/api/workout-templates/${id}/duplicate`
 }
 
@@ -6368,11 +6394,19 @@ export const getDuplicateWorkoutTemplateUrl = (id: number) => {
  * @summary Duplicate a workout template
  */
 export const duplicateWorkoutTemplate = async (id: number, options?: RequestInit): Promise<WorkoutTemplate> => {
-  return customFetch<WorkoutTemplate>(getDuplicateWorkoutTemplateUrl(id), {
+
+  return customFetch<WorkoutTemplate>(getDuplicateWorkoutTemplateUrl(id),
+  {
     ...options,
-    method: 'POST',
-  });
-}
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
 
 export const getDuplicateWorkoutTemplateMutationOptions = <TError = ErrorType<void>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof duplicateWorkoutTemplate>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
@@ -6385,14 +6419,24 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       : {...options, mutation: {...options.mutation, mutationKey}}
       : {mutation: { mutationKey, }, request: undefined};
 
+
+
+
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof duplicateWorkoutTemplate>>, {id: number}> = (props) => {
           const {id} = props ?? {};
-          return duplicateWorkoutTemplate(id, requestOptions)
+
+          return  duplicateWorkoutTemplate(id,requestOptions)
         }
 
-  return { mutationFn, ...mutationOptions }}
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
 
     export type DuplicateWorkoutTemplateMutationResult = NonNullable<Awaited<ReturnType<typeof duplicateWorkoutTemplate>>>
+
     export type DuplicateWorkoutTemplateMutationError = ErrorType<void>
 
     /**
@@ -6409,7 +6453,11 @@ export const useDuplicateWorkoutTemplate = <TError = ErrorType<void>,
       return useMutation(getDuplicateWorkoutTemplateMutationOptions(options));
     }
 
-export const getDeleteWorkoutTemplateUrl = (id: number) => {
+export const getDeleteWorkoutTemplateUrl = (id: number,) => {
+
+
+
+
   return `/api/workout-templates/${id}`
 }
 
@@ -6417,11 +6465,19 @@ export const getDeleteWorkoutTemplateUrl = (id: number) => {
  * @summary Delete a workout template
  */
 export const deleteWorkoutTemplate = async (id: number, options?: RequestInit): Promise<void> => {
-  return customFetch<void>(getDeleteWorkoutTemplateUrl(id), {
+
+  return customFetch<void>(getDeleteWorkoutTemplateUrl(id),
+  {
     ...options,
-    method: 'DELETE',
-  });
-}
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
 
 export const getDeleteWorkoutTemplateMutationOptions = <TError = ErrorType<void>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteWorkoutTemplate>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
@@ -6434,14 +6490,24 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       : {...options, mutation: {...options.mutation, mutationKey}}
       : {mutation: { mutationKey, }, request: undefined};
 
+
+
+
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteWorkoutTemplate>>, {id: number}> = (props) => {
           const {id} = props ?? {};
-          return deleteWorkoutTemplate(id, requestOptions)
+
+          return  deleteWorkoutTemplate(id,requestOptions)
         }
 
-  return { mutationFn, ...mutationOptions }}
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
 
     export type DeleteWorkoutTemplateMutationResult = NonNullable<Awaited<ReturnType<typeof deleteWorkoutTemplate>>>
+
     export type DeleteWorkoutTemplateMutationError = ErrorType<void>
 
     /**

@@ -7,6 +7,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -17,11 +18,27 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 
+export const TEMPLATE_CATEGORIES = [
+  "Strength",
+  "Hypertrophy",
+  "Fat Loss",
+  "Cardio",
+  "Mobility",
+  "HIIT",
+  "Powerlifting",
+  "Functional",
+  "Recovery",
+  "Custom",
+] as const;
+
+export type TemplateCategory = (typeof TEMPLATE_CATEGORIES)[number];
+
 interface EditTemplateDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   templateId: number;
   currentName: string;
+  currentCategory: string;
 }
 
 export function EditTemplateDialog({
@@ -29,21 +46,24 @@ export function EditTemplateDialog({
   onOpenChange,
   templateId,
   currentName,
+  currentCategory,
 }: EditTemplateDialogProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const updateTemplate = useUpdateWorkoutTemplate();
 
   const [name, setName] = useState(currentName);
+  const [category, setCategory] = useState(currentCategory);
   const [inlineError, setInlineError] = useState("");
 
-  // Sync name when dialog opens with a new template
+  // Sync fields when dialog opens with a new template
   useEffect(() => {
     if (open) {
       setName(currentName);
+      setCategory(currentCategory);
       setInlineError("");
     }
-  }, [open, currentName]);
+  }, [open, currentName, currentCategory]);
 
   async function handleSave() {
     const trimmed = name.trim();
@@ -58,7 +78,7 @@ export function EditTemplateDialog({
     try {
       await updateTemplate.mutateAsync({
         id: templateId,
-        data: { name: trimmed },
+        data: { name: trimmed, category },
       });
 
       queryClient.invalidateQueries({
@@ -105,31 +125,46 @@ export function EditTemplateDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-2 pt-2">
-          <label htmlFor="edit-template-name" className="text-sm font-medium">
-            Template Name *
-          </label>
-          <Input
-            id="edit-template-name"
-            placeholder="e.g., My Push Day"
-            value={name}
-            onChange={(e) => {
-              setName(e.target.value);
-              if (inlineError) setInlineError("");
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") handleSave();
-            }}
-            className={
-              inlineError
-                ? "border-destructive focus-visible:ring-destructive"
-                : ""
-            }
-            autoFocus
-          />
-          {inlineError && (
-            <p className="text-xs text-destructive">{inlineError}</p>
-          )}
+        <div className="space-y-4 pt-2">
+          <div className="space-y-2">
+            <label htmlFor="edit-template-name" className="text-sm font-medium">
+              Template Name *
+            </label>
+            <Input
+              id="edit-template-name"
+              placeholder="e.g., My Push Day"
+              value={name}
+              onChange={(e) => {
+                setName(e.target.value);
+                if (inlineError) setInlineError("");
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleSave();
+              }}
+              className={
+                inlineError
+                  ? "border-destructive focus-visible:ring-destructive"
+                  : ""
+              }
+              autoFocus
+            />
+            {inlineError && (
+              <p className="text-xs text-destructive">{inlineError}</p>
+            )}
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Category</label>
+            <Select value={category} onValueChange={setCategory}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a category" />
+              </SelectTrigger>
+              <SelectContent>
+                {TEMPLATE_CATEGORIES.map((c) => (
+                  <SelectItem key={c} value={c}>{c}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         <DialogFooter className="pt-2 gap-2">

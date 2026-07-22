@@ -13,6 +13,7 @@ import {
   duplicateWorkoutTemplate,
   toggleTemplateFavorite,
 } from "../lib/workout-template-service.js";
+import { TEMPLATE_CATEGORIES } from "@workspace/db";
 
 const router = Router();
 
@@ -90,7 +91,10 @@ router.patch("/workout-templates/:id", requireAuth, async (req, res) => {
   }
 
   const bodySchema = z.object({
-    name: z.string().trim().min(1, "Template name is required").max(120),
+    name: z.string().trim().min(1, "Template name is required").max(120).optional(),
+    category: z.enum(TEMPLATE_CATEGORIES).optional(),
+  }).refine((d) => d.name !== undefined || d.category !== undefined, {
+    message: "At least one of name or category is required",
   });
 
   const parsed = bodySchema.safeParse(req.body);
@@ -104,7 +108,7 @@ router.patch("/workout-templates/:id", requireAuth, async (req, res) => {
     });
   }
 
-  const { name } = parsed.data;
+  const { name, category } = parsed.data;
 
   // Verify the template exists and belongs to the user.
   const template = await findTemplateById(user.id, templateId);
@@ -113,12 +117,14 @@ router.patch("/workout-templates/:id", requireAuth, async (req, res) => {
   }
 
   // Reject if another template already uses this name (case-insensitive).
-  const duplicate = await findTemplateByNameExcluding(user.id, name, templateId);
-  if (duplicate) {
-    return res.status(409).json({ error: "A template with this name already exists." });
+  if (name) {
+    const duplicate = await findTemplateByNameExcluding(user.id, name, templateId);
+    if (duplicate) {
+      return res.status(409).json({ error: "A template with this name already exists." });
+    }
   }
 
-  const updated = await updateWorkoutTemplate(user.id, templateId, name);
+  const updated = await updateWorkoutTemplate(user.id, templateId, { name, category });
   if (!updated) {
     return res.status(500).json({ error: "Failed to update template" });
   }
@@ -137,6 +143,7 @@ router.post("/workout-templates", requireAuth, async (req, res) => {
   const bodySchema = z.object({
     name: z.string().trim().min(1, "Template name is required").max(120),
     workoutId: z.number().int().positive("A valid workout is required"),
+    category: z.enum(TEMPLATE_CATEGORIES).default("Strength"),
   });
 
   const parsed = bodySchema.safeParse(req.body);
@@ -150,7 +157,7 @@ router.post("/workout-templates", requireAuth, async (req, res) => {
     });
   }
 
-  const { name, workoutId } = parsed.data;
+  const { name, workoutId, category } = parsed.data;
 
   // The referenced workout must exist and belong to the current user.
   const workout = await findUserWorkout(user.id, workoutId);
@@ -164,7 +171,7 @@ router.post("/workout-templates", requireAuth, async (req, res) => {
     return res.status(409).json({ error: "A template with this name already exists." });
   }
 
-  const template = await createUserWorkoutTemplate(user.id, name, workoutId, workout.name);
+  const template = await createUserWorkoutTemplate(user.id, name, workoutId, workout.name, category);
   return res.status(201).json(template);
 });
 

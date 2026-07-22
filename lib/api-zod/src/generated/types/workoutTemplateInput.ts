@@ -5,10 +5,13 @@
  * FitCore AI Fitness App API
  * OpenAPI spec version: 0.1.0
  */
+import type { WorkoutTemplateInputCategory } from './workoutTemplateInputCategory';
 
 export interface WorkoutTemplateInput {
   /** Template name (must be unique per user) */
   name: string;
   /** The existing workout plan to save as a template */
   workoutId: number;
+  /** Template category (default Strength) */
+  category?: WorkoutTemplateInputCategory;
 }

@@ -26,6 +26,7 @@ export function serializeWorkoutTemplate(row: WorkoutTemplateWithWorkout) {
     name: row.name,
     workoutId: row.workoutId,
     workoutName: row.workoutName,
+    category: row.category,
     isFavorite: row.isFavorite,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
@@ -60,6 +61,7 @@ export async function listUserWorkoutTemplates(userId: number) {
       userId: workoutTemplatesTable.userId,
       name: workoutTemplatesTable.name,
       workoutId: workoutTemplatesTable.workoutId,
+      category: workoutTemplatesTable.category,
       isFavorite: workoutTemplatesTable.isFavorite,
       createdAt: workoutTemplatesTable.createdAt,
       updatedAt: workoutTemplatesTable.updatedAt,
@@ -81,6 +83,7 @@ export async function findTemplateById(userId: number, templateId: number) {
       userId: workoutTemplatesTable.userId,
       name: workoutTemplatesTable.name,
       workoutId: workoutTemplatesTable.workoutId,
+      category: workoutTemplatesTable.category,
       isFavorite: workoutTemplatesTable.isFavorite,
       createdAt: workoutTemplatesTable.createdAt,
       updatedAt: workoutTemplatesTable.updatedAt,
@@ -116,15 +119,19 @@ export async function findTemplateByNameExcluding(
   );
 }
 
-// Rename a template; returns the updated record.
+// Update a template's name and/or category; returns the updated record.
 export async function updateWorkoutTemplate(
   userId: number,
   templateId: number,
-  newName: string,
+  updates: { name?: string; category?: string },
 ) {
+  const set: Record<string, unknown> = { updatedAt: new Date() };
+  if (updates.name !== undefined) set.name = updates.name.trim();
+  if (updates.category !== undefined) set.category = updates.category;
+
   const [updated] = await db
     .update(workoutTemplatesTable)
-    .set({ name: newName.trim(), updatedAt: new Date() })
+    .set(set)
     .where(
       and(
         eq(workoutTemplatesTable.id, templateId),
@@ -168,7 +175,7 @@ export async function duplicateWorkoutTemplate(
 
   const [newRow] = await db
     .insert(workoutTemplatesTable)
-    .values({ userId, name: copyName, workoutId: source.workoutId })
+    .values({ userId, name: copyName, workoutId: source.workoutId, category: source.category })
     .returning();
 
   return serializeWorkoutTemplate({ ...newRow, workoutName: source.workoutName });
@@ -220,10 +227,11 @@ export async function createUserWorkoutTemplate(
   name: string,
   workoutId: number,
   workoutName: string,
+  category: string = "Strength",
 ) {
   const [row] = await db
     .insert(workoutTemplatesTable)
-    .values({ userId, name: name.trim(), workoutId })
+    .values({ userId, name: name.trim(), workoutId, category })
     .returning();
 
   return serializeWorkoutTemplate({ ...row, workoutName });

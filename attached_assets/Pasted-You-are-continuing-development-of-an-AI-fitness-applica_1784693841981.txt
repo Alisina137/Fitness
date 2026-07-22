@@ -1,0 +1,141 @@
+You are continuing development of an AI fitness application.
+
+IMPORTANT IMPLEMENTATION RULES
+
+- Implement ONLY the features in this prompt.
+- Do NOT add extra features.
+- Do NOT modify existing systems unless required.
+- If something appears to be missing, DO NOT implement it.
+- Add it to the Suggestions section.
+- Future prompts will implement the remaining functionality.
+
+--------------------------------------------------
+
+FEATURE
+
+Workout Templates
+
+Completed
+
+✓ Template Foundation
+✓ Save as Template
+✓ Templates Library
+✓ Edit Template
+✓ Delete Template
+✓ Duplicate Template
+✓ Favorite Templates
+
+Current Task
+
+Template Categories
+
+Upcoming
+
+- Search
+- Sort & Filter
+- Quick Apply
+
+--------------------------------------------------
+
+TASK
+
+Implement Template Categories.
+
+1. Extend the WorkoutTemplate model.
+
+Add:
+
+- category (string)
+
+Allowed values:
+
+- Strength
+- Hypertrophy
+- Fat Loss
+- Cardio
+- Mobility
+- HIIT
+- Powerlifting
+- Functional
+- Recovery
+- Custom
+
+Default:
+
+Strength
+
+2. Update Create/Edit Template.
+
+Allow users to select a category.
+
+3. Display category.
+
+Show a category badge on every template card.
+
+4. Add category filter.
+
+Display category chips above the template list.
+
+Selecting a category should only display templates from that category.
+
+Include:
+
+- All Categories
+
+5. Empty State.
+
+If no templates exist in a selected category:
+
+"No templates found."
+
+6. Validation.
+
+Prevent:
+
+- Invalid category
+- Empty custom category name
+
+--------------------------------------------------
+
+TECH REQUIREMENTS
+
+- Reuse the existing WorkoutTemplate model.
+- Keep category filtering reusable.
+- Follow the existing design system.
+
+--------------------------------------------------
+
+DO NOT IMPLEMENT
+
+- Search
+- Sorting
+- AI recommendations
+- Quick Apply
+- Import/Export
+- Sharing
+
+--------------------------------------------------
+
+DEFINITION OF DONE
+
+✓ Categories can be assigned.
+✓ Categories appear on template cards.
+✓ Filtering works correctly.
+✓ Existing features continue working.
+✓ Loading and empty states are handled.
+
+--------------------------------------------------
+
+COMPLETION REPORT
+
+Provide:
+
+- Files created
+- Files modified
+- Database changes
+- API changes
+- Components updated
+
+Suggestions:
+
+List features intentionally left for future prompts.

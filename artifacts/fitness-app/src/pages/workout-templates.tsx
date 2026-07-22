@@ -8,10 +8,11 @@ import {
   useToggleWorkoutTemplateFavorite,
 } from "@workspace/api-client-react";
 import { LayoutTemplate, Plus, Dumbbell, CalendarDays, Pencil, Trash2, Copy, Star } from "lucide-react";
-import { EditTemplateDialog } from "@/components/edit-template-dialog";
+import { EditTemplateDialog, TEMPLATE_CATEGORIES } from "@/components/edit-template-dialog";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -27,13 +28,47 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
+
+// ─── Category helpers ─────────────────────────────────────────────────────────
+
+const CATEGORY_COLORS: Record<string, string> = {
+  Strength:     "bg-red-500/15 text-red-400 border-red-500/20",
+  Hypertrophy:  "bg-purple-500/15 text-purple-400 border-purple-500/20",
+  "Fat Loss":   "bg-green-500/15 text-green-400 border-green-500/20",
+  Cardio:       "bg-blue-500/15 text-blue-400 border-blue-500/20",
+  Mobility:     "bg-cyan-500/15 text-cyan-400 border-cyan-500/20",
+  HIIT:         "bg-orange-500/15 text-orange-400 border-orange-500/20",
+  Powerlifting: "bg-rose-500/15 text-rose-400 border-rose-500/20",
+  Functional:   "bg-yellow-500/15 text-yellow-400 border-yellow-500/20",
+  Recovery:     "bg-teal-500/15 text-teal-400 border-teal-500/20",
+  Custom:       "bg-muted text-muted-foreground border-border",
+};
+
+function categoryBadgeClass(category: string) {
+  return CATEGORY_COLORS[category] ?? "bg-muted text-muted-foreground border-border";
+}
+
+// ─── Schema / types ───────────────────────────────────────────────────────────
 
 const createTemplateSchema = z.object({
   name: z.string().trim().min(1, "Template name is required").max(120),
   workoutId: z.coerce.number().int().positive("Select a workout"),
+  category: z.enum(TEMPLATE_CATEGORIES).default("Strength"),
 });
 
 type CreateTemplateForm = z.infer<typeof createTemplateSchema>;
+
+type Template = {
+  id: number;
+  name: string;
+  workoutName: string;
+  category: string;
+  isFavorite: boolean;
+  createdAt: string;
+};
+
+// ─── Save Template Dialog ─────────────────────────────────────────────────────
 
 function SaveTemplateDialog({
   open,
@@ -50,12 +85,12 @@ function SaveTemplateDialog({
 
   const form = useForm<CreateTemplateForm>({
     resolver: zodResolver(createTemplateSchema),
-    defaultValues: { name: "", workoutId: undefined },
+    defaultValues: { name: "", workoutId: undefined, category: "Strength" },
   });
 
   const onSubmit = (values: CreateTemplateForm) => {
     createTemplate.mutate(
-      { data: { name: values.name.trim(), workoutId: values.workoutId } },
+      { data: { name: values.name.trim(), workoutId: values.workoutId, category: values.category } },
       {
         onSuccess: () => {
           onOpenChange(false);
@@ -123,6 +158,28 @@ function SaveTemplateDialog({
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="category"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Category</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a category" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {TEMPLATE_CATEGORIES.map((c) => (
+                        <SelectItem key={c} value={c}>{c}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <div className="pt-2 flex justify-end">
               <Button type="submit" disabled={createTemplate.isPending} className="text-black font-bold">
                 {createTemplate.isPending ? "Saving…" : "Save Template"}
@@ -134,6 +191,8 @@ function SaveTemplateDialog({
     </Dialog>
   );
 }
+
+// ─── Delete Template Dialog ───────────────────────────────────────────────────
 
 function DeleteTemplateDialog({
   templateId,
@@ -195,13 +254,7 @@ function DeleteTemplateDialog({
   );
 }
 
-type Template = {
-  id: number;
-  name: string;
-  workoutName: string;
-  isFavorite: boolean;
-  createdAt: string;
-};
+// ─── Template Card ────────────────────────────────────────────────────────────
 
 function TemplateCard({
   template,
@@ -224,10 +277,20 @@ function TemplateCard({
     <div className="group bg-card border border-border rounded-3xl overflow-hidden hover:border-primary/50 transition-colors flex flex-col">
       <div className="p-6 flex-1 space-y-4">
         <div className="flex items-start justify-between gap-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary text-xs font-semibold rounded-full">
-            <LayoutTemplate className="h-3.5 w-3.5" /> Template
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary text-xs font-semibold rounded-full">
+              <LayoutTemplate className="h-3.5 w-3.5" /> Template
+            </div>
+            <span
+              className={cn(
+                "inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-full border",
+                categoryBadgeClass(template.category),
+              )}
+            >
+              {template.category}
+            </span>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 shrink-0">
             {/* Star always visible */}
             <button
               onClick={onToggleFavorite}
@@ -248,7 +311,7 @@ function TemplateCard({
               <button
                 onClick={onEdit}
                 className="p-1.5 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
-                title="Edit template name"
+                title="Edit template"
               >
                 <Pencil className="h-4 w-4" />
               </button>
@@ -302,11 +365,54 @@ function TemplateCard({
   );
 }
 
+// ─── Category Filter Chips ────────────────────────────────────────────────────
+
+function CategoryFilter({
+  selected,
+  onChange,
+}: {
+  selected: string | null;
+  onChange: (cat: string | null) => void;
+}) {
+  return (
+    <div className="flex items-center gap-2 flex-wrap">
+      <button
+        onClick={() => onChange(null)}
+        className={cn(
+          "px-3 py-1.5 rounded-full text-sm font-medium border transition-colors",
+          selected === null
+            ? "bg-primary text-black border-primary"
+            : "bg-transparent text-muted-foreground border-border hover:border-primary/50 hover:text-foreground",
+        )}
+      >
+        All Categories
+      </button>
+      {TEMPLATE_CATEGORIES.map((cat) => (
+        <button
+          key={cat}
+          onClick={() => onChange(cat)}
+          className={cn(
+            "px-3 py-1.5 rounded-full text-sm font-medium border transition-colors",
+            selected === cat
+              ? cn("border", categoryBadgeClass(cat), "opacity-100")
+              : "bg-transparent text-muted-foreground border-border hover:border-primary/50 hover:text-foreground",
+          )}
+        >
+          {cat}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
+
 export default function WorkoutTemplatesPage() {
   const { data: templates, isLoading, refetch } = useListUserWorkoutTemplates();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingTemplate, setEditingTemplate] = useState<{ id: number; name: string } | null>(null);
+  const [editingTemplate, setEditingTemplate] = useState<{ id: number; name: string; category: string } | null>(null);
   const [deletingTemplateId, setDeletingTemplateId] = useState<number | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const { toast } = useToast();
 
   const duplicateTemplate = useDuplicateWorkoutTemplate();
@@ -347,14 +453,20 @@ export default function WorkoutTemplatesPage() {
   };
 
   const allTemplates = (templates ?? []) as Template[];
-  const favorites = allTemplates.filter((t) => t.isFavorite);
-  const others = allTemplates.filter((t) => !t.isFavorite);
   const hasTemplates = allTemplates.length > 0;
+
+  // Apply category filter
+  const filteredTemplates = selectedCategory
+    ? allTemplates.filter((t) => t.category === selectedCategory)
+    : allTemplates;
+
+  const favorites = filteredTemplates.filter((t) => t.isFavorite);
+  const others = filteredTemplates.filter((t) => !t.isFavorite);
   const hasFavorites = favorites.length > 0;
 
   const cardProps = (template: Template) => ({
     template,
-    onEdit: () => setEditingTemplate({ id: template.id, name: template.name }),
+    onEdit: () => setEditingTemplate({ id: template.id, name: template.name, category: template.category }),
     onDelete: () => setDeletingTemplateId(template.id),
     onDuplicate: () => handleDuplicate(template.id),
     onToggleFavorite: () => handleToggleFavorite(template.id, template.isFavorite),
@@ -363,7 +475,7 @@ export default function WorkoutTemplatesPage() {
   });
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-10 animate-in fade-in duration-500">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
@@ -378,12 +490,18 @@ export default function WorkoutTemplatesPage() {
       </div>
 
       {isLoading ? (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-40 rounded-3xl" />
-          ))}
+        <div className="space-y-6">
+          <div className="flex gap-2 flex-wrap">
+            {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-9 w-24 rounded-full" />)}
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-48 rounded-3xl" />
+            ))}
+          </div>
         </div>
       ) : !hasTemplates ? (
+        /* Global empty state — no templates at all */
         <div className="text-center py-24 bg-card border border-border border-dashed rounded-3xl">
           <LayoutTemplate className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
           <h3 className="text-xl font-bold mb-2">No workout templates yet.</h3>
@@ -395,34 +513,47 @@ export default function WorkoutTemplatesPage() {
           </Button>
         </div>
       ) : (
-        <div className="space-y-10">
-          {/* Favorites section — only shown when at least one favorite exists */}
-          {hasFavorites && (
-            <section className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                <h2 className="text-lg font-semibold">Favorites</h2>
-              </div>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {favorites.map((template) => (
-                  <TemplateCard key={template.id} {...cardProps(template)} />
-                ))}
-              </div>
-            </section>
-          )}
+        <div className="space-y-8">
+          {/* Category filter chips */}
+          <CategoryFilter selected={selectedCategory} onChange={setSelectedCategory} />
 
-          {/* All / remaining templates */}
-          {others.length > 0 && (
-            <section className="space-y-4">
+          {filteredTemplates.length === 0 ? (
+            /* Category-filtered empty state */
+            <div className="text-center py-20 bg-card border border-border border-dashed rounded-3xl">
+              <LayoutTemplate className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+              <p className="text-muted-foreground font-medium">No templates found.</p>
+            </div>
+          ) : (
+            <div className="space-y-10">
+              {/* Favorites section — only shown when at least one favorite exists */}
               {hasFavorites && (
-                <h2 className="text-lg font-semibold text-muted-foreground">All Templates</h2>
+                <section className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                    <h2 className="text-lg font-semibold">Favorites</h2>
+                  </div>
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {favorites.map((template) => (
+                      <TemplateCard key={template.id} {...cardProps(template)} />
+                    ))}
+                  </div>
+                </section>
               )}
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {others.map((template) => (
-                  <TemplateCard key={template.id} {...cardProps(template)} />
-                ))}
-              </div>
-            </section>
+
+              {/* All / remaining templates */}
+              {others.length > 0 && (
+                <section className="space-y-4">
+                  {hasFavorites && (
+                    <h2 className="text-lg font-semibold text-muted-foreground">All Templates</h2>
+                  )}
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {others.map((template) => (
+                      <TemplateCard key={template.id} {...cardProps(template)} />
+                    ))}
+                  </div>
+                </section>
+              )}
+            </div>
           )}
         </div>
       )}
@@ -435,6 +566,7 @@ export default function WorkoutTemplatesPage() {
           onOpenChange={(open) => { if (!open) setEditingTemplate(null); }}
           templateId={editingTemplate.id}
           currentName={editingTemplate.name}
+          currentCategory={editingTemplate.category}
         />
       )}
 

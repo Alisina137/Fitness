@@ -3856,10 +3856,13 @@ components:
           type: string
           minLength: 1
           maxLength: 120
+        category:
+          type: string
+          enum: [Strength, Hypertrophy, Fat Loss, Cardio, Mobility, HIIT, Powerlifting, Functional, Recovery, Custom]
 
     WorkoutTemplate:
       type: object
-      required: [id, userId, name, workoutId, workoutName, createdAt, updatedAt]
+      required: [id, userId, name, workoutId, workoutName, category, createdAt, updatedAt]
       properties:
         id:
           type: integer
@@ -3871,6 +3874,9 @@ components:
           type: integer
         workoutName:
           type: string
+        category:
+          type: string
+          enum: [Strength, Hypertrophy, Fat Loss, Cardio, Mobility, HIIT, Powerlifting, Functional, Recovery, Custom]
         createdAt:
           type: string
           format: date-time
@@ -3888,6 +3894,10 @@ components:
         workoutId:
           type: integer
           description: The existing workout plan to save as a template
+        category:
+          type: string
+          enum: [Strength, Hypertrophy, Fat Loss, Cardio, Mobility, HIIT, Powerlifting, Functional, Recovery, Custom]
+          description: Template category (default Strength)
 
     UserReminderSettings:
       type: object

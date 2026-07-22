@@ -2233,6 +2233,54 @@ export const ListWorkoutScheduleResponse = zod.array(ListWorkoutScheduleResponse
 
 
 /**
+ * @summary Toggle the favorite status of a workout template
+ */
+export const ToggleWorkoutTemplateFavoriteParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const ToggleWorkoutTemplateFavoriteResponse = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "name": zod.string(),
+  "workoutId": zod.number(),
+  "workoutName": zod.string(),
+  "category": zod.enum(['Strength', 'Hypertrophy', 'Fat Loss', 'Cardio', 'Mobility', 'HIIT', 'Powerlifting', 'Functional', 'Recovery', 'Custom']),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Duplicate a workout template
+ */
+export const DuplicateWorkoutTemplateParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const DuplicateWorkoutTemplateResponse = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "name": zod.string(),
+  "workoutId": zod.number(),
+  "workoutName": zod.string(),
+  "category": zod.enum(['Strength', 'Hypertrophy', 'Fat Loss', 'Cardio', 'Mobility', 'HIIT', 'Powerlifting', 'Functional', 'Recovery', 'Custom']),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Delete a workout template
+ */
+export const DeleteWorkoutTemplateParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const DeleteWorkoutTemplateResponse = zod.void()
+
+
+/**
  * @summary Rename a workout template
  */
 export const UpdateWorkoutTemplateParams = zod.object({
@@ -2244,7 +2292,8 @@ export const updateWorkoutTemplateBodyNameMax = 120;
 
 
 export const UpdateWorkoutTemplateBody = zod.object({
-  "name": zod.string().min(1).max(updateWorkoutTemplateBodyNameMax).optional()
+  "name": zod.string().min(1).max(updateWorkoutTemplateBodyNameMax).optional(),
+  "category": zod.enum(['Strength', 'Hypertrophy', 'Fat Loss', 'Cardio', 'Mobility', 'HIIT', 'Powerlifting', 'Functional', 'Recovery', 'Custom']).optional()
 })
 
 export const UpdateWorkoutTemplateResponse = zod.object({
@@ -2253,6 +2302,7 @@ export const UpdateWorkoutTemplateResponse = zod.object({
   "name": zod.string(),
   "workoutId": zod.number(),
   "workoutName": zod.string(),
+  "category": zod.enum(['Strength', 'Hypertrophy', 'Fat Loss', 'Cardio', 'Mobility', 'HIIT', 'Powerlifting', 'Functional', 'Recovery', 'Custom']),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })
@@ -2263,7 +2313,8 @@ export const UpdateWorkoutTemplateResponse = zod.object({
  */
 export const CreateWorkoutTemplateBody = zod.object({
   "name": zod.string().describe('Template name (must be unique per user)'),
-  "workoutId": zod.number().describe('The existing workout plan to save as a template')
+  "workoutId": zod.number().describe('The existing workout plan to save as a template'),
+  "category": zod.enum(['Strength', 'Hypertrophy', 'Fat Loss', 'Cardio', 'Mobility', 'HIIT', 'Powerlifting', 'Functional', 'Recovery', 'Custom']).optional().describe('Template category (default Strength)')
 })
 
 export const CreateWorkoutTemplateResponse = zod.object({
@@ -2272,6 +2323,7 @@ export const CreateWorkoutTemplateResponse = zod.object({
   "name": zod.string(),
   "workoutId": zod.number(),
   "workoutName": zod.string(),
+  "category": zod.enum(['Strength', 'Hypertrophy', 'Fat Loss', 'Cardio', 'Mobility', 'HIIT', 'Powerlifting', 'Functional', 'Recovery', 'Custom']),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })
@@ -2286,6 +2338,7 @@ export const ListUserWorkoutTemplatesResponseItem = zod.object({
   "name": zod.string(),
   "workoutId": zod.number(),
   "workoutName": zod.string(),
+  "category": zod.enum(['Strength', 'Hypertrophy', 'Fat Loss', 'Cardio', 'Mobility', 'HIIT', 'Powerlifting', 'Functional', 'Recovery', 'Custom']),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })

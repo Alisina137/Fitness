@@ -8,6 +8,21 @@ import { workoutPlansTable } from "./workouts";
 // A reusable, user-named reference to an existing workout plan. Templates never
 // duplicate workout data — they point at the underlying workout via workoutId.
 
+export const TEMPLATE_CATEGORIES = [
+  "Strength",
+  "Hypertrophy",
+  "Fat Loss",
+  "Cardio",
+  "Mobility",
+  "HIIT",
+  "Powerlifting",
+  "Functional",
+  "Recovery",
+  "Custom",
+] as const;
+
+export type TemplateCategory = (typeof TEMPLATE_CATEGORIES)[number];
+
 export const workoutTemplatesTable = pgTable(
   "workout_templates",
   {
@@ -19,6 +34,7 @@ export const workoutTemplatesTable = pgTable(
     workoutId: integer("workout_id")
       .notNull()
       .references(() => workoutPlansTable.id, { onDelete: "cascade" }),
+    category: text("category").default("Strength").notNull(),
     isFavorite: boolean("is_favorite").default(false).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),

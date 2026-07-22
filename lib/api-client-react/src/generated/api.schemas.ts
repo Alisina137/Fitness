@@ -1525,13 +1525,46 @@ export interface CreateWorkoutScheduleInput {
   notes?: string | null;
 }
 
+export type UpdateWorkoutTemplateInputCategory = typeof UpdateWorkoutTemplateInputCategory[keyof typeof UpdateWorkoutTemplateInputCategory];
+
+
+export const UpdateWorkoutTemplateInputCategory = {
+  Strength: 'Strength',
+  Hypertrophy: 'Hypertrophy',
+  Fat_Loss: 'Fat Loss',
+  Cardio: 'Cardio',
+  Mobility: 'Mobility',
+  HIIT: 'HIIT',
+  Powerlifting: 'Powerlifting',
+  Functional: 'Functional',
+  Recovery: 'Recovery',
+  Custom: 'Custom',
+} as const;
+
 export interface UpdateWorkoutTemplateInput {
   /**
      * @minLength 1
      * @maxLength 120
      */
   name?: string;
+  category?: UpdateWorkoutTemplateInputCategory;
 }
+
+export type WorkoutTemplateCategory = typeof WorkoutTemplateCategory[keyof typeof WorkoutTemplateCategory];
+
+
+export const WorkoutTemplateCategory = {
+  Strength: 'Strength',
+  Hypertrophy: 'Hypertrophy',
+  Fat_Loss: 'Fat Loss',
+  Cardio: 'Cardio',
+  Mobility: 'Mobility',
+  HIIT: 'HIIT',
+  Powerlifting: 'Powerlifting',
+  Functional: 'Functional',
+  Recovery: 'Recovery',
+  Custom: 'Custom',
+} as const;
 
 export interface WorkoutTemplate {
   id: number;
@@ -1539,15 +1572,37 @@ export interface WorkoutTemplate {
   name: string;
   workoutId: number;
   workoutName: string;
+  category: WorkoutTemplateCategory;
   createdAt: string;
   updatedAt: string;
 }
+
+/**
+ * Template category (default Strength)
+ */
+export type WorkoutTemplateInputCategory = typeof WorkoutTemplateInputCategory[keyof typeof WorkoutTemplateInputCategory];
+
+
+export const WorkoutTemplateInputCategory = {
+  Strength: 'Strength',
+  Hypertrophy: 'Hypertrophy',
+  Fat_Loss: 'Fat Loss',
+  Cardio: 'Cardio',
+  Mobility: 'Mobility',
+  HIIT: 'HIIT',
+  Powerlifting: 'Powerlifting',
+  Functional: 'Functional',
+  Recovery: 'Recovery',
+  Custom: 'Custom',
+} as const;
 
 export interface WorkoutTemplateInput {
   /** Template name (must be unique per user) */
   name: string;
   /** The existing workout plan to save as a template */
   workoutId: number;
+  /** Template category (default Strength) */
+  category?: WorkoutTemplateInputCategory;
 }
 
 export interface UserReminderSettings {

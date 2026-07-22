@@ -5,6 +5,7 @@
  * FitCore AI Fitness App API
  * OpenAPI spec version: 0.1.0
  */
+import type { WorkoutTemplateCategory } from './workoutTemplateCategory';
 
 export interface WorkoutTemplate {
   id: number;
@@ -12,6 +13,7 @@ export interface WorkoutTemplate {
   name: string;
   workoutId: number;
   workoutName: string;
+  category: WorkoutTemplateCategory;
   createdAt: Date;
   updatedAt: Date;
 }
