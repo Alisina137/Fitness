@@ -8,18 +8,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { token, setAuth, logout } = useAuthStore();
   const [, setLocation] = useLocation();
 
-  // Configure customFetch to inject auth header
+  // Inject auth header into every fetch and bump the activity timestamp on
+  // every successful authenticated response (keeps the 5-day window rolling).
   useEffect(() => {
     const originalFetch = window.fetch;
     window.fetch = async (input, init) => {
       let headers = init?.headers ? new Headers(init.headers) : new Headers();
-      
+
       const currentToken = useAuthStore.getState().token;
       if (currentToken) {
         headers.set("Authorization", `Bearer ${currentToken}`);
       }
-      
-      return originalFetch(input, { ...init, headers });
+
+      const response = await originalFetch(input, { ...init, headers });
+
+      // Any successful response while logged in counts as activity.
+      if (response.ok && useAuthStore.getState().token) {
+        useAuthStore.getState().refreshActivity();
+      }
+
+      return response;
+    };
+
+    return () => {
+      window.fetch = originalFetch;
     };
   }, []);
 
@@ -28,7 +40,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       enabled: !!token,
       retry: false,
       queryKey: getGetMeQueryKey(),
-    }
+    },
   });
 
   useEffect(() => {
@@ -40,7 +52,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [user, error, token, setAuth, logout, setLocation]);
 
-  // If we have a token but no user yet, show loading
+  // Token present but user not loaded yet — show spinner
   if (token && isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
