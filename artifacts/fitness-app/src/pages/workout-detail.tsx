@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { SaveAsTemplateDialog } from "@/components/save-as-template-dialog";
+import { useToast } from "@/hooks/use-toast";
 
 export default function WorkoutDetailPage() {
   const [, params] = useRoute("/workouts/:id");
