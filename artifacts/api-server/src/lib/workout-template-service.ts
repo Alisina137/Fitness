@@ -28,6 +28,7 @@ export function serializeWorkoutTemplate(row: WorkoutTemplateWithWorkout) {
     workoutName: row.workoutName,
     category: row.category,
     isFavorite: row.isFavorite,
+    lastUsedAt: row.lastUsedAt ? row.lastUsedAt.toISOString() : null,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };
@@ -220,6 +221,29 @@ export async function deleteWorkoutTemplate(
     )
     .returning({ id: workoutTemplatesTable.id });
   return result.length > 0;
+}
+
+// Mark a template as used by updating lastUsedAt to now.
+export async function markTemplateUsed(
+  userId: number,
+  templateId: number,
+): Promise<ReturnType<typeof serializeWorkoutTemplate> | null> {
+  const current = await findTemplateById(userId, templateId);
+  if (!current) return null;
+
+  const [updated] = await db
+    .update(workoutTemplatesTable)
+    .set({ lastUsedAt: new Date(), updatedAt: new Date() })
+    .where(
+      and(
+        eq(workoutTemplatesTable.id, templateId),
+        eq(workoutTemplatesTable.userId, userId),
+      ),
+    )
+    .returning();
+
+  if (!updated) return null;
+  return serializeWorkoutTemplate({ ...updated, workoutName: current.workoutName });
 }
 
 export async function createUserWorkoutTemplate(

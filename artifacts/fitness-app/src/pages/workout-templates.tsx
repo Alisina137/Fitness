@@ -6,10 +6,13 @@ import {
   useDeleteWorkoutTemplate,
   useDuplicateWorkoutTemplate,
   useToggleWorkoutTemplateFavorite,
+  useRecordWorkoutTemplateUse,
 } from "@workspace/api-client-react";
-import { LayoutTemplate, Plus, Dumbbell, CalendarDays, Pencil, Trash2, Copy, Star, Search, X, SlidersHorizontal } from "lucide-react";
+import { LayoutTemplate, Plus, Dumbbell, CalendarDays, Pencil, Trash2, Copy, Star, Search, X, SlidersHorizontal, Play, Clock } from "lucide-react";
 import { EditTemplateDialog, TEMPLATE_CATEGORIES } from "@/components/edit-template-dialog";
-import { format } from "date-fns";
+import { ScheduleWorkoutDialog } from "@/components/schedule-workout-dialog";
+import { format, formatDistanceToNow } from "date-fns";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -63,8 +66,10 @@ type Template = {
   id: number;
   name: string;
   workoutName: string;
+  workoutId: number;
   category: string;
   isFavorite: boolean;
+  lastUsedAt: string | null;
   createdAt: string;
 };
 
@@ -262,16 +267,22 @@ function TemplateCard({
   onDelete,
   onDuplicate,
   onToggleFavorite,
+  onStartWorkout,
+  onSchedule,
   duplicatePending,
   favoritePending,
+  startPending,
 }: {
   template: Template;
   onEdit: () => void;
   onDelete: () => void;
   onDuplicate: () => void;
   onToggleFavorite: () => void;
+  onStartWorkout: () => void;
+  onSchedule: () => void;
   duplicatePending: boolean;
   favoritePending: boolean;
+  startPending: boolean;
 }) {
   return (
     <div className="group bg-card border border-border rounded-3xl overflow-hidden hover:border-primary/50 transition-colors flex flex-col">
@@ -339,8 +350,39 @@ function TemplateCard({
         <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
           <Dumbbell className="h-4 w-4" /> {template.workoutName}
         </div>
+
+        {/* Last Used */}
+        {template.lastUsedAt && (
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Clock className="h-3.5 w-3.5" />
+            Used {formatDistanceToNow(new Date(template.lastUsedAt), { addSuffix: true })}
+          </div>
+        )}
       </div>
-      <div className="p-4 bg-secondary/50 border-t border-border flex items-center justify-between">
+
+      {/* Quick Apply actions */}
+      <div className="px-6 pb-4 flex items-center gap-2">
+        <Button
+          size="sm"
+          onClick={onStartWorkout}
+          disabled={startPending}
+          className="flex-1 text-black font-bold text-xs h-9"
+        >
+          <Play className="h-3.5 w-3.5 mr-1.5" />
+          {startPending ? "Starting…" : "Start Workout"}
+        </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={onSchedule}
+          className="flex-1 text-xs h-9"
+        >
+          <CalendarDays className="h-3.5 w-3.5 mr-1.5" />
+          Schedule
+        </Button>
+      </div>
+
+      <div className="px-6 pb-4 pt-0 border-t border-border flex items-center justify-between pt-3">
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <CalendarDays className="h-3.5 w-3.5" />
           Created {format(new Date(template.createdAt), "MMM d, yyyy")}
@@ -472,6 +514,7 @@ function QuickFilters({
 
 export default function WorkoutTemplatesPage() {
   const { data: templates, isLoading, refetch } = useListUserWorkoutTemplates();
+  const [, setLocation] = useLocation();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<{ id: number; name: string; category: string } | null>(null);
   const [deletingTemplateId, setDeletingTemplateId] = useState<number | null>(null);
@@ -479,6 +522,8 @@ export default function WorkoutTemplatesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
   const [quickFilter, setQuickFilter] = useState<QuickFilter>("all");
+  const [schedulingWorkoutId, setSchedulingWorkoutId] = useState<number | null>(null);
+  const [startingTemplateId, setStartingTemplateId] = useState<number | null>(null);
   const { toast } = useToast();
 
   const clearFilters = () => {
@@ -490,6 +535,34 @@ export default function WorkoutTemplatesPage() {
 
   const duplicateTemplate = useDuplicateWorkoutTemplate();
   const toggleFavorite = useToggleWorkoutTemplateFavorite();
+  const recordUse = useRecordWorkoutTemplateUse();
+
+  const handleStartWorkout = (template: Template) => {
+    if (!template.workoutId) {
+      toast({ variant: "destructive", title: "Invalid template", description: "This template has no linked workout." });
+      return;
+    }
+    setStartingTemplateId(template.id);
+    recordUse.mutate(
+      { id: template.id },
+      {
+        onSuccess: () => {
+          setStartingTemplateId(null);
+          refetch();
+          setLocation(`/workouts/${template.workoutId}/active`);
+        },
+        onError: (err: unknown) => {
+          setStartingTemplateId(null);
+          const message = err instanceof Error ? err.message : "Failed to start workout";
+          toast({ variant: "destructive", title: "Could not start workout", description: message });
+        },
+      },
+    );
+  };
+
+  const handleSchedule = (workoutId: number) => {
+    setSchedulingWorkoutId(workoutId);
+  };
 
   const handleDuplicate = (templateId: number) => {
     duplicateTemplate.mutate(
@@ -567,8 +640,11 @@ export default function WorkoutTemplatesPage() {
     onDelete: () => setDeletingTemplateId(template.id),
     onDuplicate: () => handleDuplicate(template.id),
     onToggleFavorite: () => handleToggleFavorite(template.id, template.isFavorite),
+    onStartWorkout: () => handleStartWorkout(template),
+    onSchedule: () => handleSchedule(template.workoutId),
     duplicatePending: duplicateTemplate.isPending,
     favoritePending: toggleFavorite.isPending,
+    startPending: startingTemplateId === template.id,
   });
 
   return (
@@ -705,6 +781,12 @@ export default function WorkoutTemplatesPage() {
       )}
 
       <SaveTemplateDialog open={isDialogOpen} onOpenChange={setIsDialogOpen} onSaved={() => refetch()} />
+
+      <ScheduleWorkoutDialog
+        open={schedulingWorkoutId !== null}
+        onOpenChange={(open) => { if (!open) setSchedulingWorkoutId(null); }}
+        defaultWorkoutId={schedulingWorkoutId ?? undefined}
+      />
 
       {editingTemplate && (
         <EditTemplateDialog

@@ -1,0 +1,131 @@
+You are continuing development of an AI fitness application.
+
+IMPORTANT IMPLEMENTATION RULES
+
+- Implement ONLY the features in this prompt.
+- Do NOT add extra features.
+- Do NOT modify existing systems unless required.
+- If something is missing, add it to the Suggestions section.
+- Future prompts will implement the remaining functionality.
+
+--------------------------------------------------
+
+FEATURE
+
+Workout Templates
+
+Completed
+
+✓ Template Foundation
+✓ Save as Template
+✓ Templates Library
+✓ Edit Template
+✓ Delete Template
+✓ Duplicate Template
+✓ Favorites
+✓ Categories
+✓ Search
+✓ Sort & Filter
+
+Current Task
+
+Quick Apply Template
+
+Upcoming
+
+- Exercise Experience Module
+
+--------------------------------------------------
+
+TASK
+
+Implement Quick Apply.
+
+1. Add two actions to every template card.
+
+- Start Workout
+- Schedule Workout
+
+2. Start Workout.
+
+Immediately create a workout session using the selected template.
+
+Navigate to the Workout Execution page.
+
+3. Schedule Workout.
+
+Open the existing Schedule Workout dialog.
+
+Preselect:
+
+- Workout Template
+
+The user only needs to choose:
+
+- Date
+- Time
+
+4. Recently Used.
+
+Track the last time each template was used.
+
+Display:
+
+Last Used
+
+Example:
+
+"Used 3 days ago"
+
+5. Validation.
+
+Handle:
+
+- Invalid template
+- Missing workout
+- Failed workout creation
+
+Show user-friendly error messages.
+
+--------------------------------------------------
+
+TECH REQUIREMENTS
+
+- Reuse the existing Workout Engine.
+- Reuse the existing Workout Scheduling feature.
+- Do not duplicate workout logic.
+- Follow the existing design system.
+
+--------------------------------------------------
+
+DO NOT IMPLEMENT
+
+- AI template recommendations
+- Template sharing
+- Import/Export
+- Public templates
+- Team templates
+
+--------------------------------------------------
+
+DEFINITION OF DONE
+
+✓ Templates can immediately start a workout.
+✓ Templates can be scheduled.
+✓ Last Used updates automatically.
+✓ Existing functionality remains unchanged.
+
+--------------------------------------------------
+
+COMPLETION REPORT
+
+Provide:
+
+- Files created
+- Files modified
+- Components updated
+- API changes
+
+Suggestions:
+
+List features intentionally left for future prompts.

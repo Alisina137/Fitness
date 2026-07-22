@@ -32,17 +32,22 @@ interface ScheduleWorkoutDialogProps {
   onOpenChange: (open: boolean) => void;
   /** Pre-fill the date field when opened from a calendar day click */
   defaultDate?: Date;
+  /** Pre-select a workout when opened from a template */
+  defaultWorkoutId?: number;
 }
 
 export function ScheduleWorkoutDialog({
   open,
   onOpenChange,
   defaultDate,
+  defaultWorkoutId,
 }: ScheduleWorkoutDialogProps) {
   const queryClient = useQueryClient();
   const { data: workouts, isLoading: loadingWorkouts } = useListWorkouts({ status: "active" });
 
-  const [workoutId, setWorkoutId] = useState<string>("");
+  const [workoutId, setWorkoutId] = useState<string>(
+    defaultWorkoutId ? String(defaultWorkoutId) : "",
+  );
   const [scheduledDate, setScheduledDate] = useState<string>(
     defaultDate ? format(defaultDate, "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"),
   );
@@ -61,11 +66,11 @@ export function ScheduleWorkoutDialog({
 
   const isPending = createSchedule.isPending || createRecurring.isPending;
 
-  // Keep date in sync when defaultDate changes (dialog re-opened on a new day)
+  // Keep date and workout in sync when the dialog is re-opened
   React.useEffect(() => {
     if (open) {
       setScheduledDate(defaultDate ? format(defaultDate, "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"));
-      setWorkoutId("");
+      setWorkoutId(defaultWorkoutId ? String(defaultWorkoutId) : "");
       setScheduledTime("");
       setNotes("");
       setIsRecurring(false);
@@ -73,7 +78,7 @@ export function ScheduleWorkoutDialog({
       setRecurrenceEndDate("");
       setErrors({});
     }
-  }, [open, defaultDate]);
+  }, [open, defaultDate, defaultWorkoutId]);
 
   function validate(): boolean {
     const errs: Record<string, string> = {};

@@ -6311,6 +6311,77 @@ export function useListWorkoutSchedule<TData = Awaited<ReturnType<typeof listWor
 
 
 
+export const getRecordWorkoutTemplateUseUrl = (id: number,) => {
+
+
+
+
+  return `/api/workout-templates/${id}/use`
+}
+
+/**
+ * @summary Record that a template was used (updates lastUsedAt)
+ */
+export const recordWorkoutTemplateUse = async (id: number, options?: RequestInit): Promise<WorkoutTemplate> => {
+
+  return customFetch<WorkoutTemplate>(getRecordWorkoutTemplateUseUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getRecordWorkoutTemplateUseMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof recordWorkoutTemplateUse>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof recordWorkoutTemplateUse>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['recordWorkoutTemplateUse'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof recordWorkoutTemplateUse>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  recordWorkoutTemplateUse(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RecordWorkoutTemplateUseMutationResult = NonNullable<Awaited<ReturnType<typeof recordWorkoutTemplateUse>>>
+
+    export type RecordWorkoutTemplateUseMutationError = ErrorType<void>
+
+    /**
+ * @summary Record that a template was used (updates lastUsedAt)
+ */
+export const useRecordWorkoutTemplateUse = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof recordWorkoutTemplateUse>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof recordWorkoutTemplateUse>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getRecordWorkoutTemplateUseMutationOptions(options));
+    }
+
 export const getToggleWorkoutTemplateFavoriteUrl = (id: number,) => {
 
 

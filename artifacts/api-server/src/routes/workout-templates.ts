@@ -12,10 +12,30 @@ import {
   deleteWorkoutTemplate,
   duplicateWorkoutTemplate,
   toggleTemplateFavorite,
+  markTemplateUsed,
 } from "../lib/workout-template-service.js";
 import { TEMPLATE_CATEGORIES } from "@workspace/db";
 
 const router = Router();
+
+// ─── POST /api/workout-templates/:id/use ─────────────────────────────────────
+// Record that a template was used; sets lastUsedAt to now.
+
+router.post("/workout-templates/:id/use", requireAuth, async (req, res) => {
+  const user = getUser(req);
+  const templateId = parseInt(req.params.id ?? "", 10);
+
+  if (!templateId || isNaN(templateId)) {
+    return res.status(400).json({ error: "Invalid template ID" });
+  }
+
+  const updated = await markTemplateUsed(user.id, templateId);
+  if (!updated) {
+    return res.status(404).json({ error: "Template not found" });
+  }
+
+  return res.json(updated);
+});
 
 // ─── PATCH /api/workout-templates/:id/favorite ────────────────────────────────
 // Toggle the isFavorite flag on a template.

@@ -36,6 +36,7 @@ export const workoutTemplatesTable = pgTable(
       .references(() => workoutPlansTable.id, { onDelete: "cascade" }),
     category: text("category").default("Strength").notNull(),
     isFavorite: boolean("is_favorite").default(false).notNull(),
+    lastUsedAt: timestamp("last_used_at"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },

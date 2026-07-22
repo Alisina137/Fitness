@@ -1573,6 +1573,8 @@ export interface WorkoutTemplate {
   workoutId: number;
   workoutName: string;
   category: WorkoutTemplateCategory;
+  isFavorite: boolean;
+  lastUsedAt?: string | null;
   createdAt: string;
   updatedAt: string;
 }

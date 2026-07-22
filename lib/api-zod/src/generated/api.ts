@@ -2233,6 +2233,27 @@ export const ListWorkoutScheduleResponse = zod.array(ListWorkoutScheduleResponse
 
 
 /**
+ * @summary Record that a template was used (updates lastUsedAt)
+ */
+export const RecordWorkoutTemplateUseParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const RecordWorkoutTemplateUseResponse = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "name": zod.string(),
+  "workoutId": zod.number(),
+  "workoutName": zod.string(),
+  "category": zod.enum(['Strength', 'Hypertrophy', 'Fat Loss', 'Cardio', 'Mobility', 'HIIT', 'Powerlifting', 'Functional', 'Recovery', 'Custom']),
+  "isFavorite": zod.boolean(),
+  "lastUsedAt": zod.coerce.date().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
  * @summary Toggle the favorite status of a workout template
  */
 export const ToggleWorkoutTemplateFavoriteParams = zod.object({
@@ -2246,6 +2267,8 @@ export const ToggleWorkoutTemplateFavoriteResponse = zod.object({
   "workoutId": zod.number(),
   "workoutName": zod.string(),
   "category": zod.enum(['Strength', 'Hypertrophy', 'Fat Loss', 'Cardio', 'Mobility', 'HIIT', 'Powerlifting', 'Functional', 'Recovery', 'Custom']),
+  "isFavorite": zod.boolean(),
+  "lastUsedAt": zod.coerce.date().nullish(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })
@@ -2265,6 +2288,8 @@ export const DuplicateWorkoutTemplateResponse = zod.object({
   "workoutId": zod.number(),
   "workoutName": zod.string(),
   "category": zod.enum(['Strength', 'Hypertrophy', 'Fat Loss', 'Cardio', 'Mobility', 'HIIT', 'Powerlifting', 'Functional', 'Recovery', 'Custom']),
+  "isFavorite": zod.boolean(),
+  "lastUsedAt": zod.coerce.date().nullish(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })
@@ -2303,6 +2328,8 @@ export const UpdateWorkoutTemplateResponse = zod.object({
   "workoutId": zod.number(),
   "workoutName": zod.string(),
   "category": zod.enum(['Strength', 'Hypertrophy', 'Fat Loss', 'Cardio', 'Mobility', 'HIIT', 'Powerlifting', 'Functional', 'Recovery', 'Custom']),
+  "isFavorite": zod.boolean(),
+  "lastUsedAt": zod.coerce.date().nullish(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })
@@ -2324,6 +2351,8 @@ export const CreateWorkoutTemplateResponse = zod.object({
   "workoutId": zod.number(),
   "workoutName": zod.string(),
   "category": zod.enum(['Strength', 'Hypertrophy', 'Fat Loss', 'Cardio', 'Mobility', 'HIIT', 'Powerlifting', 'Functional', 'Recovery', 'Custom']),
+  "isFavorite": zod.boolean(),
+  "lastUsedAt": zod.coerce.date().nullish(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })
@@ -2339,6 +2368,8 @@ export const ListUserWorkoutTemplatesResponseItem = zod.object({
   "workoutId": zod.number(),
   "workoutName": zod.string(),
   "category": zod.enum(['Strength', 'Hypertrophy', 'Fat Loss', 'Cardio', 'Mobility', 'HIIT', 'Powerlifting', 'Functional', 'Recovery', 'Custom']),
+  "isFavorite": zod.boolean(),
+  "lastUsedAt": zod.coerce.date().nullish(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })

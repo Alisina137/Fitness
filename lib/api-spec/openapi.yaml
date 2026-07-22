@@ -1747,6 +1747,31 @@ paths:
                   $ref: "#/components/schemas/ScheduledWorkout"
 
   # ─── Workout Templates ───────────────────────────────────────────────────────
+  /workout-templates/{id}/use:
+    post:
+      operationId: recordWorkoutTemplateUse
+      tags: [workout-templates]
+      summary: Record that a template was used (updates lastUsedAt)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Updated template
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkoutTemplate"
+        "400":
+          description: Invalid template ID
+        "404":
+          description: Template not found
+
   /workout-templates/{id}/favorite:
     patch:
       operationId: toggleWorkoutTemplateFavorite
@@ -3862,7 +3887,7 @@ components:
 
     WorkoutTemplate:
       type: object
-      required: [id, userId, name, workoutId, workoutName, category, createdAt, updatedAt]
+      required: [id, userId, name, workoutId, workoutName, category, isFavorite, createdAt, updatedAt]
       properties:
         id:
           type: integer
@@ -3877,6 +3902,12 @@ components:
         category:
           type: string
           enum: [Strength, Hypertrophy, Fat Loss, Cardio, Mobility, HIIT, Powerlifting, Functional, Recovery, Custom]
+        isFavorite:
+          type: boolean
+        lastUsedAt:
+          type: string
+          format: date-time
+          nullable: true
         createdAt:
           type: string
           format: date-time
