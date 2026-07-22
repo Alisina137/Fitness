@@ -1747,6 +1747,39 @@ paths:
                   $ref: "#/components/schemas/ScheduledWorkout"
 
   # ─── Workout Templates ───────────────────────────────────────────────────────
+  /workout-templates/{id}:
+    patch:
+      operationId: updateWorkoutTemplate
+      tags: [workout-templates]
+      summary: Rename a workout template
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateWorkoutTemplateInput"
+      responses:
+        "200":
+          description: Updated template
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkoutTemplate"
+        "400":
+          description: Validation error
+        "404":
+          description: Template not found
+        "409":
+          description: Duplicate template name
+
   /workout-templates:
     post:
       operationId: createWorkoutTemplate
@@ -3743,6 +3776,14 @@ components:
         notes:
           type: string
           nullable: true
+
+    UpdateWorkoutTemplateInput:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
 
     WorkoutTemplate:
       type: object

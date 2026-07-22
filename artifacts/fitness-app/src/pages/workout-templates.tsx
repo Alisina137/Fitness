@@ -4,7 +4,8 @@ import {
   useCreateWorkoutTemplate,
   useListWorkouts,
 } from "@workspace/api-client-react";
-import { LayoutTemplate, Plus, Dumbbell, CalendarDays } from "lucide-react";
+import { LayoutTemplate, Plus, Dumbbell, CalendarDays, Pencil } from "lucide-react";
+import { EditTemplateDialog } from "@/components/edit-template-dialog";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -133,6 +134,7 @@ function SaveTemplateDialog({
 export default function WorkoutTemplatesPage() {
   const { data: templates, isLoading, refetch } = useListUserWorkoutTemplates();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingTemplate, setEditingTemplate] = useState<{ id: number; name: string } | null>(null);
 
   const hasTemplates = (templates?.length ?? 0) > 0;
 
@@ -175,8 +177,17 @@ export default function WorkoutTemplatesPage() {
               className="group bg-card border border-border rounded-3xl overflow-hidden hover:border-primary/50 transition-colors flex flex-col"
             >
               <div className="p-6 flex-1 space-y-4">
-                <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary text-xs font-semibold rounded-full">
-                  <LayoutTemplate className="h-3.5 w-3.5" /> Template
+                <div className="flex items-start justify-between gap-2">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary text-xs font-semibold rounded-full">
+                    <LayoutTemplate className="h-3.5 w-3.5" /> Template
+                  </div>
+                  <button
+                    onClick={() => setEditingTemplate({ id: template.id, name: template.name })}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground"
+                    title="Edit template name"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </button>
                 </div>
                 <h3 className="text-xl font-bold leading-tight group-hover:text-primary transition-colors">
                   {template.name}
@@ -185,11 +196,17 @@ export default function WorkoutTemplatesPage() {
                   <Dumbbell className="h-4 w-4" /> {template.workoutName}
                 </div>
               </div>
-              <div className="p-4 bg-secondary/50 border-t border-border">
+              <div className="p-4 bg-secondary/50 border-t border-border flex items-center justify-between">
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <CalendarDays className="h-3.5 w-3.5" />
                   Created {format(new Date(template.createdAt), "MMM d, yyyy")}
                 </div>
+                <button
+                  onClick={() => setEditingTemplate({ id: template.id, name: template.name })}
+                  className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-lg hover:bg-secondary"
+                >
+                  <Pencil className="h-3 w-3" /> Edit
+                </button>
               </div>
             </div>
           ))}
@@ -197,6 +214,15 @@ export default function WorkoutTemplatesPage() {
       )}
 
       <SaveTemplateDialog open={isDialogOpen} onOpenChange={setIsDialogOpen} onSaved={() => refetch()} />
+
+      {editingTemplate && (
+        <EditTemplateDialog
+          open={!!editingTemplate}
+          onOpenChange={(open) => { if (!open) setEditingTemplate(null); }}
+          templateId={editingTemplate.id}
+          currentName={editingTemplate.name}
+        />
+      )}
     </div>
   );
 }

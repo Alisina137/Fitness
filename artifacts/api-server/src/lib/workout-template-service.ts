@@ -71,6 +71,67 @@ export async function listUserWorkoutTemplates(userId: number) {
   return rows.map(serializeWorkoutTemplate);
 }
 
+// Look up a single template by ID, verifying it belongs to the user.
+export async function findTemplateById(userId: number, templateId: number) {
+  const rows = await db
+    .select({
+      id: workoutTemplatesTable.id,
+      userId: workoutTemplatesTable.userId,
+      name: workoutTemplatesTable.name,
+      workoutId: workoutTemplatesTable.workoutId,
+      createdAt: workoutTemplatesTable.createdAt,
+      updatedAt: workoutTemplatesTable.updatedAt,
+      workoutName: workoutPlansTable.name,
+    })
+    .from(workoutTemplatesTable)
+    .innerJoin(workoutPlansTable, eq(workoutTemplatesTable.workoutId, workoutPlansTable.id))
+    .where(
+      and(
+        eq(workoutTemplatesTable.id, templateId),
+        eq(workoutTemplatesTable.userId, userId),
+      ),
+    )
+    .limit(1);
+  return rows[0] ? serializeWorkoutTemplate(rows[0]) : null;
+}
+
+// Case-insensitive duplicate name check that excludes the template being edited.
+export async function findTemplateByNameExcluding(
+  userId: number,
+  name: string,
+  excludeId: number,
+) {
+  const templates = await db
+    .select({ id: workoutTemplatesTable.id, name: workoutTemplatesTable.name })
+    .from(workoutTemplatesTable)
+    .where(and(eq(workoutTemplatesTable.userId, userId)));
+  const target = name.trim().toLowerCase();
+  return (
+    templates.find(
+      (t) => t.id !== excludeId && t.name.trim().toLowerCase() === target,
+    ) ?? null
+  );
+}
+
+// Rename a template; returns the updated record.
+export async function updateWorkoutTemplate(
+  userId: number,
+  templateId: number,
+  newName: string,
+) {
+  const [updated] = await db
+    .update(workoutTemplatesTable)
+    .set({ name: newName.trim(), updatedAt: new Date() })
+    .where(
+      and(
+        eq(workoutTemplatesTable.id, templateId),
+        eq(workoutTemplatesTable.userId, userId),
+      ),
+    )
+    .returning();
+  return updated ?? null;
+}
+
 export async function createUserWorkoutTemplate(
   userId: number,
   name: string,

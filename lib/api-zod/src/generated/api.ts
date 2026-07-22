@@ -2233,6 +2233,32 @@ export const ListWorkoutScheduleResponse = zod.array(ListWorkoutScheduleResponse
 
 
 /**
+ * @summary Rename a workout template
+ */
+export const UpdateWorkoutTemplateParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const updateWorkoutTemplateBodyNameMax = 120;
+
+
+
+export const UpdateWorkoutTemplateBody = zod.object({
+  "name": zod.string().min(1).max(updateWorkoutTemplateBodyNameMax).optional()
+})
+
+export const UpdateWorkoutTemplateResponse = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "name": zod.string(),
+  "workoutId": zod.number(),
+  "workoutName": zod.string(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
  * @summary Save an existing workout as a reusable template
  */
 export const CreateWorkoutTemplateBody = zod.object({

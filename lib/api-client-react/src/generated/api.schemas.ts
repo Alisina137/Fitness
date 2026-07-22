@@ -1525,6 +1525,14 @@ export interface CreateWorkoutScheduleInput {
   notes?: string | null;
 }
 
+export interface UpdateWorkoutTemplateInput {
+  /**
+     * @minLength 1
+     * @maxLength 120
+     */
+  name?: string;
+}
+
 export interface WorkoutTemplate {
   id: number;
   userId: number;

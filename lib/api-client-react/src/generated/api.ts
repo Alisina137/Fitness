@@ -96,6 +96,7 @@ import type {
   UpdateReminderSettingsInput,
   UpdateWorkoutScheduleInput,
   UpdateWorkoutScheduleStatusInput,
+  UpdateWorkoutTemplateInput,
   User,
   UserProfile,
   UserProfileUpdate,
@@ -6309,6 +6310,78 @@ export function useListWorkoutSchedule<TData = Awaited<ReturnType<typeof listWor
 
 
 
+
+export const getUpdateWorkoutTemplateUrl = (id: number,) => {
+
+
+
+
+  return `/api/workout-templates/${id}`
+}
+
+/**
+ * @summary Rename a workout template
+ */
+export const updateWorkoutTemplate = async (id: number,
+    updateWorkoutTemplateInput: UpdateWorkoutTemplateInput, options?: RequestInit): Promise<WorkoutTemplate> => {
+
+  return customFetch<WorkoutTemplate>(getUpdateWorkoutTemplateUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(updateWorkoutTemplateInput)
+  }
+);}
+
+
+
+
+
+export const getUpdateWorkoutTemplateMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateWorkoutTemplate>>, TError,{id: number;data: BodyType<UpdateWorkoutTemplateInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateWorkoutTemplate>>, TError,{id: number;data: BodyType<UpdateWorkoutTemplateInput>}, TContext> => {
+
+const mutationKey = ['updateWorkoutTemplate'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateWorkoutTemplate>>, {id: number;data: BodyType<UpdateWorkoutTemplateInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateWorkoutTemplate(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateWorkoutTemplateMutationResult = NonNullable<Awaited<ReturnType<typeof updateWorkoutTemplate>>>
+    export type UpdateWorkoutTemplateMutationBody = BodyType<UpdateWorkoutTemplateInput>
+    export type UpdateWorkoutTemplateMutationError = ErrorType<void>
+
+    /**
+ * @summary Rename a workout template
+ */
+export const useUpdateWorkoutTemplate = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateWorkoutTemplate>>, TError,{id: number;data: BodyType<UpdateWorkoutTemplateInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateWorkoutTemplate>>,
+        TError,
+        {id: number;data: BodyType<UpdateWorkoutTemplateInput>},
+        TContext
+      > => {
+      return useMutation(getUpdateWorkoutTemplateMutationOptions(options));
+    }
 
 export const getCreateWorkoutTemplateUrl = () => {
 

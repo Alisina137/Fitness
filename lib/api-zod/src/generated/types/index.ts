@@ -137,6 +137,7 @@ export * from './updateReminderSettingsInput';
 export * from './updateWorkoutScheduleInput';
 export * from './updateWorkoutScheduleStatusInput';
 export * from './updateWorkoutScheduleStatusInputStatus';
+export * from './updateWorkoutTemplateInput';
 export * from './user';
 export * from './userProfile';
 export * from './userProfileActivityLevel';
