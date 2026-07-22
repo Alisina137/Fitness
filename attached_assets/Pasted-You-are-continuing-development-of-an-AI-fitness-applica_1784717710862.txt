@@ -1,0 +1,151 @@
+You are continuing development of an AI fitness application.
+
+IMPORTANT IMPLEMENTATION RULES
+
+- Implement ONLY the features in this prompt.
+- Do NOT redesign the existing Exercise page.
+- Do NOT rebuild search or filters.
+- Do NOT add features not mentioned here.
+- If something appears to be missing, DO NOT implement it.
+- Add it to the Suggestions section.
+- Future prompts will implement the remaining functionality.
+
+--------------------------------------------------
+
+MODULE
+
+Exercise Experience
+
+Completed
+
+✓ Exercise page
+✓ Search bar
+✓ Category filters
+✓ Target muscle filters
+
+Current Task
+
+Professional Exercise Cards
+
+Upcoming
+
+- Exercise Detail Page
+- Exercise Images
+- Exercise Instructions
+- Favorites
+- Exercise Videos
+- Exercise History
+
+--------------------------------------------------
+
+TASK
+
+Upgrade the existing Exercise cards to production quality.
+
+IMPLEMENT
+
+1. Professional Exercise Card
+
+Each card should display:
+
+- Exercise Name
+- Primary Muscle Group
+- Difficulty Badge
+- Equipment Required
+
+2. Visual Improvements
+
+Use premium card styling:
+
+- Rounded corners
+- Subtle border
+- Hover elevation
+- Smooth transition
+- Better spacing
+- Better typography
+
+3. Difficulty Badge
+
+Display:
+
+- Beginner
+- Intermediate
+- Advanced
+
+Each badge should have its own visual style.
+
+4. Equipment Badge
+
+Display equipment such as:
+
+- Barbell
+- Dumbbell
+- Machine
+- Cable
+- Bodyweight
+- Resistance Band
+
+5. Click Behavior
+
+Clicking a card should navigate to the Exercise Details page.
+
+(Create only the navigation. The page itself will be built later.)
+
+6. Loading State
+
+Display reusable skeleton cards while exercises are loading.
+
+7. Empty State
+
+Display:
+
+"No exercises found."
+
+with a button:
+
+"Clear Filters"
+
+--------------------------------------------------
+
+TECH REQUIREMENTS
+
+- Reuse the existing Exercise model.
+- Reuse the existing search and filters.
+- Keep ExerciseCard as a reusable component.
+- Support responsive layouts.
+- Follow the existing design system.
+
+--------------------------------------------------
+
+DO NOT IMPLEMENT
+
+- Exercise Details page
+- Exercise images
+- Videos
+- GIFs
+- Favorites
+- Exercise history
+- AI recommendations
+- Personal records
+
+--------------------------------------------------
+
+DEFINITION OF DONE
+
+✓ Existing page is preserved.
+✓ Exercise cards have a premium appearance.
+✓ Cards are fully responsive.
+✓ Loading and empty states work.
+✓ Clicking a card navigates to the detail page.
+✓ No existing functionality is broken.
+
+--------------------------------------------------
+
+COMPLETION REPORT
+
+Provide:
+
+- Files created
+- Files modified
+- Components created
+- Suggestions for future prompts.
