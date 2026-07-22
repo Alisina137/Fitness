@@ -3,8 +3,9 @@ import { useRoute, useLocation, Link } from "wouter";
 import { useGetWorkout, getGetWorkoutQueryKey, useCompleteWorkout } from "@workspace/api-client-react";
 import {
   ArrowLeft, CheckCircle2, Circle, ChevronRight, ChevronLeft,
-  Timer, Pause, Play, SkipForward, X, Star, Flame, Trophy,
+  Timer, Pause, Play, SkipForward, X, Star, Flame, Trophy, LayoutTemplate,
 } from "lucide-react";
+import { SaveAsTemplateDialog } from "@/components/save-as-template-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -52,6 +53,9 @@ export default function WorkoutActivePage() {
   const [currentIdx, setCurrentIdx] = useState(0);
   const [exerciseLogs, setExerciseLogs] = useState<ExerciseLog[]>([]);
   const [startTime] = useState(() => new Date());
+
+  // Save-as-template dialog
+  const [isTemplateOpen, setIsTemplateOpen] = useState(false);
 
   // Timers
   const [elapsedSec, setElapsedSec] = useState(0);
@@ -241,6 +245,15 @@ export default function WorkoutActivePage() {
 
   // ── Feedback Screen ───────────────────────────────────────────────────────────
   if (phase === "feedback") {
+    const templateDialog = workout ? (
+      <SaveAsTemplateDialog
+        open={isTemplateOpen}
+        onOpenChange={setIsTemplateOpen}
+        workoutId={workoutId}
+        workoutName={workout.name}
+      />
+    ) : null;
+
     return (
       <div className="min-h-screen bg-background flex flex-col">
         <div className="max-w-lg mx-auto w-full flex-1 flex flex-col p-6 md:p-8 space-y-8 justify-center">
@@ -297,13 +310,26 @@ export default function WorkoutActivePage() {
             </div>
           </div>
 
-          <Button
-            onClick={finishWorkout}
-            disabled={completeWorkout.isPending}
-            className="w-full h-14 text-base font-bold text-black"
-          >
-            {completeWorkout.isPending ? "Saving…" : "Log Workout"}
-          </Button>
+          <div className="flex flex-col gap-3">
+            <Button
+              onClick={finishWorkout}
+              disabled={completeWorkout.isPending}
+              className="w-full h-14 text-base font-bold text-black"
+            >
+              {completeWorkout.isPending ? "Saving…" : "Log Workout"}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setIsTemplateOpen(true)}
+              disabled={completeWorkout.isPending}
+              className="w-full gap-2"
+            >
+              <LayoutTemplate className="h-4 w-4" />
+              Save as Template
+            </Button>
+          </div>
+
+          {templateDialog}
         </div>
       </div>
     );

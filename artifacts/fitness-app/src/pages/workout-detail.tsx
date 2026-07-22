@@ -5,7 +5,6 @@ import {
   getGetWorkoutQueryKey,
   useCompleteWorkout,
   useUpdateWorkout,
-  useCreateWorkoutTemplate
 } from "@workspace/api-client-react";
 import { 
   ArrowLeft, 
@@ -18,18 +17,9 @@ import {
   LayoutTemplate
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { SaveAsTemplateDialog } from "@/components/save-as-template-dialog";
 
 export default function WorkoutDetailPage() {
   const [, params] = useRoute("/workouts/:id");
@@ -42,33 +32,9 @@ export default function WorkoutDetailPage() {
   });
   
   const completeWorkout = useCompleteWorkout();
-  const createTemplate = useCreateWorkoutTemplate();
 
   // Save-as-template dialog state
   const [isTemplateOpen, setIsTemplateOpen] = useState(false);
-  const [templateName, setTemplateName] = useState("");
-
-  const saveAsTemplate = () => {
-    const name = templateName.trim();
-    if (!name) {
-      toast({ variant: "destructive", title: "Template name is required" });
-      return;
-    }
-    createTemplate.mutate(
-      { data: { name, workoutId: id } },
-      {
-        onSuccess: () => {
-          setIsTemplateOpen(false);
-          setTemplateName("");
-          toast({ title: "Template saved", description: "You can reuse this workout anytime." });
-        },
-        onError: (err: unknown) => {
-          const message = err instanceof Error ? err.message : "Failed to save template";
-          toast({ variant: "destructive", title: "Could not save template", description: message });
-        },
-      },
-    );
-  };
 
   // Local state for active workout tracking
   const [isActive, setIsActive] = useState(false);
@@ -218,36 +184,12 @@ export default function WorkoutDetailPage() {
           </div>
         )}
 
-        <Dialog open={isTemplateOpen} onOpenChange={setIsTemplateOpen}>
-          <DialogContent className="sm:max-w-[425px] bg-card border-border">
-            <DialogHeader>
-              <DialogTitle>Save as Template</DialogTitle>
-              <DialogDescription>
-                Save "{workout.name}" as a reusable template.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-2 pt-2">
-              <label htmlFor="template-name" className="text-sm font-medium">Template Name</label>
-              <Input
-                id="template-name"
-                placeholder="e.g., My Push Day"
-                value={templateName}
-                onChange={(e) => setTemplateName(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter") saveAsTemplate(); }}
-                autoFocus
-              />
-            </div>
-            <DialogFooter className="pt-2">
-              <Button
-                onClick={saveAsTemplate}
-                disabled={createTemplate.isPending || !templateName.trim()}
-                className="text-black font-bold"
-              >
-                {createTemplate.isPending ? "Saving…" : "Save Template"}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <SaveAsTemplateDialog
+          open={isTemplateOpen}
+          onOpenChange={setIsTemplateOpen}
+          workoutId={id}
+          workoutName={workout.name}
+        />
 
         {/* Exercises List */}
         <div className="space-y-4 pt-4">
