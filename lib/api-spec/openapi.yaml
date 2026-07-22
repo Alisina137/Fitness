@@ -1747,6 +1747,33 @@ paths:
                   $ref: "#/components/schemas/ScheduledWorkout"
 
   # ─── Workout Templates ───────────────────────────────────────────────────────
+  /workout-templates/{id}/duplicate:
+    post:
+      operationId: duplicateWorkoutTemplate
+      tags: [workout-templates]
+      summary: Duplicate a workout template
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "201":
+          description: Duplicated template
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkoutTemplate"
+        "400":
+          description: Invalid template ID
+        "404":
+          description: Template not found
+        "500":
+          description: Duplicate operation failure
+
   /workout-templates/{id}:
     delete:
       operationId: deleteWorkoutTemplate

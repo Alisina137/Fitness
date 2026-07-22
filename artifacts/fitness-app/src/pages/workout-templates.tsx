@@ -4,8 +4,9 @@ import {
   useCreateWorkoutTemplate,
   useListWorkouts,
   useDeleteWorkoutTemplate,
+  useDuplicateWorkoutTemplate,
 } from "@workspace/api-client-react";
-import { LayoutTemplate, Plus, Dumbbell, CalendarDays, Pencil, Trash2 } from "lucide-react";
+import { LayoutTemplate, Plus, Dumbbell, CalendarDays, Pencil, Trash2, Copy } from "lucide-react";
 import { EditTemplateDialog } from "@/components/edit-template-dialog";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -198,6 +199,24 @@ export default function WorkoutTemplatesPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<{ id: number; name: string } | null>(null);
   const [deletingTemplateId, setDeletingTemplateId] = useState<number | null>(null);
+  const { toast } = useToast();
+  const duplicateTemplate = useDuplicateWorkoutTemplate();
+
+  const handleDuplicate = (templateId: number) => {
+    duplicateTemplate.mutate(
+      { id: templateId },
+      {
+        onSuccess: () => {
+          refetch();
+          toast({ title: "Template duplicated", description: "A copy has been added to your library." });
+        },
+        onError: (err: unknown) => {
+          const message = err instanceof Error ? err.message : "Failed to duplicate template";
+          toast({ variant: "destructive", title: "Could not duplicate template", description: message });
+        },
+      },
+    );
+  };
 
   const hasTemplates = (templates?.length ?? 0) > 0;
 
@@ -253,6 +272,14 @@ export default function WorkoutTemplatesPage() {
                       <Pencil className="h-4 w-4" />
                     </button>
                     <button
+                      onClick={() => handleDuplicate(template.id)}
+                      disabled={duplicateTemplate.isPending}
+                      className="p-1.5 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+                      title="Duplicate template"
+                    >
+                      <Copy className="h-4 w-4" />
+                    </button>
+                    <button
                       onClick={() => setDeletingTemplateId(template.id)}
                       className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
                       title="Delete template"
@@ -273,12 +300,21 @@ export default function WorkoutTemplatesPage() {
                   <CalendarDays className="h-3.5 w-3.5" />
                   Created {format(new Date(template.createdAt), "MMM d, yyyy")}
                 </div>
-                <button
-                  onClick={() => setEditingTemplate({ id: template.id, name: template.name })}
-                  className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-lg hover:bg-secondary"
-                >
-                  <Pencil className="h-3 w-3" /> Edit
-                </button>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => handleDuplicate(template.id)}
+                    disabled={duplicateTemplate.isPending}
+                    className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-lg hover:bg-secondary disabled:opacity-50"
+                  >
+                    <Copy className="h-3 w-3" /> Duplicate
+                  </button>
+                  <button
+                    onClick={() => setEditingTemplate({ id: template.id, name: template.name })}
+                    className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-lg hover:bg-secondary"
+                  >
+                    <Pencil className="h-3 w-3" /> Edit
+                  </button>
+                </div>
               </div>
             </div>
           ))}

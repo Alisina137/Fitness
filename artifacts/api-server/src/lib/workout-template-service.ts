@@ -132,6 +132,45 @@ export async function updateWorkoutTemplate(
   return updated ?? null;
 }
 
+// Generate a unique copy name for a template. Tries "Name (Copy)", then
+// "Name (Copy 2)", "Name (Copy 3)", … until an unused name is found.
+export async function generateCopyName(userId: number, originalName: string): Promise<string> {
+  const existing = await db
+    .select({ name: workoutTemplatesTable.name })
+    .from(workoutTemplatesTable)
+    .where(eq(workoutTemplatesTable.userId, userId));
+
+  const taken = new Set(existing.map((t) => t.name.trim().toLowerCase()));
+
+  const base = `${originalName} (Copy)`;
+  if (!taken.has(base.toLowerCase())) return base;
+
+  for (let n = 2; ; n++) {
+    const candidate = `${originalName} (Copy ${n})`;
+    if (!taken.has(candidate.toLowerCase())) return candidate;
+  }
+}
+
+// Duplicate a template: create a new row referencing the same workout with a
+// generated unique name. Returns the new template, or null when the source
+// template does not exist or belongs to a different user.
+export async function duplicateWorkoutTemplate(
+  userId: number,
+  templateId: number,
+): Promise<ReturnType<typeof serializeWorkoutTemplate> | null> {
+  const source = await findTemplateById(userId, templateId);
+  if (!source) return null;
+
+  const copyName = await generateCopyName(userId, source.name);
+
+  const [newRow] = await db
+    .insert(workoutTemplatesTable)
+    .values({ userId, name: copyName, workoutId: source.workoutId })
+    .returning();
+
+  return serializeWorkoutTemplate({ ...newRow, workoutName: source.workoutName });
+}
+
 // Delete a template owned by the user. Returns true when a row was removed.
 export async function deleteWorkoutTemplate(
   userId: number,

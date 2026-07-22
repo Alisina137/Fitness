@@ -1,0 +1,124 @@
+You are continuing development of an AI fitness application.
+
+IMPORTANT IMPLEMENTATION RULES
+
+- Implement ONLY the features in this prompt.
+- Do NOT add extra features.
+- Do NOT modify existing systems unless required.
+- If something appears to be missing, DO NOT implement it.
+- Add it to the Suggestions section.
+- Future prompts will implement the remaining functionality.
+
+--------------------------------------------------
+
+FEATURE
+
+Workout Templates
+
+Completed
+
+✓ WorkoutTemplate Foundation
+✓ Save as Template
+✓ Templates Library
+✓ Edit Template
+✓ Delete Template
+
+Current Task
+
+Duplicate Template
+
+Upcoming
+
+- Favorite Templates
+- Categories
+- Search
+- Sorting
+- Quick Apply
+
+--------------------------------------------------
+
+TASK
+
+Implement template duplication.
+
+1. Add a "Duplicate" action to every template.
+
+2. When selected:
+
+Create a copy of the template.
+
+Default name:
+
+Original Name (Copy)
+
+If that already exists:
+
+Original Name (Copy 2)
+
+Continue numbering as needed.
+
+3. The duplicated template should:
+
+- Reference the same workout
+- Have a new ID
+- Have a new created date
+
+4. Refresh the template list automatically.
+
+5. Show a success message after duplication.
+
+6. Validation.
+
+Handle:
+
+- Invalid template ID
+- Template not found
+- Duplicate operation failure
+
+Display user-friendly error messages.
+
+--------------------------------------------------
+
+TECH REQUIREMENTS
+
+- Reuse the existing WorkoutTemplate model.
+- Do not duplicate workout data.
+- Keep duplication logic reusable.
+- Follow the existing design system.
+
+--------------------------------------------------
+
+DO NOT IMPLEMENT
+
+- Favorites
+- Categories
+- Search
+- Sorting
+- Quick Apply
+- Sharing
+- Import/Export
+
+--------------------------------------------------
+
+DEFINITION OF DONE
+
+✓ Template can be duplicated.
+✓ Copy appears immediately in the library.
+✓ Naming conflicts are handled automatically.
+✓ No existing functionality is affected.
+✓ Loading, success, and error states work correctly.
+
+--------------------------------------------------
+
+COMPLETION REPORT
+
+Provide:
+
+- Files created
+- Files modified
+- API changes
+- Components updated
+
+Suggestions:
+
+List features intentionally left for future prompts.

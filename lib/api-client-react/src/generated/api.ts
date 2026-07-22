@@ -6311,6 +6311,55 @@ export function useListWorkoutSchedule<TData = Awaited<ReturnType<typeof listWor
 
 
 
+export const getDuplicateWorkoutTemplateUrl = (id: number) => {
+  return `/api/workout-templates/${id}/duplicate`
+}
+
+/**
+ * @summary Duplicate a workout template
+ */
+export const duplicateWorkoutTemplate = async (id: number, options?: RequestInit): Promise<WorkoutTemplate> => {
+  return customFetch<WorkoutTemplate>(getDuplicateWorkoutTemplateUrl(id), {
+    ...options,
+    method: 'POST',
+  });
+}
+
+export const getDuplicateWorkoutTemplateMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof duplicateWorkoutTemplate>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof duplicateWorkoutTemplate>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['duplicateWorkoutTemplate'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof duplicateWorkoutTemplate>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+          return duplicateWorkoutTemplate(id, requestOptions)
+        }
+
+  return { mutationFn, ...mutationOptions }}
+
+    export type DuplicateWorkoutTemplateMutationResult = NonNullable<Awaited<ReturnType<typeof duplicateWorkoutTemplate>>>
+    export type DuplicateWorkoutTemplateMutationError = ErrorType<void>
+
+    /**
+ * @summary Duplicate a workout template
+ */
+export const useDuplicateWorkoutTemplate = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof duplicateWorkoutTemplate>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof duplicateWorkoutTemplate>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getDuplicateWorkoutTemplateMutationOptions(options));
+    }
+
 export const getDeleteWorkoutTemplateUrl = (id: number) => {
   return `/api/workout-templates/${id}`
 }

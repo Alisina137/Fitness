@@ -10,9 +10,29 @@ import {
   listUserWorkoutTemplates,
   createUserWorkoutTemplate,
   deleteWorkoutTemplate,
+  duplicateWorkoutTemplate,
 } from "../lib/workout-template-service.js";
 
 const router = Router();
+
+// ─── POST /api/workout-templates/:id/duplicate ────────────────────────────────
+// Create a copy of an existing template with a unique auto-generated name.
+
+router.post("/workout-templates/:id/duplicate", requireAuth, async (req, res) => {
+  const user = getUser(req);
+  const templateId = parseInt(req.params.id ?? "", 10);
+
+  if (!templateId || isNaN(templateId)) {
+    return res.status(400).json({ error: "Invalid template ID" });
+  }
+
+  const copy = await duplicateWorkoutTemplate(user.id, templateId);
+  if (!copy) {
+    return res.status(404).json({ error: "Template not found" });
+  }
+
+  return res.status(201).json(copy);
+});
 
 // ─── DELETE /api/workout-templates/:id ────────────────────────────────────────
 // Delete a template. Does not delete the linked workout.
