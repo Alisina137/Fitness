@@ -1,0 +1,118 @@
+You are continuing development of an AI fitness application.
+
+IMPORTANT IMPLEMENTATION RULES
+
+- Implement ONLY the features in this prompt.
+- Do NOT add extra features.
+- Do NOT modify existing systems unless required.
+- If something appears to be missing, DO NOT implement it.
+- Add it to the Suggestions section.
+- Future prompts will implement the remaining functionality.
+
+--------------------------------------------------
+
+FEATURE
+
+Workout Templates
+
+Completed
+
+✓ Template Foundation
+✓ Save as Template
+✓ Templates Library
+✓ Edit Template
+✓ Delete Template
+✓ Duplicate Template
+✓ Favorite Templates
+✓ Template Categories
+
+Current Task
+
+Search Templates
+
+Upcoming
+
+- Sort & Filter
+- Quick Apply
+
+--------------------------------------------------
+
+TASK
+
+Implement template search.
+
+1. Add a search bar above the templates list.
+
+Placeholder:
+
+"Search templates..."
+
+2. Search should work instantly while typing.
+
+Search by:
+
+- Template name
+- Workout name
+- Category
+
+3. Search behavior.
+
+- Ignore uppercase/lowercase.
+- Ignore leading/trailing spaces.
+- Update results without refreshing the page.
+
+4. Empty State.
+
+If no templates match:
+
+"No templates found."
+
+Show a button:
+
+"Clear Search"
+
+5. Validation.
+
+Handle:
+
+- Empty search
+- No matching results
+
+--------------------------------------------------
+
+TECH REQUIREMENTS
+
+- Reuse existing template data.
+- Keep search logic reusable.
+- Follow the existing design system.
+
+--------------------------------------------------
+
+DO NOT IMPLEMENT
+
+- Sorting
+- Advanced filters
+- Quick Apply
+- AI search
+- Sharing
+- Import/Export
+
+--------------------------------------------------
+
+DEFINITION OF DONE
+
+✓ Search updates instantly.
+✓ Search works for name, workout, and category.
+✓ Empty state is handled.
+✓ Existing functionality remains unchanged.
+
+--------------------------------------------------
+
+COMPLETION REPORT
+
+Provide:
+
+- Files created
+- Files modified
+- Components added
+- Suggestions

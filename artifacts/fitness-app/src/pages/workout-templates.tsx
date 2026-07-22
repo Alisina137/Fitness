@@ -7,7 +7,7 @@ import {
   useDuplicateWorkoutTemplate,
   useToggleWorkoutTemplateFavorite,
 } from "@workspace/api-client-react";
-import { LayoutTemplate, Plus, Dumbbell, CalendarDays, Pencil, Trash2, Copy, Star } from "lucide-react";
+import { LayoutTemplate, Plus, Dumbbell, CalendarDays, Pencil, Trash2, Copy, Star, Search, X } from "lucide-react";
 import { EditTemplateDialog, TEMPLATE_CATEGORIES } from "@/components/edit-template-dialog";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -413,6 +413,7 @@ export default function WorkoutTemplatesPage() {
   const [editingTemplate, setEditingTemplate] = useState<{ id: number; name: string; category: string } | null>(null);
   const [deletingTemplateId, setDeletingTemplateId] = useState<number | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
 
   const duplicateTemplate = useDuplicateWorkoutTemplate();
@@ -455,10 +456,19 @@ export default function WorkoutTemplatesPage() {
   const allTemplates = (templates ?? []) as Template[];
   const hasTemplates = allTemplates.length > 0;
 
-  // Apply category filter
-  const filteredTemplates = selectedCategory
-    ? allTemplates.filter((t) => t.category === selectedCategory)
-    : allTemplates;
+  // Apply search + category filter
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+  const filteredTemplates = allTemplates.filter((t) => {
+    if (selectedCategory && t.category !== selectedCategory) return false;
+    if (normalizedQuery) {
+      return (
+        t.name.toLowerCase().includes(normalizedQuery) ||
+        t.workoutName.toLowerCase().includes(normalizedQuery) ||
+        t.category.toLowerCase().includes(normalizedQuery)
+      );
+    }
+    return true;
+  });
 
   const favorites = filteredTemplates.filter((t) => t.isFavorite);
   const others = filteredTemplates.filter((t) => !t.isFavorite);
@@ -514,14 +524,40 @@ export default function WorkoutTemplatesPage() {
         </div>
       ) : (
         <div className="space-y-8">
+          {/* Search bar */}
+          <div className="relative">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+            <Input
+              type="text"
+              placeholder="Search templates..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 pr-10 bg-card border-border rounded-xl h-11"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                aria-label="Clear search"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+
           {/* Category filter chips */}
           <CategoryFilter selected={selectedCategory} onChange={setSelectedCategory} />
 
           {filteredTemplates.length === 0 ? (
-            /* Category-filtered empty state */
+            /* Search / category empty state */
             <div className="text-center py-20 bg-card border border-border border-dashed rounded-3xl">
               <LayoutTemplate className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-              <p className="text-muted-foreground font-medium">No templates found.</p>
+              <p className="text-muted-foreground font-medium mb-4">No templates found.</p>
+              {normalizedQuery && (
+                <Button variant="outline" size="sm" onClick={() => setSearchQuery("")}>
+                  Clear Search
+                </Button>
+              )}
             </div>
           ) : (
             <div className="space-y-10">
