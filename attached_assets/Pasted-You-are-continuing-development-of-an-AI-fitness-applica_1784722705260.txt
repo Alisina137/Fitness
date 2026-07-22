@@ -1,0 +1,124 @@
+You are continuing development of an AI fitness application.
+
+IMPORTANT IMPLEMENTATION RULES
+
+- Implement ONLY the features in this prompt.
+- Do NOT redesign the Exercise Details page.
+- Do NOT add features not listed below.
+- If something appears to be missing, DO NOT implement it.
+- Add it to the Suggestions section.
+- Future prompts will implement the remaining functionality.
+
+--------------------------------------------------
+
+MODULE
+
+Exercise Experience
+
+Completed
+
+✓ Exercise Library
+✓ Professional Exercise Cards
+✓ Exercise Details Page
+
+Current Task
+
+Exercise Image Gallery
+
+Upcoming
+
+- Exercise Instructions
+- Target Muscles
+- Equipment Information
+- Favorites
+- Exercise Videos
+
+--------------------------------------------------
+
+TASK
+
+Add a professional image gallery to the Exercise Details page.
+
+IMPLEMENT
+
+1. Gallery Section
+
+Place it directly below the page header.
+
+2. Display
+
+Support:
+
+- Primary image
+- Multiple additional images
+
+3. Gallery Features
+
+- Horizontal scrolling thumbnails
+- Click a thumbnail to make it the main image
+- Smooth image transition
+- Maintain image aspect ratio
+
+4. Image Placeholder
+
+If no images exist:
+
+Display a professional placeholder with:
+
+"No image available"
+
+5. Loading State
+
+Display skeleton placeholders while images load.
+
+6. Error State
+
+If an image fails to load:
+
+Display the placeholder instead.
+
+--------------------------------------------------
+
+TECH REQUIREMENTS
+
+- Reuse the existing Exercise model.
+- Build a reusable ExerciseImageGallery component.
+- Optimize images for responsive layouts.
+- Lazy-load gallery images.
+
+--------------------------------------------------
+
+DO NOT IMPLEMENT
+
+- Videos
+- GIFs
+- Zoom
+- Full-screen viewer
+- Swipe gestures
+- Image upload
+- Favorites
+- AI features
+
+--------------------------------------------------
+
+DEFINITION OF DONE
+
+✓ Gallery displays correctly.
+✓ Thumbnail selection works.
+✓ Loading and error states work.
+✓ Responsive on desktop and mobile.
+✓ Existing functionality remains unchanged.
+
+--------------------------------------------------
+
+COMPLETION REPORT
+
+Provide:
+
+- Files created
+- Files modified
+- Components created
+
+Suggestions:
+
+List features intentionally left for future prompts.

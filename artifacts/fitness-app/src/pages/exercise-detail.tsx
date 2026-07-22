@@ -11,6 +11,10 @@ import {
   ExerciseInfoSection,
   ExerciseInfoSectionSkeleton,
 } from "@/components/exercise-detail/exercise-info-section";
+import {
+  ExerciseImageGallery,
+  ExerciseImageGallerySkeleton,
+} from "@/components/exercise-detail/exercise-image-gallery";
 
 // ─── Loading skeleton ─────────────────────────────────────────────────────────
 
@@ -22,6 +26,7 @@ function ExerciseDetailSkeleton() {
         <div className="h-10 w-10 bg-secondary rounded-xl shrink-0" />
         <div className="h-8 w-64 bg-secondary rounded" />
       </div>
+      <ExerciseImageGallerySkeleton />
       <ExerciseOverviewCardSkeleton />
       <ExerciseInfoSectionSkeleton />
     </div>
@@ -71,13 +76,16 @@ export default function ExerciseDetailPage() {
         onBack={() => setLocation("/exercises")}
       />
 
+      {/* Image Gallery */}
+      <ExerciseImageGallery exercise={exercise} />
+
       {/* Overview */}
       <ExerciseOverviewCard exercise={exercise} />
 
       {/* Information */}
       <ExerciseInfoSection exercise={exercise} />
 
-      {/* Future sections: Image Gallery, Instructions, Target Muscles, Exercise Videos, Favorites */}
+      {/* Future sections: Instructions, Target Muscles, Exercise Videos, Favorites */}
     </div>
   );
 }
