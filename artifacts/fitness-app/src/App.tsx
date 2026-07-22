@@ -22,6 +22,7 @@ import WorkoutAnalyticsPage from './pages/workout-analytics';
 import WorkoutCalendarPage from './pages/workout-calendar';
 import WorkoutTemplatesPage from './pages/workout-templates';
 import ExercisesPage from './pages/exercises';
+import ExerciseDetailPage from './pages/exercise-detail';
 import NutritionPage from './pages/nutrition';
 import ProgressPage from './pages/progress';
 import ProgressPhotosPage from './pages/progress-photos';
@@ -57,6 +58,7 @@ function AuthenticatedRoutes() {
         <Route path="/templates" component={WorkoutTemplatesPage} />
         <Route path="/workouts/:id/active" component={WorkoutActivePage} />
         <Route path="/workouts/:id" component={WorkoutDetailPage} />
+        <Route path="/exercises/:id" component={ExerciseDetailPage} />
         <Route path="/exercises" component={ExercisesPage} />
         <Route path="/nutrition" component={NutritionPage} />
         <Route path="/progress/weekly-summary" component={WeeklySummaryPage} />

@@ -1,0 +1,145 @@
+You are continuing development of an AI fitness application.
+
+IMPORTANT IMPLEMENTATION RULES
+
+- Implement ONLY the features in this prompt.
+- Do NOT redesign the Exercise Library.
+- Do NOT add features not listed below.
+- If something appears to be missing, DO NOT implement it.
+- Add it to the Suggestions section.
+- Future prompts will implement the remaining functionality.
+
+--------------------------------------------------
+
+MODULE
+
+Exercise Experience
+
+Completed
+
+✓ Exercise Library
+✓ Search
+✓ Category Filters
+✓ Target Filters
+✓ Professional Exercise Cards
+
+Current Task
+
+Exercise Details Page Foundation
+
+Upcoming
+
+- Exercise Image Gallery
+- Exercise Instructions
+- Target Muscles
+- Equipment Information
+- Favorites
+- Exercise Videos
+
+--------------------------------------------------
+
+TASK
+
+Build the Exercise Details page.
+
+IMPLEMENT
+
+1. Create a dedicated Exercise Details page.
+
+2. When an exercise card is clicked, navigate to this page.
+
+3. Display the following information:
+
+- Exercise Name
+- Primary Muscle Group
+- Difficulty
+- Equipment
+- Category
+
+4. Page Layout
+
+Create sections for:
+
+- Header
+- Overview
+- Information
+
+Leave space for future sections.
+
+5. Header
+
+Display:
+
+- Exercise Name
+- Back Button
+
+6. Overview Card
+
+Display:
+
+- Primary Muscle
+- Equipment
+- Difficulty
+
+7. Loading State
+
+Display skeleton placeholders while loading.
+
+8. Error State
+
+If the exercise is not found:
+
+Display:
+
+"Exercise not found."
+
+Provide a button:
+
+"Back to Exercises"
+
+--------------------------------------------------
+
+TECH REQUIREMENTS
+
+- Reuse the existing Exercise model.
+- Keep the page modular.
+- Each section should be a reusable component.
+- Follow the existing design system.
+
+--------------------------------------------------
+
+DO NOT IMPLEMENT
+
+- Images
+- Videos
+- Instructions
+- Tips
+- Safety
+- Alternatives
+- Favorites
+- Workout history
+- AI recommendations
+
+--------------------------------------------------
+
+DEFINITION OF DONE
+
+✓ Exercise Details page exists.
+✓ Navigation works.
+✓ Exercise information loads correctly.
+✓ Loading and error states work.
+✓ Existing functionality remains unchanged.
+
+--------------------------------------------------
+
+COMPLETION REPORT
+
+Provide:
+
+- Files created
+- Files modified
+- Components created
+
+Suggestions:
+
+List features intentionally left for future prompts.
