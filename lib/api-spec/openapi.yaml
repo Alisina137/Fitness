@@ -912,6 +912,130 @@ paths:
         "404":
           description: Not found
 
+  # ─── Exercise Collections ─────────────────────────────────────────────────────
+  /exercise-collections:
+    get:
+      operationId: listExerciseCollections
+      tags: [exercises]
+      summary: List all collections for the current user
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ExerciseCollection"
+    post:
+      operationId: createExerciseCollection
+      tags: [exercises]
+      summary: Create a new collection
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateExerciseCollectionInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExerciseCollection"
+        "400":
+          description: Validation error
+        "409":
+          description: Collection name already exists
+
+  /exercise-collections/{id}:
+    get:
+      operationId: getExerciseCollection
+      tags: [exercises]
+      summary: Get a collection with its exercises
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExerciseCollectionDetail"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteExerciseCollection
+      tags: [exercises]
+      summary: Delete a collection
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+
+  /exercise-collections/{id}/exercises:
+    post:
+      operationId: addExerciseToCollection
+      tags: [exercises]
+      summary: Add an exercise to a collection
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [exerciseId]
+              properties:
+                exerciseId:
+                  type: integer
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Already in collection
+        "404":
+          description: Collection or exercise not found
+
+  /exercise-collections/{id}/exercises/{exerciseId}:
+    delete:
+      operationId: removeExerciseFromCollection
+      tags: [exercises]
+      summary: Remove an exercise from a collection
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: exerciseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Removed
+        "404":
+          description: Not found
+
   # ─── Nutrition ───────────────────────────────────────────────────────────────
   /nutrition:
     get:
@@ -3069,6 +3193,54 @@ components:
           type: ["string", "null"]
         isFavorite:
           type: boolean
+
+    # ─── Exercise Collections ────────────────────────────────────────────────────
+    ExerciseCollection:
+      type: object
+      required: [id, userId, name, exerciseCount, createdAt]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        exerciseCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+
+    ExerciseCollectionDetail:
+      type: object
+      required: [id, userId, name, exercises, createdAt]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        exercises:
+          type: array
+          items:
+            $ref: "#/components/schemas/Exercise"
+        createdAt:
+          type: string
+          format: date-time
+
+    CreateExerciseCollectionInput:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
 
     # ─── Nutrition ─────────────────────────────────────────────────────────────
     NutritionEntry:

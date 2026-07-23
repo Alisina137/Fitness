@@ -1,0 +1,128 @@
+You are continuing development of an AI fitness application.
+
+IMPORTANT IMPLEMENTATION RULES
+
+- Implement ONLY the features in this prompt.
+- Do NOT redesign existing pages.
+- Do NOT add extra features.
+- If something is missing, add it to the Suggestions section.
+
+--------------------------------------------------
+
+MODULE
+
+Exercise Experience
+
+Completed
+
+✓ Exercise Library
+✓ Exercise Details
+✓ Image Gallery
+✓ Instructions
+✓ Muscles Worked
+✓ Exercise Information
+✓ Favorite Exercises
+
+Current Task
+
+Exercise Collections
+
+Upcoming
+
+- Recently Viewed
+- Personal Exercise History
+- Exercise Videos
+
+--------------------------------------------------
+
+TASK
+
+Allow users to organize exercises into custom collections.
+
+IMPLEMENT
+
+1. Create Exercise Collections.
+
+Each collection should have:
+
+- Name
+- Optional Description
+- Created Date
+
+2. Add "Add to Collection".
+
+Display this action on:
+
+- Exercise Card
+- Exercise Details page
+
+3. Collection Dialog.
+
+Allow users to:
+
+- Select an existing collection
+- Create a new collection
+
+4. Collections Page.
+
+Display all user collections.
+
+Each collection card should show:
+
+- Collection Name
+- Number of Exercises
+
+5. Collection Details.
+
+Display all exercises inside the selected collection.
+
+6. Validation.
+
+Prevent:
+
+- Empty collection name
+- Duplicate collection names for the same user
+- Adding the same exercise twice
+
+--------------------------------------------------
+
+TECH REQUIREMENTS
+
+- Keep collections user-specific.
+- Reuse the existing Exercise model.
+- Follow the existing design system.
+
+--------------------------------------------------
+
+DO NOT IMPLEMENT
+
+- Shared collections
+- Public collections
+- Collection folders
+- AI-generated collections
+- Import/Export
+
+--------------------------------------------------
+
+DEFINITION OF DONE
+
+✓ Users can create collections.
+✓ Exercises can be added to collections.
+✓ Collection details display correctly.
+✓ Existing functionality remains unchanged.
+
+--------------------------------------------------
+
+COMPLETION REPORT
+
+Provide:
+
+- Files created
+- Files modified
+- Database changes
+- API changes
+- Components created
+
+Suggestions:
+
+List future features not implemented.

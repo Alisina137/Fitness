@@ -73,3 +73,29 @@ export const userFavoriteExercisesTable = pgTable(
   },
   (t) => [primaryKey({ columns: [t.userId, t.exerciseId] })],
 );
+
+// ─── Exercise Collections ─────────────────────────────────────────────────────
+
+export const exerciseCollectionsTable = pgTable("exercise_collections", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => usersTable.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const collectionExercisesTable = pgTable(
+  "collection_exercises",
+  {
+    collectionId: integer("collection_id")
+      .notNull()
+      .references(() => exerciseCollectionsTable.id, { onDelete: "cascade" }),
+    exerciseId: integer("exercise_id")
+      .notNull()
+      .references(() => exercisesTable.id, { onDelete: "cascade" }),
+    addedAt: timestamp("added_at").defaultNow().notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.collectionId, t.exerciseId] })],
+);

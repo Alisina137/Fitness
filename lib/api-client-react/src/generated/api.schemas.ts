@@ -877,6 +877,32 @@ export interface Exercise {
   isFavorite: boolean;
 }
 
+export interface ExerciseCollection {
+  id: number;
+  userId: number;
+  name: string;
+  /** @nullable */
+  description?: string | null;
+  exerciseCount: number;
+  createdAt: string;
+}
+
+export interface ExerciseCollectionDetail {
+  id: number;
+  userId: number;
+  name: string;
+  /** @nullable */
+  description?: string | null;
+  exercises: Exercise[];
+  createdAt: string;
+}
+
+export interface CreateExerciseCollectionInput {
+  name: string;
+  /** @nullable */
+  description?: string | null;
+}
+
 export type NutritionEntryMealType = typeof NutritionEntryMealType[keyof typeof NutritionEntryMealType];
 
 
