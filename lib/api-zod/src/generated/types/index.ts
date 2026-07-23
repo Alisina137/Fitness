@@ -129,6 +129,7 @@ export * from './todayRecovery';
 export * from './todayRecoveryProfile';
 export * from './todayRecoveryReadiness';
 export * from './todayWorkout';
+export * from './toggleExerciseFavorite200';
 export * from './upcomingMilestone';
 export * from './upcomingMilestoneGoal';
 export * from './updateReminderInput';

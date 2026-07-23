@@ -1,0 +1,135 @@
+You are continuing development of an AI fitness application.
+
+IMPORTANT IMPLEMENTATION RULES
+
+- Implement ONLY the features in this prompt.
+- Do NOT redesign existing pages.
+- Do NOT add extra features.
+- If something is missing, add it to the Suggestions section.
+
+--------------------------------------------------
+
+MODULE
+
+Exercise Experience
+
+Completed
+
+✓ Exercise Library
+✓ Professional Exercise Cards
+✓ Exercise Details
+✓ Image Gallery
+✓ Instructions
+✓ Muscles Worked
+✓ Exercise Information
+
+Current Task
+
+Favorite Exercises
+
+Upcoming
+
+- Exercise Collections
+- Recently Viewed
+- Exercise Videos
+- Exercise History
+
+--------------------------------------------------
+
+TASK
+
+Allow users to save favorite exercises.
+
+IMPLEMENT
+
+1. Extend the existing Exercise Favorite system.
+
+Each exercise should support:
+
+- isFavorite
+
+for the current user.
+
+2. Add Favorite Button.
+
+Display a heart icon on:
+
+- Exercise Card
+- Exercise Details page
+
+3. Favorite Behavior.
+
+Tap once:
+
+- Add to Favorites
+
+Tap again:
+
+- Remove from Favorites
+
+Update immediately without page refresh.
+
+4. Favorites Section.
+
+Create a "Favorites" section at the top of the Exercise Library.
+
+Only display it when the user has favorite exercises.
+
+5. Empty State.
+
+If no favorites exist:
+
+Hide the Favorites section.
+
+6. Validation.
+
+Handle:
+
+- Invalid exercise ID
+- Update failure
+
+Show user-friendly error messages.
+
+--------------------------------------------------
+
+TECH REQUIREMENTS
+
+- Reuse the existing Exercise model.
+- Do not duplicate exercise data.
+- Keep favorite logic reusable.
+- Follow the existing design system.
+
+--------------------------------------------------
+
+DO NOT IMPLEMENT
+
+- Exercise Collections
+- Recently Viewed
+- Offline Favorites
+- AI Recommendations
+- Workout Integration
+
+--------------------------------------------------
+
+DEFINITION OF DONE
+
+✓ Users can favorite exercises.
+✓ Favorite status updates instantly.
+✓ Favorites appear at the top.
+✓ Existing functionality remains unchanged.
+
+--------------------------------------------------
+
+COMPLETION REPORT
+
+Provide:
+
+- Files created
+- Files modified
+- Database changes
+- API changes
+- Components updated
+
+Suggestions:
+
+List features intentionally left for future prompts.

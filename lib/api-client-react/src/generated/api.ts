@@ -91,6 +91,7 @@ import type {
   SubscriptionPlan,
   TodayRecovery,
   TodayWorkout,
+  ToggleExerciseFavorite200,
   UpcomingMilestone,
   UpdateReminderInput,
   UpdateReminderSettingsInput,
@@ -3225,6 +3226,77 @@ export function useGetExerciseAlternatives<TData = Awaited<ReturnType<typeof get
 
 
 
+
+export const getToggleExerciseFavoriteUrl = (id: number,) => {
+
+
+
+
+  return `/api/exercises/${id}/favorite`
+}
+
+/**
+ * @summary Toggle the favorite status of an exercise
+ */
+export const toggleExerciseFavorite = async (id: number, options?: RequestInit): Promise<ToggleExerciseFavorite200> => {
+
+  return customFetch<ToggleExerciseFavorite200>(getToggleExerciseFavoriteUrl(id),
+  {
+    ...options,
+    method: 'PATCH'
+
+
+  }
+);}
+
+
+
+
+
+export const getToggleExerciseFavoriteMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof toggleExerciseFavorite>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof toggleExerciseFavorite>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['toggleExerciseFavorite'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof toggleExerciseFavorite>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  toggleExerciseFavorite(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ToggleExerciseFavoriteMutationResult = NonNullable<Awaited<ReturnType<typeof toggleExerciseFavorite>>>
+
+    export type ToggleExerciseFavoriteMutationError = ErrorType<void>
+
+    /**
+ * @summary Toggle the favorite status of an exercise
+ */
+export const useToggleExerciseFavorite = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof toggleExerciseFavorite>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof toggleExerciseFavorite>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getToggleExerciseFavoriteMutationOptions(options));
+    }
 
 export const getListNutritionEntriesUrl = (params?: ListNutritionEntriesParams,) => {
   const normalizedParams = new URLSearchParams();

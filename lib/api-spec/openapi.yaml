@@ -885,6 +885,33 @@ paths:
         "404":
           description: Not found
 
+  /exercises/{id}/favorite:
+    patch:
+      operationId: toggleExerciseFavorite
+      tags: [exercises]
+      summary: Toggle the favorite status of an exercise
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [isFavorite]
+                properties:
+                  isFavorite:
+                    type: boolean
+        "400":
+          description: Bad request
+        "404":
+          description: Not found
+
   # ─── Nutrition ───────────────────────────────────────────────────────────────
   /nutrition:
     get:
@@ -2971,7 +2998,7 @@ components:
     # ─── Exercises ─────────────────────────────────────────────────────────────
     Exercise:
       type: object
-      required: [id, name, category, difficulty, primaryMuscles, muscleGroups, equipment]
+      required: [id, name, category, difficulty, primaryMuscles, muscleGroups, equipment, isFavorite]
       properties:
         id:
           type: integer
@@ -3040,6 +3067,8 @@ components:
           type: ["string", "null"]
         gifUrl:
           type: ["string", "null"]
+        isFavorite:
+          type: boolean
 
     # ─── Nutrition ─────────────────────────────────────────────────────────────
     NutritionEntry:

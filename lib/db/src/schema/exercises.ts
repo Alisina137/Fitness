@@ -1,4 +1,5 @@
-import { pgTable, serial, text, integer, numeric, pgEnum, jsonb, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, integer, numeric, pgEnum, jsonb, timestamp, primaryKey } from "drizzle-orm/pg-core";
+import { usersTable } from "./users";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -55,3 +56,20 @@ export const exercisesTable = pgTable("exercises", {
 export const insertExerciseSchema = createInsertSchema(exercisesTable).omit({ id: true, createdAt: true });
 export type InsertExercise = z.infer<typeof insertExerciseSchema>;
 export type Exercise = typeof exercisesTable.$inferSelect;
+
+// ─── User Favourite Exercises ─────────────────────────────────────────────────
+// Junction table: one row per (user, exercise) pair when the user has favourited it.
+
+export const userFavoriteExercisesTable = pgTable(
+  "user_favorite_exercises",
+  {
+    userId: integer("user_id")
+      .notNull()
+      .references(() => usersTable.id, { onDelete: "cascade" }),
+    exerciseId: integer("exercise_id")
+      .notNull()
+      .references(() => exercisesTable.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.exerciseId] })],
+);

@@ -44,4 +44,5 @@ export interface Exercise {
   thumbnailUrl?: string | null;
   /** @nullable */
   gifUrl?: string | null;
+  isFavorite: boolean;
 }

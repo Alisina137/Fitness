@@ -874,6 +874,7 @@ export interface Exercise {
   thumbnailUrl?: string | null;
   /** @nullable */
   gifUrl?: string | null;
+  isFavorite: boolean;
 }
 
 export type NutritionEntryMealType = typeof NutritionEntryMealType[keyof typeof NutritionEntryMealType];
@@ -1743,6 +1744,10 @@ export const ListExercisesTrainingType = {
 export type ListExercises200 = {
   exercises: Exercise[];
   total: number;
+};
+
+export type ToggleExerciseFavorite200 = {
+  isFavorite: boolean;
 };
 
 export type ListNutritionEntriesParams = {

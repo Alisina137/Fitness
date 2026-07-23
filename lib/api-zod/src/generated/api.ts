@@ -1243,7 +1243,8 @@ export const ListExercisesResponse = zod.object({
   "imageUrl": zod.string().nullish(),
   "videoUrl": zod.string().nullish(),
   "thumbnailUrl": zod.string().nullish(),
-  "gifUrl": zod.string().nullish()
+  "gifUrl": zod.string().nullish(),
+  "isFavorite": zod.boolean()
 })),
   "total": zod.number()
 })
@@ -1282,7 +1283,8 @@ export const GetExerciseResponse = zod.object({
   "imageUrl": zod.string().nullish(),
   "videoUrl": zod.string().nullish(),
   "thumbnailUrl": zod.string().nullish(),
-  "gifUrl": zod.string().nullish()
+  "gifUrl": zod.string().nullish(),
+  "isFavorite": zod.boolean()
 })
 
 
@@ -1319,9 +1321,22 @@ export const GetExerciseAlternativesResponseItem = zod.object({
   "imageUrl": zod.string().nullish(),
   "videoUrl": zod.string().nullish(),
   "thumbnailUrl": zod.string().nullish(),
-  "gifUrl": zod.string().nullish()
+  "gifUrl": zod.string().nullish(),
+  "isFavorite": zod.boolean()
 })
 export const GetExerciseAlternativesResponse = zod.array(GetExerciseAlternativesResponseItem)
+
+
+/**
+ * @summary Toggle the favorite status of an exercise
+ */
+export const ToggleExerciseFavoriteParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const ToggleExerciseFavoriteResponse = zod.object({
+  "isFavorite": zod.boolean()
+})
 
 
 /**
