@@ -643,6 +643,9 @@ export default function WorkoutCalendarPage() {
         onConfirm={handleRescheduleConfirm}
         onCancel={handleRescheduleCancel}
       />
+
+      {/* Reminder settings */}
+      <ReminderSettingsCard />
     </div>
   );
 }

@@ -39,7 +39,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         
         <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
           {MAIN_NAV.map((item) => {
-            const isActive = location.startsWith(item.href);
+            // Use exact match for short paths to avoid /workouts matching /workouts/calendar etc.
+            const isActive =
+              item.href === location ||
+              (item.href !== "/" && location.startsWith(item.href + "/"));
             return (
               <Link 
                 key={item.href} 
@@ -91,7 +94,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       {/* Mobile Bottom Nav */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border flex items-center justify-around px-2 py-2 pb-safe">
         {MAIN_NAV.slice(0, 5).map((item) => {
-          const isActive = location.startsWith(item.href);
+          const isActive =
+            item.href === location ||
+            (item.href !== "/" && location.startsWith(item.href + "/"));
           return (
             <Link 
               key={item.href} 
