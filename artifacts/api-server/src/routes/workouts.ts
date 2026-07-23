@@ -11,6 +11,7 @@ import {
 import type { CompletedExerciseLog } from "@workspace/db";
 import { eq, and, desc, gte, count, sum, avg, sql } from "drizzle-orm";
 import { requireAuth, getUser } from "../lib/auth";
+import { clampInt } from "../lib/http";
 import { refreshMusclesAfterWorkout } from "../lib/recovery-engine.js";
 import { processWorkoutAnalytics } from "../lib/analytics-engine.js";
 import { detectAndSavePRs } from "../lib/pr-engine.js";
@@ -115,7 +116,7 @@ router.get("/workouts/today", requireAuth, async (req, res) => {
 
 router.get("/workouts/history", requireAuth, async (req, res) => {
   const user = getUser(req);
-  const limit = Math.min(Number(req.query.limit) || 10, 50);
+  const limit = clampInt(req.query.limit, 10, 50);
   const completions = await db
     .select()
     .from(workoutCompletionsTable)
@@ -226,7 +227,7 @@ router.post("/workouts/templates/:id/adopt", requireAuth, async (req, res) => {
 
 router.get("/workouts/analytics", requireAuth, async (req, res) => {
   const user = getUser(req);
-  const days = Math.min(Number(req.query.days) || 30, 365);
+  const days = clampInt(req.query.days, 30, 365);
   const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
   const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 

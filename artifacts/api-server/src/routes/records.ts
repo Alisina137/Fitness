@@ -2,6 +2,7 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { personalRecordsTable } from "@workspace/db";
 import { requireAuth, getUser } from "../lib/auth.js";
+import { clampInt } from "../lib/http.js";
 import { eq, and, desc } from "drizzle-orm";
 
 const router = Router();
@@ -53,7 +54,7 @@ router.get("/records", requireAuth, async (req, res) => {
 // Most recent personal records (default: 10).
 router.get("/records/latest", requireAuth, async (req, res) => {
   const user = getUser(req);
-  const limit = Math.min(Number(req.query.limit) || 10, 50);
+  const limit = clampInt(req.query.limit, 10, 50);
 
   const rows = await db
     .select()

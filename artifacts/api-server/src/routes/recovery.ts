@@ -4,6 +4,7 @@ import { muscleRecoveryTable, dailyCheckInsTable, recoveryScoresTable } from "@w
 import { insertDailyCheckInSchema } from "@workspace/db";
 import { eq, desc, and } from "drizzle-orm";
 import { requireAuth, getUser } from "../lib/auth.js";
+import { clampInt } from "../lib/http.js";
 import {
   processCheckIn,
   getTodayRecovery,
@@ -103,7 +104,7 @@ router.get("/recovery/today", requireAuth, async (req, res) => {
 // ─── GET /api/recovery/history ────────────────────────────────────────────────
 router.get("/recovery/history", requireAuth, async (req, res) => {
   const user = getUser(req);
-  const days = Math.min(Number(req.query.days) || 30, 90);
+  const days = clampInt(req.query.days, 30, 90);
   const history = await getRecoveryHistory(user.id, days);
   res.json(history);
 });

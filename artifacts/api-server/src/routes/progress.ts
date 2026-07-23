@@ -12,6 +12,7 @@ import {
 } from "@workspace/db";
 import { eq, and, desc, gte, lte, lt, isNotNull, asc, count } from "drizzle-orm";
 import { requireAuth, getUser } from "../lib/auth";
+import { clampInt } from "../lib/http";
 import { updateAllUserGoals } from "../lib/goal-progress-service.js";
 import { getUserProgressSummary } from "../lib/progress-analysis-service.js";
 
@@ -305,7 +306,7 @@ router.get("/progress/stats", requireAuth, async (req, res) => {
 router.get("/progress", requireAuth, async (req, res) => {
   const user = getUser(req);
   const type = req.query.type as string | undefined;
-  const limit = Math.min(Number(req.query.limit) || 30, 100);
+  const limit = clampInt(req.query.limit, 30, 100);
 
   let entries = await db.select().from(progressEntriesTable).where(eq(progressEntriesTable.userId, user.id)).orderBy(desc(progressEntriesTable.loggedAt)).limit(limit);
   if (type) {

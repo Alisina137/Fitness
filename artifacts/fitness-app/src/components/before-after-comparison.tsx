@@ -4,6 +4,7 @@ import { ImageOff, ArrowLeftRight, ChevronDown } from "lucide-react";
 import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { authHeaders } from "@/lib/api";
 import { BeforeAfterSlider } from "@/components/before-after-slider";
 
 // ─── Types & constants ────────────────────────────────────────────────────────
@@ -34,16 +35,6 @@ type CompareResult = {
   after: GalleryPhoto;
   daysBetween: number;
 };
-
-// ─── Auth helper ──────────────────────────────────────────────────────────────
-
-function getToken(): string | null {
-  try {
-    return JSON.parse(localStorage.getItem("auth-storage") || "{}").state?.token ?? null;
-  } catch {
-    return null;
-  }
-}
 
 // ─── PhotoSelectDropdown ──────────────────────────────────────────────────────
 
@@ -252,15 +243,9 @@ export function BeforeAfterComparison() {
     setCompareError(null);
     setComparison(null);
     try {
-      const token = getToken();
       const res = await fetch(
         `${BASE}/api/progress-photos/compare?beforePhotoId=${bId}&afterPhotoId=${aId}`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
-        }
+        { headers: authHeaders() }
       );
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));

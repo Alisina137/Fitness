@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { ArrowRight, TrendingDown, TrendingUp, Minus, GitCompare, AlertCircle, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { authHeaders } from "@/lib/api";
 import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -55,11 +56,8 @@ const PERIODS: { key: PeriodKey; label: string; days: number | null }[] = [
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") || "";
 
 async function apiFetch<T>(path: string): Promise<T> {
-  const token = (() => {
-    try { return JSON.parse(localStorage.getItem("auth-storage") || "{}").state?.token; } catch { return null; }
-  })();
   const res = await fetch(`${BASE}/api${path}`, {
-    headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+    headers: authHeaders(),
   });
   const body = await res.json().catch(() => ({}));
   if (!res.ok) {

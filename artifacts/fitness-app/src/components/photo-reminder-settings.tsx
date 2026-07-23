@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Bell, BellOff, Calendar, Camera, CheckCircle2, Loader2 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { cn } from "@/lib/utils";
+import { apiFetch } from "@/lib/api";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -21,15 +22,6 @@ const FREQUENCY_OPTIONS: { value: ReminderFrequency; label: string; sublabel: st
   { value: "disabled",   label: "Disabled",     sublabel: "No reminders" },
 ];
 
-const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") || "";
-
-function getToken(): string | null {
-  try {
-    return JSON.parse(localStorage.getItem("auth-storage") || "{}").state?.token ?? null;
-  } catch {
-    return null;
-  }
-}
 
 // ─── PhotoReminderSettings ────────────────────────────────────────────────────
 
@@ -45,12 +37,7 @@ export function PhotoReminderSettings() {
     setLoading(true);
     setError(null);
     try {
-      const token = getToken();
-      const res = await fetch(`${BASE}/api/progress-photos/reminder`, {
-        headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-      });
-      if (!res.ok) throw new Error("Failed to load settings");
-      const data: ReminderInfo = await res.json();
+      const data = await apiFetch<ReminderInfo>("/progress-photos/reminder");
       setInfo(data);
       setSelected(data.frequency);
     } catch {
@@ -67,20 +54,10 @@ export function PhotoReminderSettings() {
     setError(null);
     setSaved(false);
     try {
-      const token = getToken();
-      const res = await fetch(`${BASE}/api/progress-photos/reminder`, {
+      const data = await apiFetch<ReminderInfo>("/progress-photos/reminder", {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
         body: JSON.stringify({ frequency: selected }),
       });
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error((body as { error?: string }).error ?? "Failed to save");
-      }
-      const data: ReminderInfo = await res.json();
       setInfo(data);
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);

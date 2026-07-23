@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { BarChart3, CalendarDays, AlertCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { apiFetch } from "@/lib/api";
 import { format, isToday, isYesterday } from "date-fns";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -43,22 +44,9 @@ const METRIC_COLORS: Record<string, string> = {
 
 // ─── API helper ───────────────────────────────────────────────────────────────
 
-const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") || "";
-
-async function fetchTimeline(type: FilterKey): Promise<TimelineItem[]> {
-  const token = (() => {
-    try { return JSON.parse(localStorage.getItem("auth-storage") || "{}").state?.token; } catch { return null; }
-  })();
+function fetchTimeline(type: FilterKey): Promise<TimelineItem[]> {
   const qs = type !== "all" ? `?type=${type}` : "";
-  const res = await fetch(`${BASE}/api/body-measurements/timeline${qs}`, {
-    credentials: "include",
-    headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-  });
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(body.message || "Failed to load timeline");
-  }
-  return res.json();
+  return apiFetch<TimelineItem[]>(`/body-measurements/timeline${qs}`);
 }
 
 // ─── Date label ───────────────────────────────────────────────────────────────

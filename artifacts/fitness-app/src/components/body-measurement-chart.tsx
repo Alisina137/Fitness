@@ -10,6 +10,7 @@ import {
 } from "recharts";
 import { TrendingUp, Activity } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { apiFetch } from "@/lib/api";
 import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -39,22 +40,6 @@ const RANGES: { key: RangeKey; label: string }[] = [
   { key: "1y",   label: "1 Year"  },
   { key: "all",  label: "All Time"},
 ];
-
-// ─── API helper (mirrors measurement-history pattern) ─────────────────────
-
-const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") || "";
-
-async function apiFetch<T>(path: string, opts?: RequestInit): Promise<T> {
-  const token = (() => {
-    try { return JSON.parse(localStorage.getItem("auth-storage") || "{}").state?.token; } catch { return null; }
-  })();
-  const res = await fetch(`${BASE}/api${path}`, {
-    headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-    ...opts,
-  });
-  if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || "Request failed"); }
-  return res.json();
-}
 
 // ─── Custom Tooltip ──────────────────────────────────────────────────────────
 

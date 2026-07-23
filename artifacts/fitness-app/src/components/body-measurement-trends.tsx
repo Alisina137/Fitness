@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { TrendingUp, TrendingDown, Minus, BarChart3, AlertCircle, Activity } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { apiFetch } from "@/lib/api";
 import { format } from "date-fns";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -79,18 +80,8 @@ const TREND_CONFIG: Record<TrendDirection, {
 
 // ─── API helper ───────────────────────────────────────────────────────────────
 
-const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") || "";
-
-async function fetchTrends(): Promise<TrendItem[]> {
-  const token = (() => {
-    try { return JSON.parse(localStorage.getItem("auth-storage") || "{}").state?.token; } catch { return null; }
-  })();
-  const res = await fetch(`${BASE}/api/body-measurements/trends`, {
-    credentials: "include",
-    headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-  });
-  if (!res.ok) throw new Error("Failed to load trends");
-  return res.json();
+function fetchTrends(): Promise<TrendItem[]> {
+  return apiFetch<TrendItem[]>(`/body-measurements/trends`);
 }
 
 // ─── TrendCard ────────────────────────────────────────────────────────────────

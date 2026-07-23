@@ -3,14 +3,14 @@ import { db } from "@workspace/db";
 import { nutritionEntriesTable, userProfilesTable } from "@workspace/db";
 import { eq, and, gte, lte, sql } from "drizzle-orm";
 import { requireAuth, getUser } from "../lib/auth";
+import { dayRangeUtc, todayDateString } from "../lib/http";
 
 const router = Router();
 
 router.get("/nutrition/summary", requireAuth, async (req, res) => {
   const user = getUser(req);
-  const date = (req.query.date as string) || new Date().toISOString().split("T")[0];
-  const dayStart = new Date(date + "T00:00:00.000Z");
-  const dayEnd = new Date(date + "T23:59:59.999Z");
+  const date = (req.query.date as string) || todayDateString();
+  const { start: dayStart, end: dayEnd } = dayRangeUtc(date);
 
   const [profile] = await db.select().from(userProfilesTable).where(eq(userProfilesTable.userId, user.id)).limit(1);
   const entries = await db.select().from(nutritionEntriesTable).where(
@@ -34,9 +34,8 @@ router.get("/nutrition/summary", requireAuth, async (req, res) => {
 
 router.get("/nutrition", requireAuth, async (req, res) => {
   const user = getUser(req);
-  const date = (req.query.date as string) || new Date().toISOString().split("T")[0];
-  const dayStart = new Date(date + "T00:00:00.000Z");
-  const dayEnd = new Date(date + "T23:59:59.999Z");
+  const date = (req.query.date as string) || todayDateString();
+  const { start: dayStart, end: dayEnd } = dayRangeUtc(date);
 
   const entries = await db.select().from(nutritionEntriesTable).where(
     and(eq(nutritionEntriesTable.userId, user.id), gte(nutritionEntriesTable.loggedAt, dayStart), lte(nutritionEntriesTable.loggedAt, dayEnd))

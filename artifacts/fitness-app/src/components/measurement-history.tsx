@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Trash2, Ruler, Weight, Percent, ChevronDown, BarChart2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { apiFetch } from "@/lib/api";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 
@@ -38,20 +39,6 @@ const FIELD_CONFIG: Record<FieldKey, { label: string; unit: string; key: keyof M
 const FILTERS = Object.entries(FIELD_CONFIG) as [FieldKey, typeof FIELD_CONFIG[FieldKey]][];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-
-const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") || "";
-
-async function apiFetch<T>(path: string, opts?: RequestInit): Promise<T> {
-  const token = (() => {
-    try { return JSON.parse(localStorage.getItem("auth-storage") || "{}").state?.token; } catch { return null; }
-  })();
-  const res = await fetch(`${BASE}/api${path}`, {
-    headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-    ...opts,
-  });
-  if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || "Request failed"); }
-  return res.json();
-}
 
 function getEntryRows(entry: MeasurementEntry): { label: string; value: number; unit: string }[] {
   const rows: { label: string; value: number; unit: string }[] = [];
