@@ -19,6 +19,10 @@ import {
   ExerciseInstructions,
   ExerciseInstructionsSkeleton,
 } from "@/components/exercise-detail/exercise-instructions";
+import {
+  ExerciseMusclesWorked,
+  ExerciseMusclesWorkedSkeleton,
+} from "@/components/exercise-detail/exercise-muscles-worked";
 
 // ─── Loading skeleton ─────────────────────────────────────────────────────────
 
@@ -34,6 +38,7 @@ function ExerciseDetailSkeleton() {
       <ExerciseOverviewCardSkeleton />
       <ExerciseInfoSectionSkeleton />
       <ExerciseInstructionsSkeleton />
+      <ExerciseMusclesWorkedSkeleton />
     </div>
   );
 }
@@ -92,6 +97,9 @@ export default function ExerciseDetailPage() {
 
       {/* Instructions */}
       <ExerciseInstructions exercise={exercise} />
+
+      {/* Muscles Worked */}
+      <ExerciseMusclesWorked exercise={exercise} />
     </div>
   );
 }

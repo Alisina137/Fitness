@@ -1,0 +1,116 @@
+You are continuing development of an AI fitness application.
+
+IMPORTANT IMPLEMENTATION RULES
+
+- Implement ONLY the features in this prompt.
+- Do NOT redesign the Exercise Details page.
+- Do NOT add features not listed below.
+- If something appears to be missing, DO NOT implement it.
+- Add it to the Suggestions section.
+
+--------------------------------------------------
+
+MODULE
+
+Exercise Experience
+
+Completed
+
+✓ Exercise Library
+✓ Professional Exercise Cards
+✓ Exercise Details Page
+✓ Exercise Image Gallery
+✓ Exercise Instructions
+
+Current Task
+
+Target & Secondary Muscles
+
+Upcoming
+
+- Equipment Details
+- Exercise Videos
+- Favorites
+- Exercise Collections
+
+--------------------------------------------------
+
+TASK
+
+Add a "Muscles Worked" section to the Exercise Details page.
+
+IMPLEMENT
+
+1. Create a reusable "Muscles Worked" component.
+
+2. Display:
+
+Primary Muscle
+
+Secondary Muscles
+
+3. Primary Muscle
+
+Display it prominently using a highlighted badge or card.
+
+4. Secondary Muscles
+
+Display as badges or chips below the primary muscle.
+
+5. Muscle Summary
+
+Display:
+
+Primary: Chest
+
+Secondary: Triceps, Front Delts
+
+(Use the exercise's actual data.)
+
+6. Empty State
+
+If muscle data is unavailable:
+
+"Muscle information is not available."
+
+--------------------------------------------------
+
+TECH REQUIREMENTS
+
+- Reuse the existing Exercise model.
+- Do not create a new muscle database.
+- Build the component for reuse elsewhere in the app.
+- Follow the existing design system.
+
+--------------------------------------------------
+
+DO NOT IMPLEMENT
+
+- Interactive body diagrams
+- 3D anatomy
+- Muscle percentages
+- AI explanations
+- Exercise alternatives
+
+--------------------------------------------------
+
+DEFINITION OF DONE
+
+✓ Primary muscle is displayed clearly.
+✓ Secondary muscles are displayed correctly.
+✓ Empty state works.
+✓ Existing functionality remains unchanged.
+
+--------------------------------------------------
+
+COMPLETION REPORT
+
+Provide:
+
+- Files created
+- Files modified
+- Components created
+
+Suggestions:
+
+List features intentionally left for future prompts.
