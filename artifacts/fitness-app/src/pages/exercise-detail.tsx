@@ -23,6 +23,10 @@ import {
   ExerciseMusclesWorked,
   ExerciseMusclesWorkedSkeleton,
 } from "@/components/exercise-detail/exercise-muscles-worked";
+import {
+  ExerciseInformation,
+  ExerciseInformationSkeleton,
+} from "@/components/exercise-detail/exercise-information";
 
 // ─── Loading skeleton ─────────────────────────────────────────────────────────
 
@@ -39,6 +43,7 @@ function ExerciseDetailSkeleton() {
       <ExerciseInfoSectionSkeleton />
       <ExerciseInstructionsSkeleton />
       <ExerciseMusclesWorkedSkeleton />
+      <ExerciseInformationSkeleton />
     </div>
   );
 }
@@ -100,6 +105,9 @@ export default function ExerciseDetailPage() {
 
       {/* Muscles Worked */}
       <ExerciseMusclesWorked exercise={exercise} />
+
+      {/* Exercise Information */}
+      <ExerciseInformation exercise={exercise} />
     </div>
   );
 }

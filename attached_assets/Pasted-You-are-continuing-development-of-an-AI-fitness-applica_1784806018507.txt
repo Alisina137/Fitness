@@ -1,0 +1,125 @@
+You are continuing development of an AI fitness application.
+
+IMPORTANT IMPLEMENTATION RULES
+
+- Implement ONLY the features in this prompt.
+- Do NOT redesign the Exercise Details page.
+- Do NOT add extra features.
+- If something is missing, add it to the Suggestions section.
+
+--------------------------------------------------
+
+MODULE
+
+Exercise Experience
+
+Completed
+
+✓ Exercise Library
+✓ Professional Exercise Cards
+✓ Exercise Details
+✓ Image Gallery
+✓ Instructions
+✓ Muscles Worked
+
+Current Task
+
+Equipment & Exercise Information
+
+Upcoming
+
+- Exercise Favorites
+- Exercise Collections
+- Recently Viewed
+- Exercise Videos
+
+--------------------------------------------------
+
+TASK
+
+Create an "Exercise Information" section.
+
+IMPLEMENT
+
+1. Create a reusable information card.
+
+Display:
+
+- Equipment
+- Difficulty
+- Category
+- Exercise Type (Compound / Isolation)
+- Force Type (Push / Pull / Static)
+- Mechanics (Compound / Isolation)
+- Experience Level
+
+2. Display each item as a label-value pair.
+
+Example:
+
+Equipment
+Dumbbells
+
+Difficulty
+Beginner
+
+3. Equipment Badge
+
+Display equipment as a colored badge.
+
+4. Difficulty Badge
+
+Display:
+
+- Beginner
+- Intermediate
+- Advanced
+
+using the existing badge style.
+
+5. Empty State
+
+If a value is unavailable, display:
+
+"Not specified"
+
+--------------------------------------------------
+
+TECH REQUIREMENTS
+
+- Reuse the existing Exercise model.
+- Build a reusable ExerciseInformation component.
+- Follow the existing design system.
+
+--------------------------------------------------
+
+DO NOT IMPLEMENT
+
+- Equipment alternatives
+- Purchase links
+- AI recommendations
+- Exercise videos
+- Favorites
+
+--------------------------------------------------
+
+DEFINITION OF DONE
+
+✓ Information section displays correctly.
+✓ Badges are consistent.
+✓ Empty values handled gracefully.
+✓ Existing functionality remains unchanged.
+
+--------------------------------------------------
+
+COMPLETION REPORT
+
+Provide:
+
+- Files created
+- Files modified
+- Components created
+
+Suggestions:
+
+List features intentionally left for future prompts.
