@@ -1,11 +1,14 @@
 import { Router } from "express";
-import { db, exercisesTable } from "@workspace/db";
-import { eq, ilike, or, and, sql, inArray } from "drizzle-orm";
+import { db, exercisesTable, userFavoriteExercisesTable } from "@workspace/db";
+import { eq, ilike, or, and, sql } from "drizzle-orm";
 import { requireAuth } from "../lib/auth";
 
 const router = Router();
 
-function serializeExercise(e: typeof exercisesTable.$inferSelect) {
+function serializeExercise(
+  e: typeof exercisesTable.$inferSelect,
+  isFavorite = false,
+) {
   return {
     id: e.id,
     name: e.name,
@@ -30,6 +33,7 @@ function serializeExercise(e: typeof exercisesTable.$inferSelect) {
     videoUrl: e.videoUrl,
     thumbnailUrl: e.thumbnailUrl,
     gifUrl: e.gifUrl,
+    isFavorite,
   };
 }
 
@@ -41,37 +45,28 @@ router.get("/exercises", requireAuth, async (req, res) => {
     limit = "50", offset = "0",
   } = req.query as Record<string, string>;
 
+  const userId = req.user!.id;
   const conditions: ReturnType<typeof eq>[] = [];
 
-  if (category) {
-    conditions.push(ilike(exercisesTable.category, `%${category}%`));
-  }
-  if (difficulty) {
-    conditions.push(sql`${exercisesTable.difficulty}::text = ${difficulty}`);
-  }
-  if (trainingType) {
-    conditions.push(sql`${exercisesTable.trainingType}::text = ${trainingType}`);
-  }
+  if (category)     conditions.push(ilike(exercisesTable.category, `%${category}%`));
+  if (difficulty)   conditions.push(sql`${exercisesTable.difficulty}::text = ${difficulty}`);
+  if (trainingType) conditions.push(sql`${exercisesTable.trainingType}::text = ${trainingType}`);
   if (muscleGroup) {
     conditions.push(
       or(
         sql`${muscleGroup} = ANY(${exercisesTable.primaryMuscles})`,
         sql`${muscleGroup} = ANY(${exercisesTable.secondaryMuscles})`,
-        sql`${muscleGroup} = ANY(${exercisesTable.muscleGroups})`
+        sql`${muscleGroup} = ANY(${exercisesTable.muscleGroups})`,
       )!
     );
   }
-  if (equipment) {
-    conditions.push(sql`${equipment} = ANY(${exercisesTable.equipment})`);
-  }
-  if (goal) {
-    conditions.push(sql`${goal} = ANY(${exercisesTable.goals})`);
-  }
+  if (equipment) conditions.push(sql`${equipment} = ANY(${exercisesTable.equipment})`);
+  if (goal)      conditions.push(sql`${goal} = ANY(${exercisesTable.goals})`);
   if (search) {
     conditions.push(
       or(
         ilike(exercisesTable.name, `%${search}%`),
-        ilike(exercisesTable.shortDescription, `%${search}%`)
+        ilike(exercisesTable.shortDescription, `%${search}%`),
       )!
     );
   }
@@ -80,53 +75,156 @@ router.get("/exercises", requireAuth, async (req, res) => {
   const lim = Math.min(Number(limit) || 50, 200);
   const off = Number(offset) || 0;
 
-  const [exercises, countResult] = await Promise.all([
-    db.select().from(exercisesTable).where(where).limit(lim).offset(off).orderBy(exercisesTable.name),
-    db.select({ count: sql<number>`count(*)::int` }).from(exercisesTable).where(where),
+  const [rows, countResult] = await Promise.all([
+    db
+      .select({
+        exercise: exercisesTable,
+        favUserId: userFavoriteExercisesTable.userId,
+      })
+      .from(exercisesTable)
+      .leftJoin(
+        userFavoriteExercisesTable,
+        and(
+          eq(userFavoriteExercisesTable.exerciseId, exercisesTable.id),
+          eq(userFavoriteExercisesTable.userId, userId),
+        ),
+      )
+      .where(where)
+      .limit(lim)
+      .offset(off)
+      .orderBy(exercisesTable.name),
+    db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(exercisesTable)
+      .where(where),
   ]);
 
-  res.json({ exercises: exercises.map(serializeExercise), total: countResult[0]?.count ?? 0 });
+  res.json({
+    exercises: rows.map((r) => serializeExercise(r.exercise, r.favUserId != null)),
+    total: countResult[0]?.count ?? 0,
+  });
 });
 
 // ─── GET /exercises/:id ───────────────────────────────────────────────────────
 router.get("/exercises/:id", requireAuth, async (req, res) => {
   const id = Number(req.params.id);
-  if (isNaN(id)) { res.status(400).json({ error: "Invalid id" }); return; }
+  if (isNaN(id)) { res.status(400).json({ error: "Invalid exercise ID" }); return; }
 
-  const [exercise] = await db.select().from(exercisesTable).where(eq(exercisesTable.id, id)).limit(1);
-  if (!exercise) { res.status(404).json({ error: "Exercise not found" }); return; }
+  const userId = req.user!.id;
 
-  res.json(serializeExercise(exercise));
+  const [row] = await db
+    .select({
+      exercise: exercisesTable,
+      favUserId: userFavoriteExercisesTable.userId,
+    })
+    .from(exercisesTable)
+    .leftJoin(
+      userFavoriteExercisesTable,
+      and(
+        eq(userFavoriteExercisesTable.exerciseId, exercisesTable.id),
+        eq(userFavoriteExercisesTable.userId, userId),
+      ),
+    )
+    .where(eq(exercisesTable.id, id))
+    .limit(1);
+
+  if (!row) { res.status(404).json({ error: "Exercise not found" }); return; }
+
+  res.json(serializeExercise(row.exercise, row.favUserId != null));
 });
 
 // ─── GET /exercises/:id/alternatives ─────────────────────────────────────────
 router.get("/exercises/:id/alternatives", requireAuth, async (req, res) => {
   const id = Number(req.params.id);
-  if (isNaN(id)) { res.status(400).json({ error: "Invalid id" }); return; }
+  if (isNaN(id)) { res.status(400).json({ error: "Invalid exercise ID" }); return; }
 
-  const [source] = await db.select().from(exercisesTable).where(eq(exercisesTable.id, id)).limit(1);
-  if (!source) { res.status(404).json({ error: "Exercise not found" }); return; }
+  const userId = req.user!.id;
 
-  // Find exercises that share primary muscles and same category, excluding self
-  const alternatives = await db
+  const [source] = await db
     .select()
     .from(exercisesTable)
+    .where(eq(exercisesTable.id, id))
+    .limit(1);
+
+  if (!source) { res.status(404).json({ error: "Exercise not found" }); return; }
+
+  const rows = await db
+    .select({
+      exercise: exercisesTable,
+      favUserId: userFavoriteExercisesTable.userId,
+    })
+    .from(exercisesTable)
+    .leftJoin(
+      userFavoriteExercisesTable,
+      and(
+        eq(userFavoriteExercisesTable.exerciseId, exercisesTable.id),
+        eq(userFavoriteExercisesTable.userId, userId),
+      ),
+    )
     .where(
       and(
         sql`${exercisesTable.id} != ${id}`,
         or(
           ilike(exercisesTable.category, source.category),
-          sql`${exercisesTable.primaryMuscles} && ${sql.raw(`ARRAY[${source.primaryMuscles.map(m => `'${m}'`).join(",")}]::text[]`)}`
-        )!
-      )!
+          sql`${exercisesTable.primaryMuscles} && ${sql.raw(
+            `ARRAY[${source.primaryMuscles.map((m) => `'${m}'`).join(",")}]::text[]`,
+          )}`,
+        )!,
+      )!,
     )
     .limit(6)
     .orderBy(exercisesTable.difficulty);
 
-  res.json(alternatives.map(serializeExercise));
+  res.json(rows.map((r) => serializeExercise(r.exercise, r.favUserId != null)));
 });
 
-// ─── AI-READY QUERY HELPERS (exported for future AI engine use) ───────────────
+// ─── PATCH /exercises/:id/favorite ───────────────────────────────────────────
+router.patch("/exercises/:id/favorite", requireAuth, async (req, res) => {
+  const id = Number(req.params.id);
+  if (isNaN(id)) { res.status(400).json({ error: "Invalid exercise ID" }); return; }
+
+  const userId = req.user!.id;
+
+  // Verify exercise exists
+  const [exercise] = await db
+    .select({ id: exercisesTable.id })
+    .from(exercisesTable)
+    .where(eq(exercisesTable.id, id))
+    .limit(1);
+
+  if (!exercise) { res.status(404).json({ error: "Exercise not found" }); return; }
+
+  // Check if already favorited
+  const [existing] = await db
+    .select()
+    .from(userFavoriteExercisesTable)
+    .where(
+      and(
+        eq(userFavoriteExercisesTable.userId, userId),
+        eq(userFavoriteExercisesTable.exerciseId, id),
+      ),
+    )
+    .limit(1);
+
+  if (existing) {
+    await db
+      .delete(userFavoriteExercisesTable)
+      .where(
+        and(
+          eq(userFavoriteExercisesTable.userId, userId),
+          eq(userFavoriteExercisesTable.exerciseId, id),
+        ),
+      );
+    res.json({ isFavorite: false });
+  } else {
+    await db
+      .insert(userFavoriteExercisesTable)
+      .values({ userId, exerciseId: id });
+    res.json({ isFavorite: true });
+  }
+});
+
+// ─── AI-READY QUERY HELPERS ───────────────────────────────────────────────────
 
 export async function getExercisesByGoal(goal: string, limit = 20) {
   return db.select().from(exercisesTable)
@@ -135,7 +233,7 @@ export async function getExercisesByGoal(goal: string, limit = 20) {
 }
 
 export async function getExercisesByEquipment(equipment: string[], limit = 30) {
-  const conditions = equipment.map(e => sql`${e} = ANY(${exercisesTable.equipment})`);
+  const conditions = equipment.map((e) => sql`${e} = ANY(${exercisesTable.equipment})`);
   return db.select().from(exercisesTable)
     .where(or(...conditions)!)
     .limit(limit);
@@ -146,7 +244,7 @@ export async function getExercisesByMuscle(muscle: string, limit = 20) {
     .where(
       or(
         sql`${muscle} = ANY(${exercisesTable.primaryMuscles})`,
-        sql`${muscle} = ANY(${exercisesTable.muscleGroups})`
+        sql`${muscle} = ANY(${exercisesTable.muscleGroups})`,
       )!
     )
     .limit(limit);
@@ -165,17 +263,15 @@ export async function getAlternativeExercises(exerciseId: number, limit = 6) {
     .where(
       and(
         sql`${exercisesTable.id} != ${exerciseId}`,
-        ilike(exercisesTable.category, source.category)
+        ilike(exercisesTable.category, source.category),
       )!
     )
     .limit(limit);
 }
 
 export async function getSafeExercisesForLimitation(injuries: string[], limit = 30) {
-  // Return exercises that don't have the injured body parts as primary targets
-  const injuryKeywords = injuries.flatMap(i => [i.toLowerCase()]);
-  const exclusions = injuryKeywords.map(kw =>
-    sql`NOT (${kw} = ANY(${exercisesTable.primaryMuscles}))`
+  const exclusions = injuries.map((i) =>
+    sql`NOT (${i.toLowerCase()} = ANY(${exercisesTable.primaryMuscles}))`
   );
   return db.select().from(exercisesTable)
     .where(and(...exclusions)!)

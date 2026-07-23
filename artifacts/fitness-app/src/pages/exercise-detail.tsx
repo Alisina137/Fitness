@@ -1,6 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import { useParams, useLocation } from "wouter";
-import { useGetExercise } from "@workspace/api-client-react";
+import {
+  useGetExercise,
+  useToggleExerciseFavorite,
+  getGetExerciseQueryKey,
+} from "@workspace/api-client-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { ExerciseDetailHeader } from "@/components/exercise-detail/exercise-detail-header";
 import {
@@ -27,13 +32,13 @@ import {
   ExerciseInformation,
   ExerciseInformationSkeleton,
 } from "@/components/exercise-detail/exercise-information";
+import { toast } from "@/hooks/use-toast";
 
 // ─── Loading skeleton ─────────────────────────────────────────────────────────
 
 function ExerciseDetailSkeleton() {
   return (
     <div className="p-4 md:p-8 max-w-4xl mx-auto space-y-6 animate-pulse">
-      {/* Header skeleton */}
       <div className="flex items-center gap-4">
         <div className="h-10 w-10 bg-secondary rounded-xl shrink-0" />
         <div className="h-8 w-64 bg-secondary rounded" />
@@ -53,6 +58,7 @@ function ExerciseDetailSkeleton() {
 export default function ExerciseDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
+  const queryClient = useQueryClient();
 
   const exerciseId = Number(id);
   const isValidId = !!exerciseId && !isNaN(exerciseId);
@@ -61,12 +67,37 @@ export default function ExerciseDetailPage() {
     query: { enabled: isValidId },
   });
 
-  // Loading state
-  if (isLoading) {
-    return <ExerciseDetailSkeleton />;
+  // Local optimistic favorite state
+  const [favoriteOverride, setFavoriteOverride] = useState<boolean | null>(null);
+  const [isFavPending, setIsFavPending] = useState(false);
+  const toggleFavoriteMutation = useToggleExerciseFavorite();
+
+  const isFavorite = favoriteOverride !== null
+    ? favoriteOverride
+    : (exercise?.isFavorite ?? false);
+
+  async function handleToggleFavorite() {
+    if (!exercise) return;
+    const next = !isFavorite;
+    setFavoriteOverride(next);
+    setIsFavPending(true);
+    try {
+      await toggleFavoriteMutation.mutateAsync({ id: exerciseId });
+      queryClient.invalidateQueries({ queryKey: getGetExerciseQueryKey(exerciseId) });
+    } catch {
+      setFavoriteOverride(isFavorite); // revert
+      toast({
+        title: "Couldn't update favorite",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsFavPending(false);
+    }
   }
 
-  // Error / not found state
+  if (isLoading) return <ExerciseDetailSkeleton />;
+
   if (!isValidId || isError || !exercise) {
     return (
       <div className="p-4 md:p-8 max-w-4xl mx-auto">
@@ -85,28 +116,18 @@ export default function ExerciseDetailPage() {
 
   return (
     <div className="p-4 md:p-8 max-w-4xl mx-auto space-y-6 animate-in fade-in duration-500">
-      {/* Header */}
       <ExerciseDetailHeader
         name={exercise.name}
         onBack={() => setLocation("/exercises")}
+        isFavorite={isFavorite}
+        onToggleFavorite={handleToggleFavorite}
+        isFavoritePending={isFavPending}
       />
-
-      {/* Image Gallery */}
       <ExerciseImageGallery exercise={exercise} />
-
-      {/* Overview */}
       <ExerciseOverviewCard exercise={exercise} />
-
-      {/* Information */}
       <ExerciseInfoSection exercise={exercise} />
-
-      {/* Instructions */}
       <ExerciseInstructions exercise={exercise} />
-
-      {/* Muscles Worked */}
       <ExerciseMusclesWorked exercise={exercise} />
-
-      {/* Exercise Information */}
       <ExerciseInformation exercise={exercise} />
     </div>
   );
