@@ -15,6 +15,10 @@ import {
   ExerciseImageGallery,
   ExerciseImageGallerySkeleton,
 } from "@/components/exercise-detail/exercise-image-gallery";
+import {
+  ExerciseInstructions,
+  ExerciseInstructionsSkeleton,
+} from "@/components/exercise-detail/exercise-instructions";
 
 // ─── Loading skeleton ─────────────────────────────────────────────────────────
 
@@ -29,6 +33,7 @@ function ExerciseDetailSkeleton() {
       <ExerciseImageGallerySkeleton />
       <ExerciseOverviewCardSkeleton />
       <ExerciseInfoSectionSkeleton />
+      <ExerciseInstructionsSkeleton />
     </div>
   );
 }
@@ -85,7 +90,8 @@ export default function ExerciseDetailPage() {
       {/* Information */}
       <ExerciseInfoSection exercise={exercise} />
 
-      {/* Future sections: Instructions, Target Muscles, Exercise Videos, Favorites */}
+      {/* Instructions */}
+      <ExerciseInstructions exercise={exercise} />
     </div>
   );
 }

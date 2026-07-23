@@ -1,0 +1,113 @@
+You are continuing development of an AI fitness application.
+
+IMPORTANT IMPLEMENTATION RULES
+
+- Implement ONLY the features in this prompt.
+- Do NOT redesign the Exercise Details page.
+- Do NOT add features not listed below.
+- If something is missing, DO NOT implement it.
+- Add it to the Suggestions section.
+
+--------------------------------------------------
+
+MODULE
+
+Exercise Experience
+
+Completed
+
+✓ Exercise Library
+✓ Professional Exercise Cards
+✓ Exercise Details Page
+✓ Exercise Image Gallery
+
+Current Task
+
+Step-by-Step Exercise Instructions
+
+Upcoming
+
+- Target Muscles
+- Equipment Details
+- Exercise Videos
+- Favorites
+
+--------------------------------------------------
+
+TASK
+
+Add an "Instructions" section to the Exercise Details page.
+
+IMPLEMENT
+
+1. Create an Instructions section.
+
+2. Display numbered steps.
+
+Example:
+
+1. Starting Position
+2. Movement
+3. End Position
+4. Return to Start
+
+3. Long instructions should be easy to read.
+
+Use:
+
+- Numbered list
+- Proper spacing
+- Comfortable line height
+
+4. If no instructions exist:
+
+Display:
+
+"No instructions available."
+
+5. Loading State.
+
+Display skeleton placeholders while loading.
+
+--------------------------------------------------
+
+TECH REQUIREMENTS
+
+- Reuse the existing Exercise model.
+- Build a reusable ExerciseInstructions component.
+- Follow the existing design system.
+
+--------------------------------------------------
+
+DO NOT IMPLEMENT
+
+- Videos
+- Voice guidance
+- Tips
+- Common mistakes
+- Safety warnings
+- AI coaching
+
+--------------------------------------------------
+
+DEFINITION OF DONE
+
+✓ Instructions display correctly.
+✓ Numbering works.
+✓ Empty state works.
+✓ Responsive layout.
+✓ Existing functionality remains unchanged.
+
+--------------------------------------------------
+
+COMPLETION REPORT
+
+Provide:
+
+- Files created
+- Files modified
+- Components created
+
+Suggestions:
+
+List features intentionally left for future prompts.
